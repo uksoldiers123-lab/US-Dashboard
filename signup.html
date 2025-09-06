@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
+</head>
+<body>
+  <main class="container auth-page">
+    <h2>Create an account</h2>
+    <form id="signup-form" class="form">
+      <label>
+        Email
+        <input type="email" id="signup-email" required />
+      </label>
+      <label>
+        Password
+        <input type="password" id="signup-password" required />
+      </label>
+      <!-- Optional: display name -->
+      <label>
+        Display name (optional)
+        <input type="text" id="signup-name" />
+      </label>
+      <button type="submit" class="btn">Create account</button>
+    </form>
+
+    <p class="note">Already have an account? <a href="login.html">Log in</a></p>
+
+    <div id="signup-status" class="status" aria-live="polite"></div>
+  </main>
+
+  <script src="js/supabase-init.js"></script>
+  <script src="js/auth-logic.js"></script>
+  <script>
+    const form = document.getElementById('signup-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const name = document.getElementById('signup-name').value || null;
+      const res = await signUpUser(email, password, name);
+      if (res && res.error) {
+        showStatusSignup('Signup error: ' + res.error.message);
+      } else {
+        alert('Signup successful. Please check your email to verify, then sign in.');
+        window.location.href = 'login.html';
+      }
+    });
+
+    function showStatusSignup(msg) {
+      const el = document.getElementById('signup-status');
+      if (el) el.textContent = msg;
+    }
+
+    // Optional: auto-redirect if already signed in
+    (async function(){
+      const user = await getCurrentUser();
+      if (user) window.location.href = 'dashboard.html';
+    })();
+  </script>
+</body>
+</html>

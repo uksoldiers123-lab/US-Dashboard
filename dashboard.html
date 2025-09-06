@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
+</head>
+<body>
+  <main class="container dashboard-page">
+    <header class="dashboard-header">
+      <h2>Your Dashboard</h2>
+      <button id="signout" class="btn">Sign out</button>
+    </header>
+
+    <section id="loading">Loading data...</section>
+    <section id="content" style="display:none;">
+      <!-- Render your data here. For example: a div for data -->
+      <div id="data"></div>
+    </section>
+
+    <!-- You can add charts/tables here -->
+  </main>
+
+  <script src="js/supabase-init.js"></script>
+  <script src="js/auth-logic.js"></script>
+  <script src="js/dashboard-logic.js"></script>
+  <script>
+    (async function(){
+      const user = await getCurrentUser();
+      if (!user) {
+        // Not signed in; redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+      // Load dashboard data
+      await loadDashboardData();
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    })();
+
+    // Sign out handler
+    document.getElementById('signout').addEventListener('click', async () => {
+      await signOutUser();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

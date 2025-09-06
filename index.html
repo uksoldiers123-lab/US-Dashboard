@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Landing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Supabase JS via CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <img src="assets/logo.png" alt="Logo" class="logo" style="max-height:50px; display:none;">
+    <h1>Welcome to the Dashboard</h1>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <p>Sign up or log in to view your personalized dashboard.</p>
+      <div class="auth-links">
+        <a href="signup.html" class="btn">Create account</a>
+        <a href="login.html" class="btn">Log in</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/supabase-init.js"></script>
+  <script src="js/auth-logic.js"></script>
+  <script>
+    // Simple session check to auto-redirect to dashboard if already signed in
+    (async function(){
+      const user = await getCurrentUser();
+      if (user) {
+        window.location.href = 'dashboard.html';
+      }
+    })();
+  </script>
+</body>
+</html>

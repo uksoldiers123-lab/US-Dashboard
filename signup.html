@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -11,102 +10,56 @@
       --card: #fff;
       --text: #111;
       --primary: #4f46e5;
-      --muted: #666;
     }
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100%;
-    }
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+    html, body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100%; }
+    .container { max-width: 420px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     h2 { margin: 0 0 12px; font-size: 1.4rem; text-align: center; }
-    label {
-      display: block;
-      font-size: 0.92rem;
-      margin: 12px 0 6px;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
-      color: #fff;
-      background: var(--primary);
-      cursor: pointer;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .status {
-      margin-top: 12px;
-      min-height: 1.2em;
-      font-size: 0.95rem;
-      color: #333;
-    }
-    .link {
-      display: block;
-      text-align: center;
-      margin-top: 12px;
-      color: #1f6feb;
-      text-decoration: none;
-    }
+    label { display: block; font-size: 0.92rem; margin: 12px 0 6px; }
+    input { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    button { width: 100%; padding: 14px; font-size: 1rem; border-radius: 8px; border: none; color: #fff; background: var(--primary); cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status { margin-top: 12px; min-height: 1.2em; font-size: 0.95rem; color: #333; }
   </style>
 
   <!-- 1) Supabase CDN (UMD) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
 
-  <!-- 2) Init script: creates window.supabase (must run before signup) -->
+  <!-- 2) Init script: creates window.supabase (idempotent) -->
   <script>
     (function initSupabaseGlobal() {
-      // Replace with your real values for production.
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-      // Create client if not yet created
       if (!window.supabase) {
         window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase initialized:', !!window.supabase);
       } else {
         console.log('Supabase already initialized');
       }
-      // Quick guard: expose a sanity check function
-      window.__CHECK_SUPABASE__ = function() {
-        console.log('Supabase in window?', !!window.supabase);
+      // In-page quick check
+      window.__checkSupabase = function() {
+        console.log('CHECK: Supabase exists?', !!window.supabase);
+        console.log('CHECK: window.supabase object:', window.supabase);
       };
-      window.__CHECK_SUPABASE__();
+      window.__checkSupabase();
     })();
   </script>
 
   <!-- 3) Auth logic wrapper (safe wrapper) -->
   <script>
-    // Safe wrapper to sign up a user
     function signUpUser(email, password, options = {}) {
       if (!window.supabase) {
-        return Promise.reject(new Error('Supabase not initialized'));
+        // Soft-fail: wait a moment and retry a tiny bit
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (window.supabase) {
+              resolve(window.supabase.auth.signUp({ email, password, ...options }));
+            } else {
+              reject(new Error('Supabase not initialized'));
+            }
+          }, 50);
+        });
       }
-      // Include any extra options (e.g., data)
       return window.supabase.auth.signUp({ email, password, ...options });
     }
   </script>
@@ -128,14 +81,10 @@
         <label for="signup-name">Display name (optional)</label>
         <input id="signup-name" type="text" placeholder="Your name" />
 
-        <button type="submit" id="signup-btn" aria-label="Create account">
-          Create account
-        </button>
+        <button type="submit" id="signup-btn" aria-label="Create account">Create account</button>
       </form>
 
       <div id="signup-status" class="status" aria-live="polite"></div>
-
-      <a href="login.html" class="link">Already have an account? Log in</a>
     </div>
   </div>
 
@@ -166,7 +115,7 @@
           return;
         }
 
-        // Sanity log to verify init
+        // Debug: show init state
         console.log('Trying signup, supabase:', window.supabase);
 
         setLoading(true);
@@ -174,7 +123,7 @@
 
         try {
           const { user, session, error } = await signUpUser(email, password, {
-            data: { display_name: name || '' } // optional metadata
+            data: { display_name: name || '' }
           });
 
           if (error) {

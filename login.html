@@ -1,51 +1,25 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- Supabase JS (non-module) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
   <style>
-    /* Optional inline styles for spinner and loading state if you don't have CSS for it yet */
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,.5);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-left: 6px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .status {
-      margin-top: 12px;
-      min-height: 1.25em;
-      color: #333;
-    }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-left: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status { margin-top: 12px; min-height: 1.25em; color: #333; }
   </style>
 </head>
 <body>
   <main class="container auth-page">
     <h2>Log in</h2>
     <form id="login-form" class="form" autocomplete="on">
-      <label>
-        Email
-        <input type="email" id="login-email" required autocomplete="email" />
-      </label>
-      <label>
-        Password
-        <input type="password" id="login-password" required autocomplete="current-password" />
-      </label>
+      <label>Email<input type="email" id="login-email" required autocomplete="email" /></label>
+      <label>Password<input type="password" id="login-password" required autocomplete="current-password" /></label>
       <button type="submit" id="login-btn" class="btn">
         Log In
         <span class="spinner" aria-label="Loading" style="display:none;"></span>
@@ -62,98 +36,53 @@
     <div id="login-status" class="status" aria-live="polite"></div>
   </main>
 
+  <script src="js/supabase-init.js"></script>
+  <script src="js/auth-logic.js"></script>
   <script>
-    // ===== Configuration: replace with your actual values =====
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-
-    // Initialize Supabase (non-module)
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Helpers
-    function showStatus(msg) {
-      const el = document.getElementById('login-status');
-      if (el) el.textContent = msg;
-    }
-
-    function setLoading(isLoading) {
-      const btn = document.getElementById('login-btn');
-      const spinner = btn?.querySelector('.spinner');
-      if (!btn) return;
-      if (isLoading) {
-        btn.disabled = true;
-        if (spinner) spinner.style.display = 'inline-block';
-      } else {
-        btn.disabled = false;
-        if (spinner) spinner.style.display = 'none';
-      }
-    }
-
-    async function loginUser(email, password) {
-      const { user, session, error } = await supabase.auth.signIn({ email, password });
-      return { user, session, error };
-    }
-
-    async function signInWithProvider(provider) {
-      // E.g., provider = 'google'
-      // This will redirect the user to the OAuth provider
-      return await supabase.auth.signIn({ provider });
-    }
-
-    async function getCurrentUser() {
-      try {
-        const { data } = await supabase.auth.getUser();
-        return data?.user ?? null;
-      } catch {
-        try {
-          return supabase.auth.user?.() ?? null;
-        } catch {
-          return null;
-        }
-      }
-    }
-
-    // Bind login form
     (function init() {
-      const loginForm = document.getElementById('login-form');
+      const form = document.getElementById('login-form');
       const loginBtn = document.getElementById('login-btn');
       const spinner = loginBtn.querySelector('.spinner');
+      const emailInput = document.getElementById('login-email');
+      const passwordInput = document.getElementById('login-password');
+      const statusEl = document.getElementById('login-status');
 
-      loginForm.addEventListener('submit', async (e) => {
+      function setLoading(isLoading) {
+        loginBtn.disabled = isLoading;
+        spinner.style.display = isLoading ? 'inline-block' : 'none';
+      }
+      function showStatus(msg) {
+        if (statusEl) statusEl.textContent = msg;
+      }
+
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         setLoading(true);
         showStatus('');
-
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
+        const email = emailInput.value;
+        const password = passwordInput.value;
         if (!email || !password) {
           showStatus('Please provide both email and password.');
           setLoading(false);
           return;
         }
 
-        const res = await loginUser(email, password);
+        const res = await signInUser(email, password);
         setLoading(false);
-
-        if (res && res.error) {
+        if (res?.error) {
           showStatus('Login error: ' + (res.error.message || 'Unknown error'));
         } else {
-          // Success: redirect to dashboard
           window.location.href = 'dashboard.html';
         }
       });
 
-      // OAuth
       document.getElementById('social-login').addEventListener('click', async () => {
         const res = await signInWithProvider('google');
         if (res && res.error) {
           showStatus('OAuth error: ' + (res.error.message || 'Unknown error'));
         }
-        // If successful, Supabase will redirect to the provider and back
       });
 
-      // Auto-redirect if already signed in
       (async function redirectIfSignedIn() {
         const user = await getCurrentUser();
         if (user) window.location.href = 'dashboard.html';
@@ -162,3 +91,4 @@
   </script>
 </body>
 </html>
+

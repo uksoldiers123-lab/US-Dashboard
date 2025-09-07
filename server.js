@@ -1,5 +1,3 @@
-
-
 const express = require("express");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
@@ -59,3 +57,4 @@ app.get("/logout", (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+

@@ -7,14 +7,14 @@
   <link rel="stylesheet" href="css/styles.css" />
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
   <style>
-    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-left: 6px; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-left: 6px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .status { margin-top: 12px; min-height: 1.25em; color: #333; }
   </style>
 </head>
 <body>
-  <main class="container auth-page">
+  <main class="container auth-page" aria-label="Login page">
     <h2>Log in</h2>
     <form id="login-form" class="form" autocomplete="on">
       <label>Email<input type="email" id="login-email" required autocomplete="email" /></label>
@@ -58,8 +58,10 @@
         e.preventDefault();
         setLoading(true);
         showStatus('');
+
         const email = emailInput.value;
         const password = passwordInput.value;
+
         if (!email || !password) {
           showStatus('Please provide both email and password.');
           setLoading(false);
@@ -90,4 +92,3 @@
   </script>
 </body>
 </html>
-

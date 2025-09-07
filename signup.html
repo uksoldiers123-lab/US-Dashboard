@@ -17,9 +17,15 @@
   <main class="container auth-page" aria-label="Sign up page">
     <h2>Create an account</h2>
     <form id="signup-form" class="form" autocomplete="on" aria-label="Sign up form">
-      <label>Email<input type="email" id="signup-email" required autocomplete="email" /></label>
-      <label>Password<input type="password" id="signup-password" required autocomplete="new-password" /></label>
-      <label>Display name (optional)<input type="text" id="signup-name" autocomplete="name" /></label>
+      <label>Email
+        <input type="email" id="signup-email" required autocomplete="email" />
+      </label>
+      <label>Password
+        <input type="password" id="signup-password" required autocomplete="new-password" />
+      </label>
+      <label>Display name (optional)
+        <input type="text" id="signup-name" autocomplete="name" />
+      </label>
       <button type="submit" id="signup-btn" class="btn">
         Create account
         <span class="spinner" aria-label="Loading" style="display:none;"></span>
@@ -41,13 +47,8 @@
       const statusEl = document.getElementById('signup-status');
 
       function setLoading(isLoading) {
-        if (isLoading) {
-          btn.disabled = true;
-          spinner.style.display = 'inline-block';
-        } else {
-          btn.disabled = false;
-          spinner.style.display = 'none';
-        }
+        btn.disabled = !!isLoading;
+        if (spinner) spinner.style.display = isLoading ? 'inline-block' : 'none';
       }
       function showStatusSignup(msg) {
         if (statusEl) statusEl.textContent = msg;
@@ -57,6 +58,7 @@
         e.preventDefault();
         setLoading(true);
         showStatusSignup('');
+
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const name = document.getElementById('signup-name').value || null;
@@ -67,22 +69,52 @@
           return;
         }
 
+        // Step 1: Sign up
         const res = await signUpUser(email, password, name);
-        setLoading(false);
-
         if (res?.error) {
           showStatusSignup('Signup error: ' + (res.error.message || 'Unknown error'));
-        } else {
-          showStatusSignup('Signup successful. Please check your email to verify, then sign in.');
-          setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+          setLoading(false);
+          return;
         }
+
+        // Step 2: Seed tables (user and tenant_user)
+        // Try to get user id from the auth response or fetch current user
+        let userId = res?.data?.user?.id ?? null;
+        if (!userId) {
+          const current = await getCurrentUser();
+          userId = current?.id ?? null;
+        }
+
+        // Seed only if we have an id
+        if (userId) {
+          // Insert into 'user' table
+          const { data: userRow, error: userError } = await window.supabase
+            .from('user')
+            .insert([{ id: userId, email, display_name: name || '' }])
+            .single();
+
+          // Insert into 'tenant_user' table
+          const tenantId = 'default-tenant';
+          const { data: tuRow, error: tenantError } = await window.supabase
+            .from('tenant_user')
+            .insert([{ user_id: userId, tenant_id: tenantId, role: 'member' }])
+            .single();
+
+          if (userError || tenantError) {
+            const err = userError?.message || tenantError?.message || 'Unknown error';
+            showStatusSignup('Signup seed error: ' + err);
+          } else {
+            showStatusSignup('Signup successful. Please verify email, then sign in.');
+          }
+        } else {
+          showStatusSignup('Signup successful. Please verify email, then sign in.');
+        }
+
+        // Optional: redirect to login
+        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+        setLoading(false);
       });
 
-      // Auto-redirect if already signed in
-      (async function redirectIfSignedIn() {
-        const user = await getCurrentUser();
-        if (user) window.location.href = 'dashboard.html';
-      })();
     })();
   </script>
 </body>

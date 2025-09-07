@@ -21,7 +21,6 @@
     <h2>Welcome</h2>
     <p id="user-info">Loading user information...</p>
 
-    <!-- Example: Data from a table -->
     <div id="data-section">
       <h3>Your Data</h3>
       <table id="data-table" aria-label="User data">
@@ -42,22 +41,20 @@
         return;
       }
 
-      // Fetch and render user info
-      const infoEl = document.getElementById('user-info');
-      infoEl.textContent = 'Hello, ' + (user.email || 'User');
+      document.getElementById('user-info').textContent = 'Hello, ' + (user.email || 'User');
 
-      // Load sample data
       const rows = await fetchUserData();
       const tbody = document.querySelector('#data-table tbody');
       if (rows && rows.length) {
         tbody.innerHTML = rows.map(r => `<tr><td>${r.id ?? ''}</td><td>${r.field ?? ''}</td><td>${r.value ?? ''}</td></tr>`).join('');
       }
-
-      document.getElementById('sign-out').addEventListener('click', async () => {
-        await signOutUser();
-        window.location.href = 'login.html';
-      });
     })();
+
+    // Sign out handler
+    document.getElementById('sign-out').addEventListener('click', async () => {
+      await signOutUser();
+      window.location.href = 'login.html';
+    });
   </script>
 </body>
 </html>

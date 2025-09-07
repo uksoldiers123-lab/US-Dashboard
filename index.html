@@ -5,69 +5,26 @@
   <title>Welcome</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- Supabase JS (non-module) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
-  <style>
-    /* Optional quick styles for the welcome page */
-    .welcome {
-      text-align: center;
-      padding: 4rem 1rem;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.25rem;
-      background: #4a90e2;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
-  <header class="site-header welcome">
+  <main class="container" style="padding:2rem;">
     <h1>Welcome</h1>
     <p>Checking your session and routing accordingly...</p>
-  </header>
-
-  <main class="container welcome">
-    <p>If you’re not redirected yet, you can go to:</p>
-    <p>
-      <a href="login.html" class="btn">Log in</a>
-      &nbsp; or &nbsp;
-      <a href="signup.html" class="btn" style="background:#7ed321;">Create account</a>
-    </p>
   </main>
 
+  <script src="js/supabase-init.js"></script>
   <script>
-    // Replace with your actual values
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-
-    // Initialize Supabase (non-module)
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Helper: get current user (non-module style)
-    async function getCurrentUser() {
-      try {
-        // Newer API (v2)
-        const { data } = await supabase.auth.getUser();
-        return data?.user ?? null;
-      } catch {
-        // Fallback for older versions
+    (async function redirect() {
+      const user = await (async () => {
         try {
-          return supabase.auth.user();
+          const { data } = await window.supabase.auth.getUser();
+          return data?.user ?? null;
         } catch {
-          return null;
+          try { return window.supabase.auth.user?.() ?? null; } catch { return null; }
         }
-      }
-    }
+      })();
 
-    // Redirect logic
-    (async function redirectLogic() {
-      const user = await getCurrentUser();
       if (user) {
         window.location.href = 'dashboard.html';
       } else {

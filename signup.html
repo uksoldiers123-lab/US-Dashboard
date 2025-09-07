@@ -56,7 +56,7 @@
       padding: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    h2 { margin: 0 0 12px; font-size: 1.4rem; }
+    h2 { margin: 0 0 12px; font-size: 1.4rem; text-align: center; }
     label {
       display: block;
       font-size: 0.92rem;
@@ -98,17 +98,17 @@
       text-decoration: none;
     }
   </style>
+
   <!-- 1) Supabase CDN (UMD) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
 
-  <!-- 2) Init script: creates window.supabase
-       Place this before any script that uses window.supabase -->
+  <!-- 2) Init script: creates window.supabase (must run before any signUpUser call) -->
   <script>
     (function initSupabaseGlobal() {
-      // Replace with your real values (temp hard-coded for quick test)
+      // Replace with your real values.
+      // For testing, you can use a sample (do not expose prod keys publicly in production code).
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-      // Create the client if not already created
       if (!window.supabase) {
         window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase initialized:', !!window.supabase);
@@ -118,15 +118,16 @@
     })();
   </script>
 
-  <!-- 3) Auth logic script (defines signUpUser) -->
+  <!-- 3) Auth logic script (wrapper) -->
   <script>
-    // Expose a helper to sign up a user using the global client
+    // Safe wrapper to sign up a user
     function signUpUser(email, password, options = {}) {
       if (!window.supabase) {
         return Promise.reject(new Error('Supabase not initialized'));
       }
-      // support optional data payload (e.g., display_name)
-      return window.supabase.auth.signUp({ email, password, options });
+      // For Supabase v2, options can include data via options: { data: { ... } }
+      // Here we spread options so you can pass { data: { ... } } or other props.
+      return window.supabase.auth.signUp({ email, password, ...options });
     }
   </script>
 </head>
@@ -185,16 +186,16 @@
           return;
         }
 
-        // Quick pre-check: ensure Supabase is initialized
+        // Sanity: ensure Supabase is initialized
         console.log('Trying signup, supabase:', window.supabase);
 
         setLoading(true);
         status.textContent = '';
 
         try {
-          // Use the wrapper function to sign up
+          // Pass optional data (e.g., display_name) via data in options
           const { user, session, error } = await signUpUser(email, password, {
-            data: { display_name: name || '' } // optional metadata
+            data: { display_name: name || '' }
           });
 
           if (error) {

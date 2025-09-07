@@ -5,54 +5,21 @@
   <title>Sign Up</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- Supabase JS (non-module) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
   <style>
-    /* Optional inline styles for spinner and loading state if you don't have CSS for it yet */
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(0,0,0,.25);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    /* Ensure disabled button looks distinct */
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    /* Simple status styling (optional) */
-    .status {
-      margin-top: 12px;
-      min-height: 1.25em;
-      color: #333;
-    }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status { margin-top: 12px; min-height: 1.25em; color: #333; }
   </style>
 </head>
 <body>
   <main class="container auth-page" aria-label="Sign up page">
     <h2>Create an account</h2>
     <form id="signup-form" class="form" autocomplete="on" aria-label="Sign up form">
-      <label>
-        Email
-        <input type="email" id="signup-email" required autocomplete="email" />
-      </label>
-      <label>
-        Password
-        <input type="password" id="signup-password" required autocomplete="new-password" />
-      </label>
-      <!-- Optional: display name -->
-      <label>
-        Display name (optional)
-        <input type="text" id="signup-name" autocomplete="name" />
-      </label>
+      <label>Email<input type="email" id="signup-email" required autocomplete="email" /></label>
+      <label>Password<input type="password" id="signup-password" required autocomplete="new-password" /></label>
+      <label>Display name (optional)<input type="text" id="signup-name" autocomplete="name" /></label>
       <button type="submit" id="signup-btn" class="btn">
         Create account
         <span class="spinner" aria-label="Loading" style="display:none;"></span>
@@ -64,75 +31,36 @@
     <div id="signup-status" class="status" aria-live="polite"></div>
   </main>
 
+  <script src="js/supabase-init.js"></script>
+  <script src="js/auth-logic.js"></script>
   <script>
-    // === Configuration: replace with your actual values ===
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-
-    // Initialize Supabase (non-module)
-    // Supabase.createClient(url, key) returns a client instance
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Helpers
-    function showStatusSignup(msg) {
-      const el = document.getElementById('signup-status');
-      if (el) el.textContent = msg;
-    }
-
-    async function signUpUser(email, password, name) {
-      // Optional: store display name as user metadata
-      const { user, session, error } = await supabase.auth.signUp(
-        { email, password },
-        { data: { display_name: name || '' } }
-      );
-      return { user, session, error };
-    }
-
-    async function getCurrentUser() {
-      // Try the modern getUser() (v2+) if available
-      try {
-        const { data } = await supabase.auth.getUser();
-        return data?.user ?? null;
-      } catch {
-        // Fallback for older versions
-        try {
-          return supabase.auth.user();
-        } catch {
-          return null;
-        }
-      }
-    }
-
-    // Bind signup form
     (function init() {
       const form = document.getElementById('signup-form');
       const btn = document.getElementById('signup-btn');
       const spinner = btn.querySelector('.spinner');
+      const statusEl = document.getElementById('signup-status');
 
       function setLoading(isLoading) {
         if (isLoading) {
           btn.disabled = true;
-          // show spinner and optional text
           spinner.style.display = 'inline-block';
-          btn.firstChild?.after ? null : null; // placeholder to avoid lint
         } else {
           btn.disabled = false;
           spinner.style.display = 'none';
         }
       }
+      function showStatusSignup(msg) {
+        if (statusEl) statusEl.textContent = msg;
+      }
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // Start loading
         setLoading(true);
         showStatusSignup('');
-
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const name = document.getElementById('signup-name').value || null;
 
-        // Client-side basic validation
         if (!email || !password) {
           showStatusSignup('Please provide both email and password.');
           setLoading(false);
@@ -140,21 +68,13 @@
         }
 
         const res = await signUpUser(email, password, name);
-
-        // Stop loading
         setLoading(false);
 
-        if (res && res.error) {
-          // Friendly error messages
-          const msg = res.error.message || 'An error occurred during signup.';
-          showStatusSignup('Signup error: ' + msg);
+        if (res?.error) {
+          showStatusSignup('Signup error: ' + (res.error.message || 'Unknown error'));
         } else {
-          // On success, inform user about email verification
           showStatusSignup('Signup successful. Please check your email to verify, then sign in.');
-          // Optional: keep user on the page briefly, then go to login
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 1500);
+          setTimeout(() => { window.location.href = 'login.html'; }, 1500);
         }
       });
 

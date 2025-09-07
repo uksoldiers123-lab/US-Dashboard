@@ -1,6 +1,5 @@
 
-
-export async function signUpUser(email, password, displayName) {
+async function signUpUser(email, password, displayName) {
   const { data, error } = await window.supabase.auth.signUp(
     { email, password },
     { data: { display_name: displayName || '' } }
@@ -8,12 +7,16 @@ export async function signUpUser(email, password, displayName) {
   return { data, error };
 }
 
-export async function signInUser(email, password) {
-  const { data, error } = await window.supabase.auth.signIn({ email, password });
-  return { data, error };
+async function signInUser(email, password) {
+  const { user, session, error } = await window.supabase.auth.signIn({ email, password });
+  return { user, session, error };
 }
 
-export async function getCurrentUser() {
+async function signInWithProvider(provider) {
+  return await window.supabase.auth.signIn({ provider });
+}
+
+async function getCurrentUser() {
   try {
     const { data } = await window.supabase.auth.getUser();
     return data?.user ?? null;
@@ -26,7 +29,7 @@ export async function getCurrentUser() {
   }
 }
 
-export async function signOutUser() {
+async function signOutUser() {
   const { data, error } = await window.supabase.auth.signOut();
   return { data, error };
 }

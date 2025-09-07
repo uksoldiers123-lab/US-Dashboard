@@ -1,28 +1,4 @@
 
-<script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
-
-<!-- 2) Init script: creates window.supabase -->
-<script>
-  (function initSupabase() {
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-    if (!window.supabase) {
-      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase initialized:', !!window.supabase);
-    } else {
-      console.log('Supabase already initialized');
-    }
-  })();
-</script>
-
-<!-- 3) Auth logic wrapper -->
-<script>
-  function signUpUser(email, password, options = {}) {
-    if (!window.supabase) return Promise.reject(new Error('Supabase not initialized'));
-    return window.supabase.auth.signUp({ email, password, ...options });
-  }
-</script>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,31 +78,35 @@
   <!-- 1) Supabase CDN (UMD) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
 
-  <!-- 2) Init script: creates window.supabase (must run before any signUpUser call) -->
+  <!-- 2) Init script: creates window.supabase (must run before signup) -->
   <script>
     (function initSupabaseGlobal() {
-      // Replace with your real values.
-      // For testing, you can use a sample (do not expose prod keys publicly in production code).
+      // Replace with your real values for production.
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+      // Create client if not yet created
       if (!window.supabase) {
         window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase initialized:', !!window.supabase);
       } else {
         console.log('Supabase already initialized');
       }
+      // Quick guard: expose a sanity check function
+      window.__CHECK_SUPABASE__ = function() {
+        console.log('Supabase in window?', !!window.supabase);
+      };
+      window.__CHECK_SUPABASE__();
     })();
   </script>
 
-  <!-- 3) Auth logic script (wrapper) -->
+  <!-- 3) Auth logic wrapper (safe wrapper) -->
   <script>
     // Safe wrapper to sign up a user
     function signUpUser(email, password, options = {}) {
       if (!window.supabase) {
         return Promise.reject(new Error('Supabase not initialized'));
       }
-      // For Supabase v2, options can include data via options: { data: { ... } }
-      // Here we spread options so you can pass { data: { ... } } or other props.
+      // Include any extra options (e.g., data)
       return window.supabase.auth.signUp({ email, password, ...options });
     }
   </script>
@@ -186,24 +166,21 @@
           return;
         }
 
-        // Sanity: ensure Supabase is initialized
+        // Sanity log to verify init
         console.log('Trying signup, supabase:', window.supabase);
 
         setLoading(true);
         status.textContent = '';
 
         try {
-          // Pass optional data (e.g., display_name) via data in options
           const { user, session, error } = await signUpUser(email, password, {
-            data: { display_name: name || '' }
+            data: { display_name: name || '' } // optional metadata
           });
 
           if (error) {
             status.textContent = 'Signup error: ' + (error.message || error);
           } else if (user) {
             status.textContent = 'Signup successful. Check your email to confirm.';
-            // Optional: auto-redirect to login
-            // window.location.href = 'login.html';
           } else {
             status.textContent = 'Signup complete. Please verify email.';
           }

@@ -63,7 +63,7 @@
   </main>
 
   <script>
-    // === Configuration: replace with your actual values ===
+    // ===== Configuration: replace with your actual values =====
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
 
@@ -106,7 +106,7 @@
         return data?.user ?? null;
       } catch {
         try {
-          return supabase.auth.user();
+          return supabase.auth.user?.() ?? null;
         } catch {
           return null;
         }
@@ -134,12 +134,12 @@
         }
 
         const res = await loginUser(email, password);
-
         setLoading(false);
 
         if (res && res.error) {
           showStatus('Login error: ' + (res.error.message || 'Unknown error'));
         } else {
+          // Success: redirect to dashboard
           window.location.href = 'dashboard.html';
         }
       });

@@ -1,3 +1,28 @@
+
+<script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
+
+<!-- 2) Init script: creates window.supabase -->
+<script>
+  (function initSupabase() {
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+    if (!window.supabase) {
+      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase initialized:', !!window.supabase);
+    } else {
+      console.log('Supabase already initialized');
+    }
+  })();
+</script>
+
+<!-- 3) Auth logic wrapper -->
+<script>
+  function signUpUser(email, password, options = {}) {
+    if (!window.supabase) return Promise.reject(new Error('Supabase not initialized'));
+    return window.supabase.auth.signUp({ email, password, ...options });
+  }
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

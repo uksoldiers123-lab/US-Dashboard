@@ -5,36 +5,25 @@
   <title>Sign Up</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #f7f7f7;
-      --card: #fff;
-      --text: #111;
-      --primary: #4f46e5;
-    }
-    html, body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100%; }
-    .container { max-width: 420px; margin: 0 auto; padding: 20px; }
-    .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    h2 { margin: 0 0 12px; font-size: 1.4rem; text-align: center; }
-    label { display: block; font-size: 0.92rem; margin: 12px 0 6px; }
-    input { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-    button { width: 100%; padding: 14px; font-size: 1rem; border-radius: 8px; border: none; color: #fff; background: var(--primary); cursor: pointer; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .status { margin-top: 12px; min-height: 1.2em; font-size: 0.95rem; color: #333; }
-    /* Optional: a tiny on-page banner at bottom for status (no console needed) */
-    .banner {
-      position: fixed; bottom: 8px; left: 8px; right: 8px;
-      background: #111; color: #fff; padding: 8px 12px; border-radius: 8px;
-      font-family: monospace; font-size: 12px; z-index: 9999;
-    }
+    :root { --bg:#f7f7f7; --card:#fff; --text:#111; --primary:#4f46e5; }
+    html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%;}
+    .container { max-width:420px; margin:0 auto; padding:20px; }
+    .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+    h2 { margin:0 0 12px; font-size:1.4rem; text-align:center; }
+    label { display:block; font-size:0.92rem; margin:12px 0 6px; }
+    input { width:100%; padding:12px; font-size:1rem; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
+    button { width:100%; padding:14px; font-size:1rem; border-radius:8px; border:none; color:#fff; background:var(--primary); cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:not-allowed; }
+    .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
+    .banner { position: fixed; bottom: 8px; left: 8px; right: 8px; z-index:9999; background:#111; color:#fff; padding:8px 12px; border-radius:8px; font-family:monospace; font-size:12px; display:none; }
   </style>
 
   <!-- 1) Supabase CDN (UMD) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
 
-  <!-- 2) Init script: creates window.supabase (idempotent) -->
+  <!-- 2) Init script: idempotent, must run before signup logic -->
   <script>
     (function initSupabaseGlobal() {
-      // Replace with your real values for production
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
       // Create client if not yet created
@@ -44,12 +33,12 @@
       } else {
         console.log('Supabase already initialized');
       }
-      // In-page quick check
-      window.__checkSupabase = function() {
-        console.log('CHECK: Supabase exists?', !!window.supabase);
-        console.log('CHECK: window.supabase object:', window.supabase);
-      };
+      // Tiny in-page check
+      window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
       window.__checkSupabase();
+      // Expose a tiny ready indicator
+      window.__SUPABASE_READY__ = !!window.supabase;
+      // Also update the on-page banner if present (see patch below)
     })();
   </script>
 
@@ -57,7 +46,7 @@
   <script>
     function signUpUser(email, password, options = {}) {
       if (!window.supabase) {
-        // Soft-fail: wait a moment and retry a tiny bit
+        // Slight delay and retry once
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             if (window.supabase) {
@@ -73,6 +62,9 @@
   </script>
 </head>
 <body>
+  <!-- In-page status banner (optional) -->
+  <div id="qp-banner" class="banner"></div>
+
   <div class="container">
     <div class="card" style="text-align:center;">
       <h2>Create an account</h2>
@@ -96,15 +88,29 @@
     </div>
   </div>
 
-  <!-- Optional on-page banner for status (no console needed) -->
-  <div id="qp-banner" class="banner" style="display:none;"></div>
+  <script>
+    // Show a persistent banner message about readiness
+    (function(){
+      const banner = document.getElementById('qp-banner');
+      function updateBanner(text) {
+        if (banner) {
+          banner.style.display = 'block';
+          banner.textContent = 'Init: ' + text;
+        }
+        console.log('BANNER:', text);
+      }
+      // Initialize banner with current state
+      updateBanner(window.supabase ? 'ready' : 'not ready');
+      // Also update when you press a test button (optional)
+      // You can refresh the page to re-check
+    })();
+  </script>
 
   <script>
     (function () {
       const form = document.getElementById('signup-form');
       const status = document.getElementById('signup-status');
       const btn = document.getElementById('signup-btn');
-      const banner = document.getElementById('qp-banner');
       let loading = false;
 
       function setLoading(v) {
@@ -112,18 +118,6 @@
         btn.disabled = v;
         btn.textContent = v ? 'Creating account...' : 'Create account';
       }
-
-      // Show banner helper
-      function showBanner(msg) {
-        if (banner) {
-          banner.style.display = 'block';
-          banner.textContent = 'Init: ' + msg;
-        }
-        console.log('INIT BANNER:', msg);
-      }
-
-      // Initial quick status
-      showBanner((window.supabase ? 'ready' : 'not ready'));
 
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -137,6 +131,10 @@
           status.textContent = 'Please provide email and password.';
           return;
         }
+
+        // Show the init state (in-page)
+        const initState = window.supabase ? 'ready' : 'not ready';
+        document.getElementById('qp-banner').textContent = 'Init: ' + initState;
 
         console.log('Trying signup, supabase:', window.supabase);
 

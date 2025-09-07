@@ -1,7 +1,7 @@
-async function fetchDashboardData() {
+⁸async function fetchDashboardData() {
   // Example: fetch rows from a table named 'tasks'
   const { data, error } = await window.supabase
-    .from('tasks')
+    .from('users')
     .select('id, title, status')
     .order('id', { ascending: true });
 

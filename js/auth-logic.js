@@ -1,16 +1,10 @@
+
 <script>
-  async function signUpUser(email, password, name) {
-    // Typical sign-up call
-    const { user, session, error } = await window.supabase.auth.signUp({ email, password, options: { data: { display_name: name || '' } } });
+  const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // replace
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // replace
 
-    // Return a uniform object to the caller
-    return { data: { user, session }, error };
-  }
+  window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  async function getCurrentUser() {
-    // Get the current user if signed in
-    const { data, error } = await window.supabase.auth.getUser();
-    if (error) return null;
-    return data.user;
-  }
+  // Quick check in console
+  console.log('Supabase initialized:', !!window.supabase);
 </script>

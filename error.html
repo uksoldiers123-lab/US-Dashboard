@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Error During Signup / Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #fff5f5;
+      --card: #ffffff;
+      --text: #1f2937;
+      --brand: #dc2626;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: linear-gradient(135deg, #fff0f0 0%, #fff 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      max-width: 520px;
+      width: 90%;
+      padding: 28px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ffe4e6;
+      color: #991b1b;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+    p {
+      color: var(--muted);
+      margin: 8px 0 0;
+    }
+    .pre {
+      white-space: pre-wrap;
+      background: #fff8f0;
+      border: 1px solid #f3e0c9;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0 0;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+      font-size: 0.9rem;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    a.btn, button.btn {
+      appearance: none;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.02s ease;
+    }
+    a.btn.primary {
+      background: var(--brand);
+      color: white;
+      text-decoration: none;
+    }
+    a.btn.secondary {
+      background: #f1f5f9;
+      color: #0f172a;
+      text-decoration: none;
+    }
+    a.btn.primary:hover, a.btn.primary:focus {
+      opacity: 0.95;
+    }
+    .footer {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="card" aria-label="Error">
+    <div class="header">
+      <div class="logo" aria-label="Logo">ER</div>
+      <div>
+        <h1>Something went wrong</h1>
+        <span class="badge" aria-live="polite">We’ll help you resolve it</span>
+      </div>
+    </div>
+
+    <p>The signup or login could not be completed. Here are common causes and how to resolve them:</p>
+
+    <ul style="margin: 8px 0 0 1.1rem;">
+      <li>Missing required fields (e.g., email, password). Ensure all required fields are filled.</li>
+      <li>Invalid email format. Please provide a valid email address (name@example.com).</li>
+      <li>Email already in use. Try logging in or use a different email.</li>
+      <li>Weak password. Use a mix of letters, numbers, and symbols.</li>
+      <li>Username or email not verified yet. Check your inbox for a verification link.</li>
+    </ul>
+
+    <div class="pre" aria-label="Error details" role="region" style="display:none;">
+      <!-- Optional dynamic error details can be injected here by the server -->
+      <strong>Error details:</strong> {{error_details}}
+    </div>
+
+    <div class="actions" aria-label="Actions">
+      <a href="/signup" class="btn secondary" role="button">Try Signup Again</a>
+      <a href="/login" class="btn primary" role="button">Go to Login</a>
+    </div>
+
+    <div class="footer" aria-live="polite">
+      If the problem persists, contact support at support@example.com with the error code.
+    </div>
+  </main>
+</body>
+</html>

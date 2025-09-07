@@ -1,132 +1,163 @@
 <!DOCTYPE html>
-
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Sign Up</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
-</head>
-<body>
-
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Sign Up</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
   <style>
-    .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .status { margin-top: 12px; min-height: 1.25em; color: #333; }
+    :root {
+      --bg: #f7f7f7;
+      --card: #fff;
+      --text: #111;
+      --primary: #4f46e5;
+      --muted: #666;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+    }
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    h2 { margin: 0 0 12px; font-size: 1.4rem; }
+    label {
+      display: block;
+      font-size: 0.92rem;
+      margin: 12px 0 6px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      color: #fff;
+      background: var(--primary);
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 12px;
+      min-height: 1.2em;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    .link {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      color: #1f6feb;
+      text-decoration: none;
+    }
   </style>
+  <!-- CDN for Supabase client -->
+  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
+  <script>
+    // Replace with your actual values
+    const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+
+    // Create a global client for other scripts to use
+    window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
 </head>
 <body>
-  <main class="container auth-page" aria-label="Sign up page">
-    <h2>Create an account</h2>
-    <form id="signup-form" class="form" autocomplete="on" aria-label="Sign up form">
-      <label>Email
-        <input type="email" id="signup-email" required autocomplete="email" />
-      </label>
-      <label>Password
-        <input type="password" id="signup-password" required autocomplete="new-password" />
-      </label>
-      <label>Display name (optional)
-        <input type="text" id="signup-name" autocomplete="name" />
-      </label>
-      <button type="submit" id="signup-btn" class="btn">
-        Create account
-        <span class="spinner" aria-label="Loading" style="display:none;"></span>
-      </button>
-    </form>
+  <div class="container">
+    <div class="card" style="text-align:center;">
+      <h2>Create an account</h2>
+    </div>
 
-    <p class="note">Already have an account? <a href="login.html">Log in</a></p>
+    <div class="card" style="margin-top:12px;">
+      <form id="signup-form" autocomplete="on" aria-label="Sign up form">
+        <label for="signup-email">Email</label>
+        <input id="signup-email" type="email" required placeholder="you@example.com" />
 
-    <div id="signup-status" class="status" aria-live="polite"></div>
-  </main>
+        <label for="signup-password">Password</label>
+        <input id="signup-password" type="password" required placeholder="Enter a strong password" />
 
-  <script src="js/supabase-init.js"></script>
-  <script src="js/auth-logic.js"></script>
+        <label for="signup-name">Display name (optional)</label>
+        <input id="signup-name" type="text" placeholder="Your name" />
+
+        <button type="submit" id="signup-btn" aria-label="Create account">
+          Create account
+        </button>
+      </form>
+
+      <div id="signup-status" class="status" aria-live="polite"></div>
+
+      <a href="login.html" class="link">Already have an account? Log in</a>
+    </div>
+  </div>
+
+  <!-- Optional: small script to wire up signup -->
   <script>
-    (function init() {
+    (function () {
       const form = document.getElementById('signup-form');
+      const status = document.getElementById('signup-status');
       const btn = document.getElementById('signup-btn');
-      const spinner = btn.querySelector('.spinner');
-      const statusEl = document.getElementById('signup-status');
+      let loading = false;
 
-      function setLoading(isLoading) {
-        btn.disabled = !!isLoading;
-        if (spinner) spinner.style.display = isLoading ? 'inline-block' : 'none';
-      }
-      function showStatusSignup(msg) {
-        if (statusEl) statusEl.textContent = msg;
+      function setLoading(v) {
+        loading = v;
+        btn.disabled = v;
+        btn.textContent = v ? 'Creating account...' : 'Create account';
       }
 
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
-        setLoading(true);
-        showStatusSignup('');
-
-        const email = document.getElementById('signup-email').value;
+        if (loading) return;
+        const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
-        const name = document.getElementById('signup-name').value || null;
+        const name = document.getElementById('signup-name').value.trim();
 
         if (!email || !password) {
-          showStatusSignup('Please provide both email and password.');
-          setLoading(false);
+          status.textContent = 'Please provide email and password.';
           return;
         }
 
-        // Step 1: Sign up
-        const res = await signUpUser(email, password, name);
-        if (res?.error) {
-          showStatusSignup('Signup error: ' + (res.error.message || 'Unknown error'));
-          setLoading(false);
-          return;
-        }
+        setLoading(true);
+        status.textContent = '';
 
-        // Step 2: Seed tables (user and tenant_user)
-        // Try to get user id from the auth response or fetch current user
-        let userId = res?.data?.user?.id ?? null;
-        if (!userId) {
-          const current = await getCurrentUser();
-          userId = current?.id ?? null;
-        }
-
-        // Seed only if we have an id
-        if (userId) {
-          // Insert into 'user' table
-          const { data: userRow, error: userError } = await window.supabase
-            .from('user')
-            .insert([{ id: userId, email, display_name: name || '' }])
-            .single();
-
-          // Insert into 'tenant_user' table
-          const tenantId = 'default-tenant';
-          const { data: tuRow, error: tenantError } = await window.supabase
-            .from('tenant_user')
-            .insert([{ user_id: userId, tenant_id: tenantId, role: 'member' }])
-            .single();
-
-          if (userError || tenantError) {
-            const err = userError?.message || tenantError?.message || 'Unknown error';
-            showStatusSignup('Signup seed error: ' + err);
+        try {
+          const { user, session, error } = await window.supabase.auth.signUp({ email, password, options: { data: { display_name: name || '' } } });
+          if (error) {
+            status.textContent = 'Signup error: ' + (error.message || error);
+          } else if (user) {
+            status.textContent = 'Signup successful. Check your email to confirm.';
+            // Optional: auto-redirect to login
+            // window.location.href = 'login.html';
           } else {
-            showStatusSignup('Signup successful. Please verify email, then sign in.');
+            status.textContent = 'Signup complete. Please verify email.';
           }
-        } else {
-          showStatusSignup('Signup successful. Please verify email, then sign in.');
+        } catch (err) {
+          status.textContent = 'Signup failed: ' + (err?.message || err);
         }
 
-        // Optional: redirect to login
-        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
         setLoading(false);
       });
-
     })();
   </script>
 </body>

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --bg:#f7f7f7; --card:#fff; --text:#111; --primary:#4f46e5; }
-    html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%;}
+    html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%; }
     .container { max-width:420px; margin:0 auto; padding:20px; }
     .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
     h2 { margin:0 0 12px; font-size:1.4rem; text-align:center; }
@@ -26,7 +26,6 @@
     (function initSupabaseGlobal() {
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-      // Create client if not yet created
       if (!window.supabase) {
         window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase initialized:', !!window.supabase);
@@ -38,7 +37,6 @@
       window.__checkSupabase();
       // Expose a tiny ready indicator
       window.__SUPABASE_READY__ = !!window.supabase;
-      // Also update the on-page banner if present (see patch below)
     })();
   </script>
 
@@ -46,7 +44,7 @@
   <script>
     function signUpUser(email, password, options = {}) {
       if (!window.supabase) {
-        // Slight delay and retry once
+        // Briefly wait and retry once
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             if (window.supabase) {
@@ -88,6 +86,7 @@
     </div>
   </div>
 
+  <!-- On-page logic: update banner and handle signup -->
   <script>
     // Show a persistent banner message about readiness
     (function(){
@@ -101,8 +100,6 @@
       }
       // Initialize banner with current state
       updateBanner(window.supabase ? 'ready' : 'not ready');
-      // Also update when you press a test button (optional)
-      // You can refresh the page to re-check
     })();
   </script>
 
@@ -132,9 +129,10 @@
           return;
         }
 
-        // Show the init state (in-page)
+        // Update banner state
         const initState = window.supabase ? 'ready' : 'not ready';
-        document.getElementById('qp-banner').textContent = 'Init: ' + initState;
+        const banner = document.getElementById('qp-banner');
+        if (banner) banner.textContent = 'Init: ' + initState;
 
         console.log('Trying signup, supabase:', window.supabase);
 
@@ -148,13 +146,17 @@
 
           if (error) {
             status.textContent = 'Signup error: ' + (error.message || error);
+            if (banner) banner.textContent = 'Signup: error';
           } else if (user) {
             status.textContent = 'Signup successful. Check your email to confirm.';
+            if (banner) banner.textContent = 'Signup: success';
           } else {
             status.textContent = 'Signup complete. Please verify email.';
+            if (banner) banner.textContent = 'Signup: complete';
           }
         } catch (err) {
           status.textContent = 'Signup failed: ' + (err?.message || err);
+          if (banner) banner.textContent = 'Signup: failed';
         }
 
         setLoading(false);

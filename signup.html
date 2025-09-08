@@ -17,34 +17,72 @@
     .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
     .banner { position: fixed; bottom: 8px; left: 8px; right: 8px; z-index:9999; background:#111; color:#fff; padding:8px 12px; border-radius:8px; font-family:monospace; font-size:12px; display:none; }
   </style>
+</head>
+<body>
+
+  <!-- In-page status banner (always visible) -->
+  <div id="qp-banner" class="banner"></div>
 
   <!-- 1) Supabase CDN (UMD) -->
   <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
 
-  <!-- 2) Init script: idempotent, must run before signup logic -->
+  <!-- 2) Fallback to local copy (loads if CDN fails) -->
+  <script>
+    (function loadLocalFallback() {
+      // If CDN loaded, skip. If not loaded soon, load local copy.
+      var CDNLoaded = typeof supabase !== 'undefined' && typeof supabase.createClient === 'function';
+      if (CDNLoaded) {
+        console.log('CDN Supabase loaded');
+        return;
+      }
+      // Create a script tag to load local copy
+      var localScript = document.createElement('script');
+      // Adjust the path to where you host the local file in Codespaces
+      localScript.src = '/public/js/supabase.min.js';
+      localScript.onload = function(){ console.log('Loaded local Supabase library'); };
+      localScript.onerror = function(){ console.error('Failed to load local Supabase library'); };
+      document.head.appendChild(localScript);
+    })();
+  </script>
+
+  <!-- 3) Init script: idempotent, with small delay to ensure library loads -->
   <script>
     (function initSupabaseGlobal() {
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-      if (!window.supabase) {
-        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase initialized:', !!window.supabase);
-      } else {
-        console.log('Supabase already initialized');
-      }
-      // Tiny in-page check
+      // Delay init a bit to give CDN/local script time to load
+      const startInit = function() {
+        if (!window.supabase) {
+          if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+            console.error('Supabase JS library not loaded yet. Waiting a bit and retrying...');
+            // schedule another try
+            setTimeout(startInit, 150);
+            // update banner
+            const b = document.getElementById('qp-banner');
+            if (b) b.textContent = 'Init: not ready (waiting for lib)';
+            return;
+          }
+          window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log('Supabase initialized:', !!window.supabase);
+        } else {
+          console.log('Supabase already initialized');
+        }
+        const banner = document.getElementById('qp-banner');
+        if (banner) banner.textContent = 'Init: ' + (window.supabase ? 'ready' : 'not ready');
+      };
+      // kick off after a short delay
+      setTimeout(startInit, 100);
+      // Quick check helper
       window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
-      window.__checkSupabase();
-      // Expose a tiny ready indicator
-      window.__SUPABASE_READY__ = !!window.supabase;
+      if (window.__checkSupabase) window.__checkSupabase();
     })();
   </script>
 
-  <!-- 3) Auth logic wrapper (safe wrapper) -->
+  <!-- 4) Auth logic wrapper (safe wrapper) -->
   <script>
+    // Robust signUpUser: waits briefly if not yet ready
     function signUpUser(email, password, options = {}) {
       if (!window.supabase) {
-        // Briefly wait and retry once
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             if (window.supabase) {
@@ -58,11 +96,8 @@
       return window.supabase.auth.signUp({ email, password, ...options });
     }
   </script>
-</head>
-<body>
-  <!-- In-page status banner (optional) -->
-  <div id="qp-banner" class="banner"></div>
 
+  <!-- Page content -->
   <div class="container">
     <div class="card" style="text-align:center;">
       <h2>Create an account</h2>
@@ -86,23 +121,7 @@
     </div>
   </div>
 
-  <!-- On-page logic: update banner and handle signup -->
-  <script>
-    // Show a persistent banner message about readiness
-    (function(){
-      const banner = document.getElementById('qp-banner');
-      function updateBanner(text) {
-        if (banner) {
-          banner.style.display = 'block';
-          banner.textContent = 'Init: ' + text;
-        }
-        console.log('BANNER:', text);
-      }
-      // Initialize banner with current state
-      updateBanner(window.supabase ? 'ready' : 'not ready');
-    })();
-  </script>
-
+  <!-- 5) Signup handler -->
   <script>
     (function () {
       const form = document.getElementById('signup-form');
@@ -129,18 +148,15 @@
           return;
         }
 
-        // Update banner state
-        const initState = window.supabase ? 'ready' : 'not ready';
+        // Update init banner
         const banner = document.getElementById('qp-banner');
-        if (banner) banner.textContent = 'Init: ' + initState;
-
-        console.log('Trying signup, supabase:', window.supabase);
+        if (banner) banner.textContent = 'Init: ' + (window.supabase ? 'ready' : 'not ready');
 
         setLoading(true);
         status.textContent = '';
 
         try {
-          const { user, session, error } = await signUpUser(email, password, {
+          const { user, error } = await signUpUser(email, password, {
             data: { display_name: name || '' }
           });
 

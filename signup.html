@@ -19,40 +19,42 @@
   </style>
 </head>
 <body>
-
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
   <!-- 1) Supabase CDN (UMD) -->
   <script src="https://app.unpkg.com/@supabase/supabase-js@2.57.4/dist/supabase-js.min.js"></script>
 
-  <!-- 2) Init and usage (single-file, no extra files) -->
+  <!-- 2) Init (one-file, no extra files) -->
   <script>
-    // Replace with your real values
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // your project URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // your anon key
+    // Replace with your real values (do not expose real keys in public chat)
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+
+    function showBanner(text){
+      const b = document.getElementById('qp-banner');
+      if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
+    }
 
     // Initialize immediately after CDN loads
     if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-      console.error('Supabase library not loaded yet. Ensure the CDN script tag is loaded before this script.');
-      const b = document.getElementById('qp-banner');
-      if (b) { b.style.display = 'block'; b.textContent = 'Init: not ready'; }
+      console.error('Supabase library not loaded yet.');
+      showBanner('not ready');
+      // Retry shortly
+      setTimeout(() => location.reload(), 150);
     } else {
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('Supabase initialized:', !!window.supabase);
-      const b = document.getElementById('qp-banner');
-      if (b) { b.style.display = 'block'; b.textContent = 'Init: ready'; }
-      // Bind signup handler if you have one defined elsewhere
+      showBanner('ready');
       if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
     }
 
-    // Optional: quick check function
     window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
   </script>
 
   <!-- 3) Sign-up logic (bind after init) -->
   <script>
     (function() {
-      window.bindSignupHandler = function() {
+      window.bindSignupHandler = async function() {
         const form = document.getElementById('signup-form');
         const status = document.getElementById('signup-status');
         const btn = document.getElementById('signup-btn');
@@ -79,14 +81,35 @@
           status.textContent = '';
 
           try {
+            // Primary signup (auth)
             const { user, session, error } = await window.supabase.auth.signUp(
               { email, password },
               { data: { display_name: name || '' } }
             );
+
             if (error) {
               status.textContent = 'Signup error: ' + (error.message || error);
             } else if (user) {
               status.textContent = 'Signup successful. Check email to verify.';
+
+              // Optional: Seed into your "user" table
+              try {
+                const uid = user.id;
+                if (uid) {
+                  const tableName = 'user'; // change to 'users' if your schema uses that
+                  const { data: seedData, error: seedError } = await window.supabase
+                    .from(tableName)
+                    .insert([{ id: uid, email: email, display_name: name || '' }])
+                    .single();
+                  if (seedError) {
+                    status.textContent += ' | Seed error: ' + (seedError.message || seedError);
+                  } else {
+                    status.textContent += ' | User row seeded';
+                  }
+                }
+              } catch (seedErr) {
+                status.textContent += ' | Seed exception: ' + (seedErr?.message || seedErr);
+              }
             } else {
               status.textContent = 'Signup complete. Please verify email.';
             }
@@ -106,7 +129,7 @@
     })();
   </script>
 
-  <!-- 4) Page content -->
+  <!-- 4) Page content (signup form) -->
   <div class="container" aria-label="Sign up form container">
     <div class="card" style="text-align:center;">
       <h2>Create an account</h2>
@@ -125,7 +148,5 @@
       <div id="signup-status" class="status" aria-live="polite"></div>
     </div>
   </div>
-
 </body>
 </html>
-

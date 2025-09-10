@@ -1,6 +1,10 @@
 
 // Centralized redirect logic for login -> dashboard flow
-// Exposes a global initializer: initDashboardLogic()
+// - If not authenticated, go to login.html
+// - If authenticated, determine role and go to AdminDashboard.html or clientdashboard.html
+// - Guard against redirect loops (one redirect per page load)
+// - Expose a single initializer and a sign-out helper
+
 (function() {
   const ADMIN_DASHBOARD = 'AdminDashboard.html';
   const CLIENT_DASHBOARD = 'clientdashboard.html';
@@ -9,6 +13,7 @@
   // One-time guard to prevent multiple redirects on a single load
   let _dashboardRedirected = false;
 
+  // Initialize and run the flow
   async function initDashboardLogic() {
     if (_dashboardRedirected) return;
 
@@ -40,9 +45,7 @@
           .eq('id', user.id)
           .maybeSingle();
 
-        if (userRow && userRow.role) {
-          role = userRow.role;
-        }
+        if (userRow && userRow.role) role = userRow.role;
       } catch (e) {
         console.warn('Could not fetch user role, defaulting to client dashboard:', e);
       }
@@ -52,7 +55,7 @@
         ? ADMIN_DASHBOARD
         : CLIENT_DASHBOARD;
 
-      // If not already on the target, redirect
+      // If not on the target, redirect
       const current = (window.location.pathname.split('/').pop() || '').toLowerCase();
       if (current !== target.toLowerCase()) {
         _dashboardRedirected = true;
@@ -60,18 +63,30 @@
       } else {
         _dashboardRedirected = true;
         console.log('Already on the correct dashboard:', target);
-        // You can initialize dashboard content here if desired
+        // Optional: keep rendering the dashboard content here
       }
     } catch (err) {
       console.error('Dashboard logic failed:', err);
-      // Fallback: go to client dashboard
       _dashboardRedirected = true;
       window.location.href = CLIENT_DASHBOARD;
     }
   }
 
-  // Expose a hook to manually trigger (e.g., after login)
+  // Public trigger (optional, used after login)
   window.initDashboardLogic = initDashboardLogic;
+
+  // Sign-out helper (call on sign out button)
+  window.signOutAndRedirect = async function() {
+    try {
+      if (window.supabase) {
+        await window.supabase.auth.signOut();
+      }
+    } catch (e) {
+      console.warn('Sign-out error:', e);
+    } finally {
+      window.location.href = LOGIN_PAGE;
+    }
+  };
 
   // Auto-run on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', initDashboardLogic);

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -22,12 +23,13 @@
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
   <!-- 1) Supabase CDN (UMD) -->
-  <script src="https://app.unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js" onload="initSupabase()"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- 2) Init (guaranteed after CDN loads) -->
   <script>
-    // Replace with your real values (keep keys secret in prod)
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+    // Replace with your real values (do not expose real keys publicly in chat)
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // YOUR-ANON-KEY
 
     function showBanner(text){
       const b = document.getElementById('qp-banner');
@@ -36,8 +38,7 @@
 
     function initSupabase(){
       if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-        // CDN not ready yet; retry gently
-        console.warn('Supabase library not loaded yet. retrying...');
+        console.warn('Supabase library not loaded yet.');
         showBanner('not ready');
         setTimeout(initSupabase, 150);
         return;
@@ -48,11 +49,11 @@
       if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
     }
 
-    // Quick check
-    window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
+    // Kick off init after CDN load
+    setTimeout(initSupabase, 0);
   </script>
 
-  <!-- 2) Sign-up logic (bind after init) -->
+  <!-- 3) Sign-up logic (bind after init) -->
   <script>
     (function() {
       window.bindSignupHandler = async function() {
@@ -82,10 +83,12 @@
           status.textContent = '';
 
           try {
+            // Primary signup (auth)
             const { user, session, error } = await window.supabase.auth.signUp(
               { email, password },
               { data: { display_name: name || '' } }
             );
+
             if (error) {
               status.textContent = 'Signup error: ' + (error.message || error);
             } else if (user) {
@@ -94,17 +97,21 @@
               status.textContent = 'Signup complete. Please verify email.';
             }
 
-            // Optional: seed user into your table after signup
+            // Optional: seed into your "user" table
             if (user && user.id) {
-              const tableName = 'user';
-              const { data: seed, error: seedError } = await window.supabase
-                .from(tableName)
-                .insert([{ id: user.id, email, display_name: name || '' }])
-                .single();
-              if (seedError) {
-                status.textContent += ' | Seed error: ' + (seedError.message || seedError);
-              } else {
-                status.textContent += ' | User row seeded';
+              const tableName = 'user'; // adjust if needed
+              try {
+                const { data: seed, error: seedError } = await window.supabase
+                  .from(tableName)
+                  .insert([{ id: user.id, email, display_name: name || '' }])
+                  .single();
+                if (seedError) {
+                  status.textContent += ' | Seed error: ' + (seedError.message || seedError);
+                } else {
+                  status.textContent += ' | User row seeded';
+                }
+              } catch (seedCatch) {
+                status.textContent += ' | Seed exception: ' + (seedCatch?.message || seedCatch);
               }
             }
           } catch (err) {
@@ -123,7 +130,7 @@
     })();
   </script>
 
-  <!-- 4) Page content -->
+  <!-- 4) Page content (signup form) -->
   <div class="container" aria-label="Sign up form container">
     <div class="card" style="text-align:center;">
       <h2>Create an account</h2>
@@ -142,3 +149,5 @@
       <div id="signup-status" class="status" aria-live="polite"></div>
     </div>
   </div>
+</body>
+</html>

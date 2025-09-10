@@ -1,7 +1,7 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <title>Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
@@ -16,13 +16,11 @@
     button:disabled { opacity:0.6; cursor:not-allowed; }
     .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
     .banner { position: fixed; bottom:0; left:0; right:0; z-index:9999; background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace; font-size:12px; display:none; }
-
-    /* Replace with your real values (do not expose real keys publicly in chat) */
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // YOUR-ANON-KEY
   </style>
 </head>
 <body>
+  <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
+
   <div class="container">
     <div class="card">
       <h2>Login</h2>
@@ -39,19 +37,18 @@
     </div>
   </div>
 
-  <div id="qp-banner" class="banner" aria-live="polite"></div>
-
-  <!-- CDN: supabase-js v2.57.4 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <!-- CDN: Supabase JS (UMD) -->
+  <<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Init helper banner
+    // Replace with your actual values locally
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+
     function showBanner(text){
       const b = document.getElementById('qp-banner');
       if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
     }
 
-    // Safely initialize Supabase after CDN loads
     function initSupabase(){
       if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
         console.warn('Supabase library not loaded yet.');
@@ -66,7 +63,6 @@
     }
 
     // Kick off init after CDN load
-    // Use 0 timeout to yield to CDN script loading
     setTimeout(initSupabase, 0);
 
     (function() {
@@ -96,9 +92,7 @@
           status.textContent = '';
 
           try {
-            // Sign in via auth
             const { data, user, session, error } = await window.supabase.auth.signInWithPassword({ email, password });
-
             if (error) {
               status.textContent = 'Login error: ' + (error.message || error);
               btn.disabled = false;
@@ -106,36 +100,26 @@
               return;
             }
 
-            // Access user from data or user for compatibility
             const currentUser = user || (data && data.user) || null;
 
-            // Optional: fetch role from users table (id matches auth user id)
+            // Fetch role from users table (id matches auth user id)
             let role = null;
             if (currentUser && currentUser.id) {
               try {
                 const { data: userRow } = await window.supabase
-                  .from('users') // adjust table name if needed
+                  .from('users') // adjust if your table name differs
                   .select('role')
                   .eq('id', currentUser.id)
                   .single();
-                if (userRow && userRow.role) {
-                  role = userRow.role;
-                }
+                if (userRow && userRow.role) role = userRow.role;
               } catch (e) {
-                // Ignore fetch errors; we'll proceed with redirect if possible
                 console.warn('Role fetch failed:', e);
               }
             }
 
-            // Redirect logic
-            // - non-admin -> clientdashboard.html
-            // - admin -> AdminDashboard.html
             const target = (role && String(role).toLowerCase() === 'admin') ? 'AdminDashboard.html' : 'clientdashboard.html';
             status.textContent = 'Login successful. Redirecting...';
-            // Use a short timeout to ensure UI update
-            setTimeout(() => {
-              window.location.href = target;
-            }, 400);
+            setTimeout(() => { window.location.href = target; }, 400);
           } catch (err) {
             status.textContent = 'Login failed: ' + (err?.message || err);
           } finally {
@@ -145,12 +129,10 @@
         });
       };
 
-      // Bind after load
       window.addEventListener('load', () => {
         if (typeof window.bindLoginHandler === 'function') window.bindLoginHandler();
       });
     })();
   </script>
-
 </body>
 </html>

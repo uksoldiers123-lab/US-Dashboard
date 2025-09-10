@@ -5,6 +5,7 @@
   <title>Sign Up</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+
     :root { --bg:#f7f7f7; --card:#fff; --text:#111; --primary:#4f46e5; }
     html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%; }
     .container { max-width:420px; margin:0 auto; padding:20px; }
@@ -12,56 +13,54 @@
     h2 { margin:0 0 12px; font-size:1.25rem; text-align:center; }
     label { display:block; font-size:0.92rem; margin:12px 0 6px; }
     input { width:100%; padding:12px; font-size:1rem; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
-    button { width:100%; padding:12px; font-size:1rem; border-radius:8px; border:none; color:#fff; background:var(--primary); cursor:pointer; }
+    button { width:100%; padding:14px; font-size:1rem; border-radius:8px; border:none; color:#fff; background:var(--primary); cursor:pointer; }
     button:disabled { opacity:0.6; cursor:not-allowed; }
     .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
-    .banner { position: fixed; bottom: 8px; left: 8px; right: 8px; z-index:9999; background:#111; color:#fff; padding:8px 12px; border-radius:8px; font-family:monospace; font-size:12px; display:none; }
-  </style>
-</head>
-<body>
+    .banner { position: fixed; bottom:0; left:0; right:0; z-index:9999; background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace; font-size:12px; display:none; }
 
-  <div id="qp-banner" class="banner"></div>
-
-  <!-- 1) CDN -->
-  <script src="https://unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
-
-  <!-- 2) Init (guaranteed before signup) -->
-  <script>
     (function init() {
-      const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-      // Ensure library loaded
+      // Replace with your real values
+      const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // TODO: replace
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // TODO: replace
+
+      // Guard for library load
       if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-        console.error('Supabase JS library not loaded yet. Make sure the CDN script tag is present and loaded.');
+        console.error('Supabase library not loaded yet. Ensure the CDN script tag is loaded before this script.');
+        showBanner('not ready');
+        setTimeout(init, 150);
         return;
       }
+
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('Supabase initialized:', !!window.supabase);
-      // Bind signup after ready
-      window.bindSignupHandler && window.bindSignupHandler();
-      // Ready banner
-      const b = document.getElementById('qp-banner');
-      if (b) { b.style.display = 'block'; b.textContent = 'Init: ready'; }
+      showBanner('ready');
+
+      // If you have a global hook to wire signup, call it here
+      if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
     })();
-  </script>
 
-  <!-- 3) Sign-up logic (bind after init) -->
-  <script>
-    (function() {
-      function waitForInit(cb) {
-        if (window.supabase && typeof window.supabase.auth === 'object') {
-          cb();
-        } else {
-          setTimeout(() => waitForInit(cb), 100);
-        }
+    function showBanner(text) {
+      const b = document.getElementById('qp-banner');
+      if (b) {
+        b.style.display = 'block';
+        b.textContent = 'Init: ' + text;
       }
+    }
 
+    (function() {
       window.bindSignupHandler = function() {
         const form = document.getElementById('signup-form');
         const status = document.getElementById('signup-status');
         const btn = document.getElementById('signup-btn');
+        if (!form) return;
+
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
+          if (!window.supabase) {
+            alert('Please wait for the Sign Up module to finish initializing. Try again in a moment.');
+            return;
+          }
+
           const email = document.getElementById('signup-email').value.trim();
           const password = document.getElementById('signup-password').value;
           const name = document.getElementById('signup-name').value.trim();
@@ -96,33 +95,131 @@
         });
       };
 
-      waitForInit(() => {
-        if (typeof window.bindSignupHandler === 'function') {
-          window.bindSignupHandler();
-        }
-      });
+      // Kick off binding after a short delay to ensure init ran
+      setTimeout(() => {
+        if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
+      }, 200);
     })();
-  </script>
 
-  <!-- 4) Page content (your form) -->
-  <div class="container">
-    <div class="card" style="text-align:center;">
-      <h2>Create an account</h2>
-    </div>
+      Create an account
 
-    <div class="card" style="margin-top:12px;">
-      <form id="signup-form" autocomplete="on" aria-label="Sign up form">
-        <label for="signup-email">Email</label>
-        <input id="signup-email" type="email" required placeholder="you@example.com" />
-        <label for="signup-password">Password</label>
-        <input id="signup-password" type="password" required placeholder="Password" />
-        <label for="signup-name">Display name (optional)</label>
-        <input id="signup-name" type="text" placeholder="Your name" />
-        <button type="submit" id="signup-btn" aria-label="Create account">Create account</button>
-      </form>
-      <div id="signup-status" class="status" aria-live="polite"></div>
-    </div>
-  </div>
+        Email
 
-</body>
-</html>
+        Password
+
+        Display name (optional)
+
+        Create account
+
+
+Notes
+This version puts the banner at the bottom and shows Init: ready when initialization finishes.
+Be sure to replace the two TODO placeholders with your actual SUPABASE_URL and SUPABASE_ANON_KEY.
+Do not use service_role keys in frontend.
+
+If you want me to tailor the exact values for your project, paste:
+Your SUPABASE_URL (redacted okay)
+Your SUPABASE_ANON_KEY (redacted okay)
+
+I can deliver a one-file patch with those values embedded and a matching login page if you want.You're right—the full page should start with a doctype. Here’s a complete, copy-paste-ready signup.html that includes the doctype, mobile-friendly UI, the bottom banner, CDN initialization, and signup logic. Replace the placeholders with your real values.
+
+Copy-paste this exact file as signup.html and host on GitHub Pages:
+
+  Sign Up
+
+    :root { --bg:#f7f7f7; --card:#fff; --text:#111; --primary:#4f46e5; }
+    html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%; }
+    .container { max-width:420px; margin:0 auto; padding:20px; }
+    .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+    h2 { margin:0 0 12px; font-size:1.25rem; text-align:center; }
+    label { display:block; font-size:0.92rem; margin:12px 0 6px; }
+    input { width:100%; padding:12px; font-size:1rem; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
+    button { width:100%; padding:14px; font-size:1rem; border-radius:8px; border:none; color:#fff; background:var(--primary); cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:not-allowed; }
+    .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
+    .banner { position: fixed; bottom:0; left:0; right:0; z-index:9999; background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace; font-size:12px; display:none; }
+
+    (function init() {
+      // Replace with your real values
+      const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; 
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // TODO: replace
+
+      // Guard for library load
+      if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+        console.error('Supabase library not loaded yet. Ensure the CDN script tag is loaded before this script.');
+        showBanner('not ready');
+        setTimeout(init, 150);
+        return;
+      }
+
+      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase initialized:', !!window.supabase);
+      showBanner('ready');
+
+      // If you have a global hook to wire signup, call it here
+      if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
+    })();
+
+    function showBanner(text) {
+      const b = document.getElementById('qp-banner');
+      if (b) {
+        b.style.display = 'block';
+        b.textContent = 'Init: ' + text;
+      }
+    }
+
+    (function() {
+      window.bindSignupHandler = function() {
+        const form = document.getElementById('signup-form');
+        const status = document.getElementById('signup-status');
+        const btn = document.getElementById('signup-btn');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (!window.supabase) {
+            alert('Please wait for the Sign Up module to finish initializing. Try again in a moment.');
+            return;
+          }
+
+          const email = document.getElementById('signup-email').value.trim();
+          const password = document.getElementById('signup-password').value;
+          const name = document.getElementById('signup-name').value.trim();
+
+          if (!email || !password) {
+            status.textContent = 'Please provide email and password.';
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Creating account...';
+          status.textContent = '';
+
+          try {
+            const { user, session, error } = await window.supabase.auth.signUp(
+              { email, password },
+              { data: { display_name: name || '' } }
+            );
+            if (error) {
+              status.textContent = 'Signup error: ' + (error.message || error);
+            } else if (user) {
+              status.textContent = 'Signup successful. Check email to verify.';
+            } else {
+              status.textContent = 'Signup complete. Please verify email.';
+            }
+          } catch (err) {
+            status.textContent = 'Signup failed: ' + (err?.message || err);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create account';
+          }
+        });
+      };
+
+      // Kick off binding after a short delay to ensure init ran
+      setTimeout(() => {
+        if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
+      }, 200);
+    })();
+
+      

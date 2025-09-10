@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -19,6 +20,7 @@
   </style>
 </head>
 <body>
+  <!-- Init status banner -->
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
   <div class="container">
@@ -38,9 +40,10 @@
   </div>
 
   <!-- CDN: Supabase JS (UMD) -->
-  <<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
   <script>
-    // Replace with your actual values locally
+    // TODO: Replace these with your actual values locally
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
 
@@ -75,7 +78,7 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           if (!window.supabase) {
-            alert('Please wait for the Sign In module to finish initializing. Try again in a moment.');
+            alert('Please wait for initialization. Try again in a moment.');
             return;
           }
 
@@ -107,7 +110,7 @@
             if (currentUser && currentUser.id) {
               try {
                 const { data: userRow } = await window.supabase
-                  .from('users') // adjust if your table name differs
+                  .from('users')
                   .select('role')
                   .eq('id', currentUser.id)
                   .single();
@@ -117,9 +120,18 @@
               }
             }
 
-            const target = (role && String(role).toLowerCase() === 'admin') ? 'AdminDashboard.html' : 'clientdashboard.html';
+            // Decide target: admin -> AdminDashboard.html, otherwise clientdashboard.html
+            const target = (role && String(role).toLowerCase() === 'admin')
+              ? 'AdminDashboard.html'
+              : 'clientdashboard.html';
+
+            // Redirect reliably
             status.textContent = 'Login successful. Redirecting...';
-            setTimeout(() => { window.location.href = target; }, 400);
+            showBanner('redirecting to ' + target);
+
+            setTimeout(() => {
+              window.location.href = target;
+            }, 250);
           } catch (err) {
             status.textContent = 'Login failed: ' + (err?.message || err);
           } finally {

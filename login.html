@@ -1,161 +1,156 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Log In</title>
+  <meta charset="utf-8" />
+  <title>Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --bg:#f7f7f7; --card:#fff; --text:#111; --primary:#4f46e5; }
     html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%; }
     .container { max-width:420px; margin:0 auto; padding:20px; }
     .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
-    h2 { margin:0 0 12px; font-size:1.4rem; text-align:center; }
+    h2 { margin:0 0 12px; font-size:1.25rem; text-align:center; }
     label { display:block; font-size:0.92rem; margin:12px 0 6px; }
     input { width:100%; padding:12px; font-size:1rem; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
     button { width:100%; padding:14px; font-size:1rem; border-radius:8px; border:none; color:#fff; background:var(--primary); cursor:pointer; }
     button:disabled { opacity:0.6; cursor:not-allowed; }
     .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
-    .banner { position: fixed; bottom: 8px; left: 8px; right: 8px; z-index:9999; background:#111; color:#fff; padding:8px 12px; border-radius:8px; font-family:monospace; font-size:12px; display:none; }
+    .banner { position: fixed; bottom:0; left:0; right:0; z-index:9999; background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace; font-size:12px; display:none; }
+
+    /* Replace with your real values (do not expose real keys publicly in chat) */
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // YOUR-ANON-KEY
   </style>
 </head>
 <body>
-
-  <div id="qp-banner" class="banner"></div>
-
-  <!-- CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Local fallback (if CDN blocked) -->
-  <script>
-    (function loadLocalFallback() {
-      var CDNLoaded = typeof supabase !== 'undefined' && typeof supabase.createClient === 'function';
-      if (CDNLoaded) {
-        console.log('CDN Supabase loaded');
-        return;
-      }
-      var s = document.createElement('script');
-      s.src = '/public/js/supabase.min.js';
-      s.onload = function(){ console.log('Loaded local Supabase library'); };
-      s.onerror = function(){ console.error('Failed to load local Supabase library'); };
-      document.head.appendChild(s);
-    })();
-  </script>
-
-  <!-- Init with guard: only set up window.supabase after library is ready -->
-  <script>
-    (function initSupabaseGlobal() {
-      const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-      function tryInit() {
-        if (!window.supabase) {
-          if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-            console.log('Init: waiting for Supabase library');
-            setTimeout(tryInit, 150);
-            updateBanner('not ready');
-            return;
-          }
-          window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          console.log('Supabase initialized:', !!window.supabase);
-        } else {
-          console.log('Supabase already initialized');
-        }
-        updateBanner(window.supabase ? 'ready' : 'not ready');
-        if (typeof window.bindLoginHandler === 'function') {
-          window.bindLoginHandler();
-        }
-      }
-      function updateBanner(text) {
-        const b = document.getElementById('qp-banner');
-        if (b) {
-          b.style.display = 'block';
-          b.textContent = 'Init: ' + text;
-        }
-      }
-      setTimeout(tryInit, 100);
-      window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
-      if (window.__checkSupabase) window.__checkSupabase();
-    })();
-  </script>
-
-  <!-- 3) Sign-in wrapper (guarded) -->
-  <script>
-    function signInUser(email, password) {
-      if (!window.supabase) {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (window.supabase) {
-              resolve(window.supabase.auth.signIn({ email, password }));
-            } else {
-              reject(new Error('Supabase not initialized'));
-            }
-          }, 50);
-        });
-      }
-      return window.supabase.auth.signIn({ email, password });
-    }
-  </script>
-
-  <!-- Page content -->
   <div class="container">
-    <div class="card" style="text-align:center;">
-      <h2>Log In</h2>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <form id="login-form" autocomplete="on" aria-label="Log in form">
+    <div class="card">
+      <h2>Login</h2>
+      <form id="login-form" autocomplete="username">
         <label for="login-email">Email</label>
-        <input id="login-email" type="email" required placeholder="you@example.com" />
+        <input type="email" id="login-email" placeholder="you@example.com" required />
 
         <label for="login-password">Password</label>
-        <input id="login-password" type="password" required placeholder="Your password" />
+        <input type="password" id="login-password" placeholder="Your password" required />
 
-        <button type="submit" id="login-btn" aria-label="Log in">Log in</button>
+        <button type="submit" id="login-btn">Sign In</button>
       </form>
-
-      <div id="login-status" class="status" aria-live="polite"></div>
-      <a href="signup.html" class="link" style="display:block; text-align:center; margin-top:8px;">Don't have an account? Sign up</a>
+      <div class="status" id="login-status"></div>
     </div>
   </div>
 
+  <div id="qp-banner" class="banner" aria-live="polite"></div>
+
+  <!-- CDN: supabase-js v2.57.4 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
-    (function () {
-      const form = document.getElementById('login-form');
-      const status = document.getElementById('login-status');
-      const btn = document.getElementById('login-btn');
-      const banner = document.getElementById('qp-banner');
+    // Init helper banner
+    function showBanner(text){
+      const b = document.getElementById('qp-banner');
+      if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
+    }
 
-      function setLoading(v) {
-        btn.disabled = v;
-        btn.textContent = v ? 'Logging in...' : 'Log in';
+    // Safely initialize Supabase after CDN loads
+    function initSupabase(){
+      if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+        console.warn('Supabase library not loaded yet.');
+        showBanner('not ready');
+        setTimeout(initSupabase, 150);
+        return;
       }
+      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase initialized:', !!window.supabase);
+      showBanner('ready');
+      if (typeof window.bindLoginHandler === 'function') window.bindLoginHandler();
+    }
 
-      form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        if (!email || !password) {
-          status.textContent = 'Please provide email and password.';
-          return;
-        }
+    // Kick off init after CDN load
+    // Use 0 timeout to yield to CDN script loading
+    setTimeout(initSupabase, 0);
 
-        // Init state
-        if (banner) banner.textContent = 'Init: ' + (window.supabase ? 'ready' : 'not ready');
-        try {
-          setLoading(true);
-          const r = await signInUser(email, password);
-          if (r && r.user) {
-            status.textContent = 'Login successful. Welcome back!';
-          } else if (r && r.error) {
-            status.textContent = 'Login error: ' + (r.error.message || r.error);
-          } else {
-            status.textContent = 'Login complete.';
+    (function() {
+      window.bindLoginHandler = async function() {
+        const form = document.getElementById('login-form');
+        const status = document.getElementById('login-status');
+        const btn = document.getElementById('login-btn');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (!window.supabase) {
+            alert('Please wait for the Sign In module to finish initializing. Try again in a moment.');
+            return;
           }
-        } catch (err) {
-          status.textContent = 'Login failed: ' + (err?.message || err);
-        } finally {
-          setLoading(false);
-        }
+
+          const email = document.getElementById('login-email').value.trim();
+          const password = document.getElementById('login-password').value;
+
+          if (!email || !password) {
+            status.textContent = 'Please provide email and password.';
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Signing in...';
+          status.textContent = '';
+
+          try {
+            // Sign in via auth
+            const { data, user, session, error } = await window.supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+              status.textContent = 'Login error: ' + (error.message || error);
+              btn.disabled = false;
+              btn.textContent = 'Sign In';
+              return;
+            }
+
+            // Access user from data or user for compatibility
+            const currentUser = user || (data && data.user) || null;
+
+            // Optional: fetch role from users table (id matches auth user id)
+            let role = null;
+            if (currentUser && currentUser.id) {
+              try {
+                const { data: userRow } = await window.supabase
+                  .from('users') // adjust table name if needed
+                  .select('role')
+                  .eq('id', currentUser.id)
+                  .single();
+                if (userRow && userRow.role) {
+                  role = userRow.role;
+                }
+              } catch (e) {
+                // Ignore fetch errors; we'll proceed with redirect if possible
+                console.warn('Role fetch failed:', e);
+              }
+            }
+
+            // Redirect logic
+            // - non-admin -> clientdashboard.html
+            // - admin -> AdminDashboard.html
+            const target = (role && String(role).toLowerCase() === 'admin') ? 'AdminDashboard.html' : 'clientdashboard.html';
+            status.textContent = 'Login successful. Redirecting...';
+            // Use a short timeout to ensure UI update
+            setTimeout(() => {
+              window.location.href = target;
+            }, 400);
+          } catch (err) {
+            status.textContent = 'Login failed: ' + (err?.message || err);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Sign In';
+          }
+        });
+      };
+
+      // Bind after load
+      window.addEventListener('load', () => {
+        if (typeof window.bindLoginHandler === 'function') window.bindLoginHandler();
       });
     })();
   </script>
+
 </body>
 </html>

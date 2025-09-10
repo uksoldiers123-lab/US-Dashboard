@@ -19,7 +19,6 @@
   </style>
 </head>
 <body>
-
   <!-- Bottom status banner (visible when active) -->
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
@@ -32,7 +31,7 @@
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // TODO: replace
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // TODO: replace
 
-    // Initialize Supabase immediately after CDN loads
+    // Initialize immediately after CDN loads
     if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
       console.error('Supabase library not loaded yet. Ensure the CDN script tag is loaded before this script.');
       document.getElementById('qp-banner').style.display = 'block';
@@ -42,6 +41,7 @@
       console.log('Supabase initialized:', !!window.supabase);
       document.getElementById('qp-banner').style.display = 'block';
       document.getElementById('qp-banner').textContent = 'Init: ready';
+      // Bind signup handler if you have one defined elsewhere
       if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
     }
 

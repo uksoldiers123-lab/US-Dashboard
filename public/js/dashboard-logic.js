@@ -1,4 +1,3 @@
-
 async function fetchUserData() {
   try {
     // Adjust based on your actual table and columns

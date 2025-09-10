@@ -22,23 +22,22 @@
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
   <!-- 1) Supabase CDN (UMD) -->
-  <script src="https://app.unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
+  <script src="https://app.unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js" onload="initSupabase()"></script>
 
-  <!-- 2) Init (one-file, no extra files) -->
   <script>
-    // Replace with your real values (do not expose real keys in public chat)
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // YOUR-ANON-KEY
+    // Replace with your real values (keep keys secret in prod)
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
 
     function showBanner(text){
       const b = document.getElementById('qp-banner');
       if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
     }
 
-    // Initialize after CDN loads (safe single-step approach)
     function initSupabase(){
       if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-        console.warn('Supabase library not loaded yet.');
+        // CDN not ready yet; retry gently
+        console.warn('Supabase library not loaded yet. retrying...');
         showBanner('not ready');
         setTimeout(initSupabase, 150);
         return;
@@ -49,11 +48,11 @@
       if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
     }
 
-    // Kick off init
-    setTimeout(initSupabase, 0);
+    // Quick check
+    window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
   </script>
 
-  <!-- 3) Sign-up logic (bind after init) -->
+  <!-- 2) Sign-up logic (bind after init) -->
   <script>
     (function() {
       window.bindSignupHandler = async function() {
@@ -97,19 +96,15 @@
 
             // Optional: seed user into your table after signup
             if (user && user.id) {
-              const tableName = 'user'; // change to 'users' if needed
-              try {
-                const { data: seed, error: seedError } = await window.supabase
-                  .from(tableName)
-                  .insert([{ id: user.id, email, display_name: name || '' }])
-                  .single();
-                if (seedError) {
-                  status.textContent += ' | Seed error: ' + (seedError.message || seedError);
-                } else {
-                  status.textContent += ' | User row seeded';
-                }
-              } catch (seedCatch) {
-                status.textContent += ' | Seed exception: ' + (seedCatch?.message || seedCatch);
+              const tableName = 'user';
+              const { data: seed, error: seedError } = await window.supabase
+                .from(tableName)
+                .insert([{ id: user.id, email, display_name: name || '' }])
+                .single();
+              if (seedError) {
+                status.textContent += ' | Seed error: ' + (seedError.message || seedError);
+              } else {
+                status.textContent += ' | User row seeded';
               }
             }
           } catch (err) {
@@ -147,5 +142,3 @@
       <div id="signup-status" class="status" aria-live="polite"></div>
     </div>
   </div>
-</body>
-</html>

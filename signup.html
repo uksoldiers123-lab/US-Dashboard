@@ -20,12 +20,13 @@
 </head>
 <body>
 
+  <!-- In-page status banner (always visible) -->
   <div id="qp-banner" class="banner"></div>
 
-  <!-- CDN -->
+  <!-- 1) Supabase CDN (UMD) - pinned to a stable 2.x version -->
   <script src="https://app.unpkg.com/@supabase/supabase-js@2.57.4/dist/supabase-js.min.js"></script>
 
-  <!-- Local fallback (if CDN blocked) -->
+  <!-- 2) Fallback to local copy (loads if CDN fails) -->
   <script>
     (function loadLocalFallback() {
       var CDNLoaded = typeof supabase !== 'undefined' && typeof supabase.createClient === 'function';
@@ -34,6 +35,7 @@
         return;
       }
       var s = document.createElement('script');
+      // Adjust path if your static server base is different
       s.src = '/public/js/supabase.min.js';
       s.onload = function(){ console.log('Loaded local Supabase library'); };
       s.onerror = function(){ console.error('Failed to load local Supabase library'); };
@@ -41,7 +43,7 @@
     })();
   </script>
 
-  <!-- Init with guard: only set up window.supabase after library is ready -->
+  <!-- 3) Init with guard: only set up window.supabase after library is ready -->
   <script>
     (function initSupabaseGlobal() {
       const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
@@ -50,6 +52,7 @@
         if (!window.supabase) {
           if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
             // library not ready yet
+            console.log('Init: waiting for Supabase library');
             setTimeout(tryInit, 150);
             updateBanner('not ready');
             return;
@@ -60,7 +63,7 @@
           console.log('Supabase already initialized');
         }
         updateBanner(window.supabase ? 'ready' : 'not ready');
-        // After init is ready, attach signup handler if not already bound
+        // After init is ready, bind signup handler if function exists
         if (typeof window.bindSignupHandler === 'function') {
           window.bindSignupHandler();
         }
@@ -74,15 +77,14 @@
         }
       }
 
-      // Delay initial init to give CDN/local time to load
+      // Start after a short delay to allow CDN/local to load
       setTimeout(tryInit, 100);
-      // Expose a hook to re-check
       window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
       if (window.__checkSupabase) window.__checkSupabase();
     })();
   </script>
 
-  <!-- 4) Sign-up guard + binding (do this once after init) -->
+  <!-- 4) Sign-up guard + binding (attach after init) -->
   <script>
     // This function will be called after init is ready
     window.bindSignupHandler = function() {
@@ -97,11 +99,11 @@
 
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
-        // If not ready yet, bail with a friendly message
         if (!window.supabase) {
-          alert('Please wait for the Sign Up module to finish initializing. Tap again in a moment.');
+          alert('Please wait for the Sign Up module to finish initializing. Try again in a moment.');
           return;
         }
+
         var email = document.getElementById('signup-email').value.trim();
         var password = document.getElementById('signup-password').value;
         var name = document.getElementById('signup-name').value.trim();
@@ -115,7 +117,10 @@
         document.querySelector('.status').textContent = '';
 
         try {
-          var result = await signUpUser(email, password, { data: { display_name: name || '' } });
+          var result = await signUpUser(email, password, {
+            data: { display_name: name || '' }
+          });
+
           if (result && result.user) {
             document.querySelector('.status').textContent = 'Signup successful. Check your email to confirm.';
           } else if (result && result.error) {
@@ -129,13 +134,12 @@
           setLoading(false);
         }
       });
-
     };
 
-    // If you’re loading this patch into an existing page, you can call bindSignupHandler() after init.
+    // If you’re applying this patch to an existing page, you can call bindSignupHandler() after init.
   </script>
 
-  <!-- Page content (keep as-is) -->
+  <!-- Page content (your existing form) -->
   <div class="container">
     <div class="card" style="text-align:center;">
       <h2>Create an account</h2>

@@ -22,7 +22,7 @@
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
   <!-- 1) Supabase CDN (UMD) -->
-  <script src="https://app.unpkg.com/@supabase/supabase-js@2.57.4/dist/supabase-js.min.js"></script>
+  <script src="https://app.unpkg.com/@supabase/supabase-js/dist/supabase-js.min.js"></script>
 
   <!-- 2) Init (one-file, no extra files) -->
   <script>
@@ -35,21 +35,22 @@
       if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
     }
 
-    // Initialize immediately after CDN loads
-    if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-      console.error('Supabase library not loaded yet.');
-      showBanner('not ready');
-      // Retry once
-      setTimeout(() => location.reload(), 150);
-    } else {
+    // Initialize after CDN loads (safe single-step approach)
+    function initSupabase(){
+      if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+        console.warn('Supabase library not loaded yet.');
+        showBanner('not ready');
+        setTimeout(initSupabase, 150);
+        return;
+      }
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('Supabase initialized:', !!window.supabase);
       showBanner('ready');
-      // Bind signup handler if you have one defined elsewhere
       if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
     }
 
-    window.__checkSupabase = function(){ console.log('CHECK: Supabase exists?', !!window.supabase); };
+    // Kick off init
+    setTimeout(initSupabase, 0);
   </script>
 
   <!-- 3) Sign-up logic (bind after init) -->
@@ -82,37 +83,34 @@
           status.textContent = '';
 
           try {
-            // Primary signup (auth)
             const { user, session, error } = await window.supabase.auth.signUp(
               { email, password },
               { data: { display_name: name || '' } }
             );
-
             if (error) {
               status.textContent = 'Signup error: ' + (error.message || error);
             } else if (user) {
               status.textContent = 'Signup successful. Check email to verify.';
-
-              // Seed into your "user" table (adjust table name if needed)
-              try {
-                const uid = user.id;
-                if (uid) {
-                  const tableName = 'user'; // use 'users' if that's your actual table
-                  const { data: seedData, error: seedError } = await window.supabase
-                    .from(tableName)
-                    .insert([{ id: uid, email: email, display_name: name || '' }])
-                    .single();
-                  if (seedError) {
-                    status.textContent += ' | Seed error: ' + (seedError.message || seedError);
-                  } else {
-                    status.textContent += ' | User row seeded';
-                  }
-                }
-              } catch (seedErr) {
-                status.textContent += ' | Seed exception: ' + (seedErr?.message || seedErr);
-              }
             } else {
               status.textContent = 'Signup complete. Please verify email.';
+            }
+
+            // Optional: seed user into your table after signup
+            if (user && user.id) {
+              const tableName = 'user'; // change to 'users' if needed
+              try {
+                const { data: seed, error: seedError } = await window.supabase
+                  .from(tableName)
+                  .insert([{ id: user.id, email, display_name: name || '' }])
+                  .single();
+                if (seedError) {
+                  status.textContent += ' | Seed error: ' + (seedError.message || seedError);
+                } else {
+                  status.textContent += ' | User row seeded';
+                }
+              } catch (seedCatch) {
+                status.textContent += ' | Seed exception: ' + (seedCatch?.message || seedCatch);
+              }
             }
           } catch (err) {
             status.textContent = 'Signup failed: ' + (err?.message || err);
@@ -123,14 +121,14 @@
         });
       };
 
-      // Kick off binding after a short delay to ensure init ran
-      setTimeout(() => {
+      // Bind after load
+      window.addEventListener('load', () => {
         if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
-      }, 200);
+      });
     })();
   </script>
 
-  <!-- 4) Page content (signup form) -->
+  <!-- 4) Page content -->
   <div class="container" aria-label="Sign up form container">
     <div class="card" style="text-align:center;">
       <h2>Create an account</h2>

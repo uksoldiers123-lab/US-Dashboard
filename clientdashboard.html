@@ -157,8 +157,8 @@
 
         const role = userRow?.role ?? 'client';
         const target = (String(role).toLowerCase() === 'admin')
-          ? 'adminDashboard.html'
-          : 'clientDashboard.html';
+          ? 'admindashboard.html'
+          : 'clientdashboard.html';
 
         const currentPath = (window.location.pathname.split('/').pop() || '').toLowerCase();
         if (currentPath !== target.toLowerCase()) {
@@ -168,7 +168,7 @@
       } catch (e) {
         console.error('Auth check failed, redirecting to client dashboard.', e);
         redirected = true;
-        window.location.href = 'clientDashboard.html';
+        window.location.href = 'clientdashboard.html';
       }
     }
 

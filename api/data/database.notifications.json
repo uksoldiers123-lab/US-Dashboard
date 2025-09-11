@@ -1,3 +1,11 @@
+[
+    {
+        "id": 1,
+        "user_id": "<user_id>",  // Replace with actual user ID or keep it generic
+        "message": "Welcome to Uniquity Solutions! We are glad to have you on board.",
+        "created_at": "2023-01-01T00:00:00Z" // Use the current date/time format
+    }
+]
 {
   "generated_at": "2025-09-11T12:00:00Z",
   "notifications": [

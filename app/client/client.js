@@ -1,121 +1,77 @@
 
-import { SUPABASE, subscribeToUserNotifications } from '../shared/real-time-subs.js';
+const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // Replace with your Supabase project URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Replace with your Supabase anon key
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Replace with actual user context retrieval
-const currentUserId = "USER_ID_PLACEHOLDER";
-const currentTenantId = "TENANT_ID_PLACEHOLDER";
+async function loadUserData() {
+    const { data: user } = await sb.auth.getUser();
+    const clientId = user.id;
 
-document.getElementById("signOutBtn").addEventListener("click", (e) => {
-  e.preventDefault();
-  // Implement your sign-out flow
-  window.location.href = "/login.html";
-});
+    // Display user's greeting
+    const clientName = user.user_metadata.name || user.user_metadata.businessId || "Client";
+    document.getElementById('clientGreeting').textContent = `Welcome, ${clientName}!`;
 
-async function loadClientData() {
-  // Populate name (example)
-  const name = "Client";
-  document.getElementById("clientName").textContent = `Welcome back, ${name}`;
+    // Load balance data
+    const balanceResponse = await fetch(`/stripe/${clientId}/balance`);
+    const balanceData = await balanceResponse.json();
+    document.getElementById('total-balance').textContent = `Total Balance: $${balanceData.total.toFixed(2)}`;
+    document.getElementById('available-balance').textContent = `Available for Payout: $${balanceData.available.toFixed(2)}`;
 
-  // Load recent invoices (stub)
-  const tbody = document.querySelector("#invoicesTable tbody");
-  tbody.innerHTML = `
-    <tr><td>INV-003-ABCDEF</td><td>INV-003-ABCDEF</td><td>${name}</td><td>100.00</td><td>USD</td><td>Paid</td><td>2025-09-01</td></tr>
-  `;
-  // real code would fetch from /api/invoices?owner=currentUserId
+    // Load user settings
+    document.getElementById('settings-email').value = user.email;
+    document.getElementById('settings-name').value = user.user_metadata.display_name || '';
+    document.getElementById('settings-bank').value = user.user_metadata.bank || '';
+    document.getElementById('settings-account').value = user.user_metadata.account_number || '';
 }
 
-async function loadNotifications() {
-  // Use server-side API or real-time subscription (see below)
-  // For a starting point, fetch initial new notifications since last view
-  const lastSeen = localStorage.getItem("last_notif_seen") || null;
-  try {
-    const res = await fetch(`/api/notifications?user_id=${encodeURIComponent(currentUserId)}&since=${encodeURIComponent(lastSeen || "")}`);
-    const data = await res.json();
-    const container = document.getElementById("notifications");
-    if (Array.isArray(data.notifications) && data.notifications.length > 0) {
-      container.innerHTML = data.notifications.map(n => `<div class="notif"><strong>${n.title}</strong> ${n.message}</div>`).join("");
-      const now = new Date().toISOString();
-      localStorage.setItem("last_notif_seen", now);
-      // Optionally mark as read in backend
-    } else {
-      container.innerHTML = "<div class='notif'>No new notifications</div>";
+async function signOut() {
+    await sb.auth.signOut();
+    window.location.href = "login.html"; // Redirect to login page after signing out
+}
+
+async function createPayout(amount) {
+    if (!amount) {
+        alert('Please enter a valid amount.');
+        return;
     }
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-async function initRealtime() {
-  // Subscribe to real-time notifications for this user
-  const channel = subscribeToUserNotifications(currentUserId, (n) => {
-    const container = document.getElementById("notifications");
-    const html = `<div class="notif"><strong>${n.title}</strong> ${n.message} <span class="date">${new Date(n.created_at).toLocaleString()}</span></div>`;
-    container.insertAdjacentHTML('beforeend', html);
-    // Update badge
-    const badge = document.getElementById("notificationsCount");
-    let count = parseInt(badge.dataset.count || "0", 10) + 1;
-    badge.dataset.count = String(count);
-    badge.textContent = `Notifications: ${count}`;
-  });
-
-  // Return unsubscribe if needed later
-  return channel;
-}
-
-document.getElementById("btnSearchOwner").addEventListener("click", () => {
-  // Implement search by business ID or owner name
-  const q = document.getElementById("searchOwner").value.trim();
-  if (!q) return;
-  // fetch invoices or tenants matching q
-  console.log("Search requested for:", q);
-});
-
-document.getElementById("startOnboarding").addEventListener("click", () => {
-  alert("Starting onboarding flow (hook to backend)");
-});
-
-// Transfers
-document.getElementById("btnSendTransfer").addEventListener("click", () => {
-  const recipientBusinessId = document.getElementById("recipientBusinessId").value.trim();
-  const amount = parseFloat(document.getElementById("transferAmount").value);
-  if (!recipientBusinessId || isNaN(amount) || amount <= 0) {
-    alert("Please provide a valid recipient and amount.");
-    return;
-  }
-  // Call API to perform transfer
-  fetch("/api/transfers/tenant-to-tenant", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ recipientBusinessId, amount, currency: "USD" })
-  }).then(r => r.json()).then(res => {
-    if (res.success) {
-      document.getElementById("transferStatus").style.display = "inline-block";
-      document.getElementById("transferStatus").textContent = `Transfer queued: ${amount} USD to ${recipientBusinessId}`;
-    } else {
-      alert("Transfer failed: " + res.error);
-    }
-  }).catch(console.error);
-});
-
-// Invoices search
-document.getElementById("btnSearchInvoices").addEventListener("click", () => {
-  const query = document.getElementById("invoiceSearch").value.trim();
-  if (!query) return;
-  // fetch invoices by owner/business id
-  fetch(`/api/invoices?owner=${encodeURIComponent(query)}`).then(r => r.json()).then(data => {
-    const tbody = document.querySelector("#invoicesTable tbody");
-    tbody.innerHTML = "";
-    data.invoices?.forEach(iv => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${iv.invoice_id || iv.id}</td><td>${iv.invoice_prefix}-${iv.invoice_suffix}</td><td>${iv.owner || ""}</td><td>${iv.amount}</td><td>${iv.currency}</td><td>${iv.status}</td><td>${iv.created_at}</td>`;
-      tbody.appendChild(tr);
+    const response = await fetch(`/client/${clientId}/payouts/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, currency: 'usd' })
     });
-  }).catch(console.error);
+    const data = await response.json();
+    // Handle payout response here (e.g., show a success message)
+    alert(data.message || 'Payout initiated successfully!');
+}
+
+document.getElementById('signOutBtn').addEventListener('click', signOut);
+document.getElementById('payout-now').addEventListener('click', async () => {
+    const amount = document.getElementById('payout-amount').value;
+    await createPayout(amount);
 });
 
-// Init on load
-window.addEventListener("load", async () => {
-  await loadClientData();
-  await loadNotifications();
-  await initRealtime();
+document.getElementById('settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('settings-email').value;
+    const password = document.getElementById('settings-password').value;
+    const name = document.getElementById('settings-name').value;
+    const bankInfo = document.getElementById('settings-bank').value;
+    const accountNumber = document.getElementById('settings-account').value;
+
+    // Update user info in Supabase
+    const { error } = await sb.auth.update({
+        email: email,
+        password: password,
+        data: { display_name: name, bank: bankInfo, account_number: accountNumber }
+    });
+
+    if (error) {
+        alert('Error updating settings: ' + error.message);
+    } else {
+        alert('Settings updated successfully!');
+        loadUserData(); // Reload user data to reflect changes
+    }
 });
+
+// Load user data on page load
+window.addEventListener('load', loadUserData);

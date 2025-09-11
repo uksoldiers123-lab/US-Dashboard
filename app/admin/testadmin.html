@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Uniquity Solutions - Admin Dashboard</title>
+    <link rel="stylesheet" href="../shared/global.css" />
+    <link rel="stylesheet" href="admin.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg: #96A3B1;
+            --text: #1f2937;
+            --muted: #4b5563;
+            --card: #ffffff;
+            --primary: #e94b4b;
+            --primary-700: #d13f3f;
+            --accent: #fbbf24;
+            --ring: rgba(0,0,0,.08);
+            --shadow: 0 10px 30px rgba(2,6,23,.15);
+            --radius: 18px;
+            --nav-h: 56px;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+        .nav {
+            position: sticky; top: 0; z-index: 1100;
+            background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,.15);
+            height: var(--nav-h);
+        }
+        .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+        .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+        .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+        aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
+        main { display: grid; gap: 16px; align-content: start; }
+        .panel { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; min-height: 180px; }
+        .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
+        h1, h2 { margin: 0 0 8px; }
+        .hero { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 6px 20px rgba(0,0,0,.04); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: 1fr; }
+        }
+        .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+        .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .btn.secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+        .chip { display:inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; }
+        .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="admin-root" class="admin-root">
+        <aside class="ad ad-top" aria-label="Top ad placeholder"></aside>
+
+        <header class="nav">
+            <div class="brand">
+                <span class="brand-mark"></span> Uniquity Solutions - Admin
+            </div>
+            <div class="search-area">
+                <input id="adminSearch" type="text" placeholder="Search by business ID or owner" />
+                <button id="btnAdminSearch" class="btn">Search</button>
+            </div>
+            <button id="adminSignOut" class="btn btn-secondary">Sign out</button>
+        </header>
+
+        <main class="container layout">
+            <!-- Left Nav -->
+            <aside class="sidebar">
+                <div class="panel">
+                    <div class="section-title">Overview</div>
+                    <div id="adminTotalClients">Total Clients: 0</div>
+                    <div id="adminTotalRevenue" class="stat">Total Revenue: $0.00</div>
+                </div>
+
+                <div class="panel">
+                    <div class="section-title">All Payments</div>
+                    <table class="table" id="adminPaymentsTable">
+                        <thead><tr><th>ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="panel">
+                    <div class="section-title">Onboarding</div>
+                    <div id="adminOnboardingStatus">Status: Unknown</div>
+                </div>
+
+                <aside class="ad ad-left" aria-label="Left ad placeholder"></aside>
+            </aside>
+
+            <!-- Right Content -->
+            <section class="main" id="adminMain">
+                <div class="panel" id="adminNotificationsPanel">
+                    <div class="section-title">Post Notification (Admin)</div>
+                    <input type="text" id="notificationMessage" placeholder="Enter notification message" class="input" />
+                    <button class="btn" id="postNotificationBtn">Post Notification</button>
+                </div>
+
+                <div class="panel" id="adminUsersPanel">
+                    <div class="section-title">Registered Users</div>
+                    <table id="adminUsersTable">
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Business ID</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        async function loadAdminData() {
+            const response = await fetch('/admin/users');
+            const users = await response.json();
+            const usersTableBody = document.querySelector('#adminUsersTable tbody');
+            usersTableBody.innerHTML = users.map(user => `
+                <tr><td>${user.name || 'N/A'}</td><td>${user.email}</td><td>${user.businessId}</td></tr>
+            `).join('');
+
+            const paymentsResponse = await fetch('/admin/payments');
+            const payments = await paymentsResponse.json();
+            const paymentsTableBody = document.querySelector('#adminPaymentsTable tbody');
+            paymentsTableBody.innerHTML = payments.map(payment => `
+                <tr><td>${payment.id}</td><td>${payment.client}</td><td>${payment.amount}</td><td>${payment.currency}</td><td>${payment.status}</td><td>${payment.date}</td></tr>
+            `).join('');
+        }
+
+        document.getElementById('btnAdminSearch').addEventListener('click', async () => {
+            const searchTerm = document.getElementById('adminSearch').value;
+            const response = await fetch(`/admin/users?search=${searchTerm}`);
+            const users = await response.json();
+            const usersTableBody = document.querySelector('#adminUsersTable tbody');
+            usersTableBody.innerHTML = users.map(user => `
+                <tr><td>${user.name || 'N/A'}</td><td>${user.email}</td><td>${user.businessId}</td></tr>
+            `).join('');
+        });
+
+        document.getElementById('postNotificationBtn').addEventListener('click', async () => {
+            const message = document.getElementById('notificationMessage').value;
+            await fetch('/admin/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            alert('Notification posted!');
+        });
+
+        window.addEventListener('load', loadAdminData);
+    </script>
+</body>
+</html>

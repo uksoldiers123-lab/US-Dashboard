@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Uniquity Solutions - Client Dashboard</title>
+  <link rel="stylesheet" href="../shared/global.css" />
+  <link rel="stylesheet" href="client.css" />
+</head>
+<body>
+  <div id="client-root" class="client-root">
+    <!-- Top Ad Banner (future use) -->
+    <aside class="ad ad-top" aria-label="Top ad placeholder"></aside>
+
+    <header class="nav">
+      <div class="brand">
+        <span class="brand-mark"></span><span>Uniquity Solutions</span>
+      </div>
+      <div class="search-area">
+        <input id="searchOwner" type="text" placeholder="Search by business ID or owner name" />
+        <button id="btnSearchOwner" class="btn">Search</button>
+      </div>
+      <button id="signOutBtn" class="btn btn-secondary">Sign out</button>
+    </header>
+
+    <main class="container layout">
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="section-title">Overview</div>
+          <div id="greeting">Hello, Client!</div>
+          <div id="tenantBalance" class="stat">Balance: $0.00</div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Invoices</div>
+          <ul id="invoicesList" class="invoice-list"></ul>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Onboarding</div>
+          <button id="startOnboarding" class="btn">Start Onboarding</button>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Settings</div>
+          <button id="btnSettingsBank" class="btn">Bank</button>
+          <button id="btnSettingsEmail" class="btn">Email</button>
+          <button id="btnSettingsPassword" class="btn">Password</button>
+          <button id="btnSettingsSecurity" class="btn">Security</button>
+        </div>
+
+        <aside class="ad ad-left" aria-label="Left ad placeholder"></aside>
+      </aside>
+
+      <section class="main">
+        <div class="panel" id="overviewPanel">
+          <div class="section-title">Overview</div>
+          <h1 id="clientName">Welcome back, Client</h1>
+
+          <!-- Real-time Notifications -->
+          <div id="notifications" class="notif-area"></div>
+          <div id="notificationsCount" class="chip" data-count="0">Notifications: 0</div>
+        </div>
+
+        <div class="panel" id="transfersPanel">
+          <div class="section-title">Tenant-to-Tenant Transfer</div>
+          <p>Send funds from your tenant to another tenant.</p>
+
+          <div class="grid">
+            <div class="card">
+              <div class="section-title">Recipient (Tenant)</div>
+              <input id="recipientBusinessId" type="text" placeholder="Recipient business ID" />
+            </div>
+
+            <div class="card">
+              <div class="section-title">Amount</div>
+              <input id="transferAmount" type="number" placeholder="Amount" />
+              <select id="transferCurrency">
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top:12px;">
+            <button id="btnSendTransfer" class="btn">Send Transfer</button>
+            <span id="transferStatus" class="chip" style="display:none;"></span>
+          </div>
+        </div>
+
+        <div class="panel" id="invoicesPanel">
+          <div class="section-title">Invoices (Owner-specific)</div>
+          <input id="invoiceSearch" type="text" placeholder="Search invoices by owner or business ID" />
+          <button id="btnSearchInvoices" class="btn">Search Invoices</button>
+
+          <table class="table" id="invoicesTable" style="margin-top:8px;">
+            <thead><tr><th>ID</th><th>Invoice</th><th>Owner</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="panel" id="onboardingPanel">
+          <div class="section-title">Onboarding</div>
+          <p>Begin Stripe Connect onboarding for your account. Status: Not started</p>
+          <button id="startOnboarding" class="btn">Begin Onboarding</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="ad ad-bottom" aria-label="Bottom ad placeholder"></aside>
+  </div>
+
+  <script src="../shared/global.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
+

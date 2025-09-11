@@ -1,0 +1,27 @@
+
+:root {
+  --bg: #f7f7fb;
+  --text: #1f2937;
+  --muted: #4b5563;
+  --card: #ffffff;
+  --primary: #e34b4b;
+  --shadow: 0 10px 30px rgba(2,6,23,.15);
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+.nav { position: sticky; top: 0; z-index: 1100; background: rgba(0,0,0,.04); display:flex; align-items:center; justify-content: space-between; padding: 12px 20px; }
+.brand { display:flex; align-items:center; gap: 10px; font-weight:700; color:#fff; }
+.brand-mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; padding: 20px 0; }
+.aside, .main { display: block; }
+.panel { padding: 16px; border-radius: 12px; background:#fff; border:1px solid #e5e7eb; min-height: 180px; }
+.ad { height: 90px; border: 1px dashed #ccc; border-radius: 8px; display: block; background: #fff; margin: 8px 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; border-bottom: 1px solid #eee; text-align:left; }
+.btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn-secondary { background: #6b7280; color:#fff; }
+.notif-area { min-height: 60px; }
+.chip { display:inline-block; padding: 4px 8px; border-radius:999px; background:#f3f4f6; font-size:12px; }

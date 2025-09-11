@@ -121,8 +121,8 @@
 
             // Decide target: admin -> AdminDashboard.html, otherwise clientdashboard.html
             const target = (role && String(role).toLowerCase() === 'admin')
-              ? 'AdminDashboard.html'
-              : 'clientdashboard.html';
+              ? 'app/admin/index.html'
+              : 'app/client/index.html';
 
             // Redirect reliably
             status.textContent = 'Login successful. Redirecting...';

@@ -1,5 +1,4 @@
 {
-  
   "top": { "enabled": true, "src": "<top-ad-creative-or-iframe>" },
   "bottom": { "enabled": true, "src": "<bottom-ad-creative-or-iframe>" },
   "left": { "enabled": true, "src": "<left-ad-creative-or-iframe>" },

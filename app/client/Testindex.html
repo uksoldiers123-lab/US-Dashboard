@@ -1,222 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>Uniquity Solutions - Client Dashboard</title>
+    <link rel="stylesheet" href="../shared/global.css" />
+    <link rel="stylesheet" href="app/client/client.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
         :root {
-            --bg: #96A3B1;           /* grayish blue */
-            --text: #1f2937;         /* slate */
-            --muted: #4b5563;        /* muted text */
-            --card: #ffffff;
-            --primary: #e94b4b;      /* red highlight */
-            --accent: #fbbf24;       /* yellow highlight */
-            --shadow: 0 10px 30px rgba(2,6,23,.15);
-            --radius: 18px;
+            --bg: #96A3B1; 
+            --text: #1f2937; 
+            --muted: #4b5563; 
+            --card: #ffffff; 
+            --primary: #e94b4b; 
+            --accent: #fbbf24; 
+            --shadow: 0 10px 30px rgba(2,6,23,.15); 
+            --radius: 18px; 
+            --nav-h: 56px; 
         }
         * { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+        
+        /* Top nav */
         .nav {
-            position: sticky; top: 0; z-index: 1100; background: rgba(255, 255, 255, 0.9); border-bottom: 1px solid #e5e7eb; padding: 12px 20px;
+            position: sticky; top: 0; z-index: 1100;
+            background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,.15);
+            height: var(--nav-h);
         }
-        .nav-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; }
-        .brand { font-weight: 700; color: #fff; }
-        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 16px; }
+        .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+        .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+        
+        /* Layout: sidebar + main content */
         .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
         aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
         main { display: grid; gap: 16px; align-content: start; }
+
+        /* Panels */
         .panel { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; min-height: 180px; }
+        .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
         h1, h2 { margin: 0 0 8px; }
-        .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+        
+        /* Notifications */
+        #notificationsList { margin-top: 10px; }
+        .notification { padding: 8px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 6px; }
+        
+        /* Buttons & inputs */
         .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .search-bar { margin: 12px 0; }
+        .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
     </style>
 </head>
 <body>
-    <nav class="nav" aria-label="Main">
-        <div class="nav-inner container">
-            <div class="brand">Uniquity Solutions</div>
-            <div>
-                <button class="btn" id="openStripe">Open Stripe Dashboard</button>
-                <button class="btn" id="signOutBtn">Sign out</button>
+    <div id="client-root" class="client-root">
+        <header class="nav">
+            <div class="nav-inner">
+                <div class="brand">
+                    <span class="brand-mark"></span> Uniquity Solutions - Client Dashboard
+                </div>
+                <div class="nav-buttons">
+                    <button id="openStripe" class="btn">Open Stripe Dashboard</button>
+                    <button id="signOutBtn" class="btn btn-secondary">Sign out</button>
+                </div>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <div class="container layout" id="layout">
-        <aside aria-label="Sidebar navigation">
-            <div class="section-title">Overview</div>
-            <div class="card" style="margin-bottom:12px;">
-                This panel shows your client data, including payments, payouts, and onboarding status.
-            </div>
-            <div class="section-title">Navigation</div>
-            <ul style="list-style:none; padding:0; margin:0;">
-                <li><a href="#overview">Overview</a></li>
-                <li><a href="#payments">Payments</a></li>
-                <li><a href="#payouts">Payouts</a></li>
-                <li><a href="#onboarding">Onboarding</a></li>
-                <li><a href="#settings">Settings</a></li>
-            </ul>
-        </aside>
-        <main aria-label="Main dashboard content">
-            <section class="panel" id="overviewPanel">
-                <div class="section-title">Overview</div>
-                <h1 id="clientGreeting">Hello, Client!</h1>
-                <div class="grid">
-                    <div class="card">
-                        <div class="section-title">Total Balance</div>
-                        <div id="total-balance" style="font-size:22px; font-weight:700;">$0.00</div>
-                    </div>
-                    <div class="card">
-                        <div class="section-title">Available for Payout</div>
-                        <div id="available-balance" style="font-size:22px; font-weight:700;">$0.00</div>
-                    </div>
+        <main class="container layout">
+            <!-- Left Nav -->
+            <aside class="sidebar">
+                <div class="panel">
+                    <div class="section-title">Overview</div>
+                    <div id="clientGreeting">Welcome, Client!</div>
+                    <div id="total-balance">Total Balance: $0.00</div>
+                    <div id="available-balance">Available for Payout: $0.00</div>
                 </div>
-                <div class="search-bar">
-                    <input type="text" id="invoice-search" placeholder="Search invoices..." />
-                    <button class="btn" id="search-invoice-btn">Search</button>
-                </div>
-                <div id="invoice-results" class="card" style="margin-top:12px;"></div>
-            </section>
-            <section class="panel" id="paymentsPanel">
-                <div class="section-title">Recent Payments</div>
-                <table id="payments-table">
-                    <thead>
-                        <tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-            <section class="panel" id="payoutsPanel">
-                <div class="section-title">Payouts</div>
-                <div id="payouts-history">
-                    <table>
-                        <thead><tr><th>Payout ID</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
-                        <tbody id="payouts-tbody"></tbody>
+
+                <div class="panel">
+                    <div class="section-title">Recent Payments</div>
+                    <table class="table" id="payments-table">
+                        <thead>
+                            <tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr>
+                        </thead>
+                        <tbody></tbody>
                     </table>
                 </div>
-                <div style="margin-top:12px;">
-                    <input id="payout-amount" type="number" placeholder="Amount (smallest unit)" />
-                    <button class="btn" id="payout-now">Payout now</button>
+
+                <div class="panel">
+                    <div class="section-title">Payouts</div>
+                    <div id="payouts-section">
+                        <input type="number" id="payout-amount" placeholder="Enter amount" class="input" />
+                        <button id="payout-now" class="btn">Payout now</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="section-title">Settings</div>
+                    <form id="settings-form">
+                        <input type="email" id="settings-email" placeholder="Email" class="input" />
+                        <input type="password" id="settings-password" placeholder="Password" class="input" />
+                        <input type="text" id="settings-name" placeholder="Display Name" class="input" />
+                        <input type="text" id="settings-bank" placeholder="Bank Information" class="input" />
+                        <input type="text" id="settings-account" placeholder="Account Number" class="input" />
+                        <button type="submit" class="btn">Update Settings</button>
+                    </form>
+                </div>
+
+                <!-- Left Ads Section -->
+                <div class="panel" id="leftAdsSection">
+                    <div class="section-title">Advertisements</div>
+                    <div id="leftAdsList">Loading ads...</div>
+                </div>
+            </aside>
+
+            <!-- Right Content -->
+            <section class="main" id="clientMain">
+                <!-- Top Ad -->
+                <div class="panel" id="topAdsSection">
+                    <div class="section-title">Advertisements</div>
+                    <div id="topAdsList">Loading ads...</div>
+                </div>
+
+                <div class="panel" id="clientNotificationsPanel">
+                    <div class="section-title">Notifications</div>
+                    <div id="notificationsList">No notifications</div>
+                </div>
+
+                <!-- Bottom Ad -->
+                <div class="panel" id="bottomAdsSection">
+                    <div class="section-title">Advertisements</div>
+                    <div id="bottomAdsList">Loading ads...</div>
                 </div>
             </section>
-            <section class="panel" id="onboardingPanel">
-                <div class="section-title">Onboarding</div>
-                <div id="onboarding-content">
-                    Onboard your Stripe Connect account. You’ll see onboarding status and links here.
+
+            <!-- Right Sidebar -->
+            <aside class="sidebar">
+                <div class="panel" id="rightAdsSection">
+                    <div class="section-title">Advertisements</div>
+                    <div id="rightAdsList">Loading ads...</div>
                 </div>
-            </section>
-            <section class="panel" id="settingsPanel">
-                <div class="section-title">Settings</div>
-                <form id="settings-form">
-                    <label for="settings-email">Email</label>
-                    <input id="settings-email" type="email" required placeholder="you@example.com" />
-                    <label for="settings-password">Password</label>
-                    <input id="settings-password" type="password" required placeholder="New Password" />
-                    <label for="settings-name">Display Name</label>
-                    <input id="settings-name" type="text" placeholder="Your Name" />
-                    <label for="settings-bank">Bank Information</label>
-                    <input id="settings-bank" type="text" placeholder="Bank Name" />
-                    <input id="settings-account" type="text" placeholder="Account Number" />
-                    <button type="submit" class="btn">Update Settings</button>
-                </form>
-            </section>
+            </aside>
         </main>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // YOUR-ANON-KEY
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function loadData() {
-            const { data: user } = await sb.auth.getUser();
-            const clientId = user.id;
-            const clientName = user.user_metadata.name || user.user_metadata.businessId || "Client";
-            document.getElementById('clientGreeting').textContent = `Hello, ${clientName}`;
-
-            const balanceResponse = await fetch(`/stripe/${clientId}/balance`);
-            const balanceData = await balanceResponse.json();
-            document.getElementById('total-balance').textContent = `$${balanceData.total.toFixed(2)}`;
-            document.getElementById('available-balance').textContent = `$${balanceData.available.toFixed(2)}`;
-
-            const paymentsResponse = await fetch(`/client/${clientId}/payments`);
-            const payments = await paymentsResponse.json();
-            const paymentsTBody = document.querySelector('#payments-table tbody');
-            paymentsTBody.innerHTML = payments.map(p => `
-                <tr><td>${p.id || ''}</td><td>${p.invoice_id || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td><td>${new Date(p.created_at).toLocaleDateString()}</td></tr>
-            `).join('');
-
-            const payoutsResponse = await fetch(`/client/${clientId}/payouts`);
-            const payouts = await payoutsResponse.json();
-            const payoutsTBody = document.getElementById('payouts-tbody');
-            payoutsTBody.innerHTML = payouts.map(pp => `
-                <tr><td>${pp.payout_id || ''}</td><td>${pp.amount || ''}</td><td>${pp.currency || ''}</td><td>${pp.status || ''}</td><td>${pp.created_at || ''}</td></tr>
-            `).join('');
-        }
-
-        window.addEventListener('load', loadData);
-
-        document.getElementById('payout-now').addEventListener('click', async () => {
-            const amount = Number(document.getElementById('payout-amount').value);
-            if (!amount) { alert('Enter an amount'); return; }
-            const res = await fetch(`/client/${clientId}/payouts/create`, {
-                method: 'POST',
-                headers: { 'Content-Type':'application/json' },
-                body: JSON.stringify({ amount, currency: 'usd' })
-            });
-            const data = await res.json();
-            console.log('Payout response', data);
-            loadData();
-        });
-
-        document.getElementById('openStripe').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const onboardingResponse = await fetch(`/stripe/${clientId}/onboard`);
-            const onboardingData = await onboardingResponse.json();
-            window.open(onboardingData.url, '_blank');
-        });
-
-        document.getElementById("signOutBtn").addEventListener("click", async () => {
-            await sb.auth.signOut();
-            window.location.href = "login.html";
-        });
-
-        document.getElementById('settings-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('settings-email').value;
-            const password = document.getElementById('settings-password').value;
-            const name = document.getElementById('settings-name').value;
-            const bankInfo = document.getElementById('settings-bank').value;
-            const accountNumber = document.getElementById('settings-account').value;
-
-            // Update user info in Supabase
-            const { error } = await sb.auth.update({
-                email: email,
-                password: password,
-                data: { display_name: name, bank: bankInfo, account_number: accountNumber }
-            });
-
-            if (error) {
-                alert('Error updating settings: ' + error.message);
-            } else {
-                alert('Settings updated successfully!');
-            }
-        });
-
-        document.getElementById('invoice-search').addEventListener('input', async (e) => {
-            const query = e.target.value.toLowerCase();
-            const paymentsResponse = await fetch(`/client/${clientId}/payments`);
-            const payments = await paymentsResponse.json();
-            const filteredPayments = payments.filter(p => p.invoice_id.toLowerCase().includes(query));
-            const paymentsTBody = document.querySelector('#payments-table tbody');
-            paymentsTBody.innerHTML = filteredPayments.map(p => `
-                <tr><td>${p.id || ''}</td><td>${p.invoice_id || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td><td>${new Date(p.created_at).toLocaleDateString()}</td></tr>
-            `).join('');
-        });
-    </script>
+    <script src="app/client/client.js"></script>
 </body>
 </html>

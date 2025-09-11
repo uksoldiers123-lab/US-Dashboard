@@ -32,6 +32,7 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
         .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .search-bar { margin: 12px 0; }
     </style>
 </head>
 <body>
@@ -48,7 +49,7 @@
     <div class="container layout" id="layout">
         <aside aria-label="Sidebar navigation">
             <div class="section-title">Overview</div>
-            <div class="card">
+            <div class="card" style="margin-bottom:12px;">
                 This panel shows your client data, including payments, payouts, and onboarding status.
             </div>
             <div class="section-title">Navigation</div>
@@ -57,6 +58,7 @@
                 <li><a href="#payments">Payments</a></li>
                 <li><a href="#payouts">Payouts</a></li>
                 <li><a href="#onboarding">Onboarding</a></li>
+                <li><a href="#settings">Settings</a></li>
             </ul>
         </aside>
         <main aria-label="Main dashboard content">
@@ -73,6 +75,11 @@
                         <div id="available-balance" style="font-size:22px; font-weight:700;">$0.00</div>
                     </div>
                 </div>
+                <div class="search-bar">
+                    <input type="text" id="invoice-search" placeholder="Search invoices..." />
+                    <button class="btn" id="search-invoice-btn">Search</button>
+                </div>
+                <div id="invoice-results" class="card" style="margin-top:12px;"></div>
             </section>
             <section class="panel" id="paymentsPanel">
                 <div class="section-title">Recent Payments</div>
@@ -102,16 +109,33 @@
                     Onboard your Stripe Connect account. You’ll see onboarding status and links here.
                 </div>
             </section>
+            <section class="panel" id="settingsPanel">
+                <div class="section-title">Settings</div>
+                <form id="settings-form">
+                    <label for="settings-email">Email</label>
+                    <input id="settings-email" type="email" required placeholder="you@example.com" />
+                    <label for="settings-password">Password</label>
+                    <input id="settings-password" type="password" required placeholder="New Password" />
+                    <label for="settings-name">Display Name</label>
+                    <input id="settings-name" type="text" placeholder="Your Name" />
+                    <label for="settings-bank">Bank Information</label>
+                    <input id="settings-bank" type="text" placeholder="Bank Name" />
+                    <input id="settings-account" type="text" placeholder="Account Number" />
+                    <button type="submit" class="btn">Update Settings</button>
+                </form>
+            </section>
         </main>
     </div>
 
     <script>
-        const clientId = 'CLIENT_ID_FROM_TOKEN';
+        const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
+        const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY'; // YOUR-ANON-KEY
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function loadData() {
-            const response = await fetch(`/client/${clientId}`);
-            const clientData = await response.json();
-            const clientName = clientData.name || clientData.businessId;
+            const { data: user } = await sb.auth.getUser();
+            const clientId = user.id;
+            const clientName = user.user_metadata.name || user.user_metadata.businessId || "Client";
             document.getElementById('clientGreeting').textContent = `Hello, ${clientName}`;
 
             const balanceResponse = await fetch(`/stripe/${clientId}/balance`);
@@ -157,9 +181,41 @@
         });
 
         document.getElementById("signOutBtn").addEventListener("click", async () => {
-            // Sign out logic here
             await sb.auth.signOut();
             window.location.href = "login.html";
+        });
+
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('settings-email').value;
+            const password = document.getElementById('settings-password').value;
+            const name = document.getElementById('settings-name').value;
+            const bankInfo = document.getElementById('settings-bank').value;
+            const accountNumber = document.getElementById('settings-account').value;
+
+            // Update user info in Supabase
+            const { error } = await sb.auth.update({
+                email: email,
+                password: password,
+                data: { display_name: name, bank: bankInfo, account_number: accountNumber }
+            });
+
+            if (error) {
+                alert('Error updating settings: ' + error.message);
+            } else {
+                alert('Settings updated successfully!');
+            }
+        });
+
+        document.getElementById('invoice-search').addEventListener('input', async (e) => {
+            const query = e.target.value.toLowerCase();
+            const paymentsResponse = await fetch(`/client/${clientId}/payments`);
+            const payments = await paymentsResponse.json();
+            const filteredPayments = payments.filter(p => p.invoice_id.toLowerCase().includes(query));
+            const paymentsTBody = document.querySelector('#payments-table tbody');
+            paymentsTBody.innerHTML = filteredPayments.map(p => `
+                <tr><td>${p.id || ''}</td><td>${p.invoice_id || ''}</td><td>${p.amount || ''}</td><td>${p.currency || ''}</td><td>${p.status || ''}</td><td>${new Date(p.created_at).toLocaleDateString()}</td></tr>
+            `).join('');
         });
     </script>
 </body>

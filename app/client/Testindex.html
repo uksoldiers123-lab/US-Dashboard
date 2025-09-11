@@ -57,6 +57,19 @@
             margin-bottom: 10px;
             width: calc(100% - 20px);
         }
+
+        /* Status bar for initialization */
+        #status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            display: none; /* Hidden by default */
+        }
     </style>
 </head>
 <body>
@@ -81,6 +94,7 @@
                     <div id="clientGreeting">Welcome, Client!</div>
                     <div id="total-balance">Total Balance: $0.00</div>
                     <div id="available-balance">Available for Payout: $0.00</div>
+                    <div id="pending-balance">Pending Balance: $0.00</div> <!-- New line for pending balance -->
                 </div>
 
                 <div class="panel">
@@ -156,6 +170,9 @@
                 </div>
             </aside>
         </main>
+
+        <!-- Status Bar for Initialization -->
+        <div id="status-bar">Loading keys and user data...</div>
     </div>
 
     <script src="https://unpkg.com/@supabase/supabase-js/dist/umd/supabase.js"></script>

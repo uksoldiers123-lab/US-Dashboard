@@ -1,0 +1,14 @@
+
+:root { --bg: #96A3B1; --text:#1f2937; --card:#fff; --primary:#e94b4b; }
+.app-root, .admin-root { font-family: Inter, system-ui, Arial, sans-serif; color: #1f2937; background: #f7f7fb; min-height: 100vh; }
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.nav { position: sticky; top: 0; z-index: 1100; background: rgba(0,0,0,.04); display:flex; align-items:center; justify-content: space-between; padding: 12px 20px; }
+.brand { display:flex; align-items:center; gap: 10px; font-weight:700; color:#fff; }
+.brand-mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+.panel { padding: 16px; border-radius: 12px; background:#fff; border:1px solid #e5e7eb; min-height: 180px; }
+.ad { height: 90px; border: 1px dashed #ccc; border-radius: 8px; display: block; background: #fff; margin: 8px 0; }
+.table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; border-bottom: 1px solid #eee; text-align:left; }
+.btn { background: var(--primary); color:#fff; border:0; padding: 10px 14px; border-radius:8px; font-weight:700; cursor:pointer; }
+.btn-secondary { background:#6b7280; color:#fff; }

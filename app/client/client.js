@@ -1,5 +1,3 @@
-
-
 let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

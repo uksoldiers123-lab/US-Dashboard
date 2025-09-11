@@ -1,4 +1,5 @@
 
+
 let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 let sb; // Supabase client will be initialized after fetching keys
 let clientId; // Store user ID to use in payouts and other functions
@@ -65,11 +66,40 @@ async function createPayout(amount) {
     alert(data.message || 'Payout initiated successfully!');
 }
 
+// Send payment to another tenant
+async function sendPayment(recipientId, amount) {
+    if (!recipientId || !amount) {
+        alert('Please enter a valid recipient and amount.');
+        return;
+    }
+
+    const response = await fetch(`/api/send-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipientId, amount, currency: 'usd' })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+        alert('Payment sent successfully!');
+        loadUserData(); // Reload user data to reflect changes
+    } else {
+        alert('Failed to send payment: ' + data.error);
+    }
+}
+
 // Event listeners
 document.getElementById('signOutBtn').addEventListener('click', signOut);
 document.getElementById('payout-now').addEventListener('click', async () => {
     const amount = document.getElementById('payout-amount').value;
     await createPayout(amount);
+});
+
+// Event listener for sending payment to another tenant
+document.getElementById('send-payment').addEventListener('click', async () => {
+    const recipientId = document.getElementById('recipient-id').value;
+    const amount = document.getElementById('tenant-payment-amount').value;
+    await sendPayment(recipientId, amount);
 });
 
 document.getElementById('settings-form').addEventListener('submit', async (e) => {

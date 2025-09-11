@@ -8,18 +8,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
         :root {
-            --bg: #96A3B1; 
+            --bg: #F8FAFC; /* Light gray background for better eye comfort */
             --text: #1f2937; 
-            --muted: #4b5563; 
-            --card: #ffffff; 
-            --primary: #e94b4b; 
-            --accent: #fbbf24; 
-            --shadow: 0 10px 30px rgba(2,6,23,.15); 
-            --radius: 18px; 
+            --muted: #6B7280; 
+            --card: #FFFFFF; 
+            --primary: #D97D7D; /* Softer primary color */
+            --accent: #FBBF24; 
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+            --radius: 12px; 
             --nav-h: 56px; 
         }
         * { box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+        html, body { height: 100%; margin: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
         
         /* Top nav */
         .nav {
@@ -29,75 +29,19 @@
             border-bottom: 1px solid rgba(255,255,255,.15);
             height: var(--nav-h);
         }
-        .nav-inner {
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 10px 20px; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            flex-wrap: wrap; /* Allow wrapping for smaller screens */
-        }
-        .brand { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-weight: 700; 
-            color: #fff; 
-        }
-        .brand-mark { 
-            width: 28px; 
-            height: 28px; 
-            border-radius: 6px; 
-            background: linear-gradient(135deg, #fff, #ffd6a3); 
-            display: inline-block; 
-        }
-        .nav-buttons {
-            display: flex; 
-            gap: 10px; /* Space between buttons */
-            flex-wrap: wrap; /* Allow wrapping for smaller screens */
-        }
-        .container { 
-            width: 100%; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 0 16px; 
-        }
+        .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: bold; color: #fff; }
+        .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
         
         /* Layout: sidebar + main content */
-        .layout { 
-            display: grid; 
-            grid-template-columns: 260px 1fr; 
-            gap: 16px; 
-            padding: 20px 0; 
-        }
-        aside { 
-            background: #fff; 
-            border: 1px solid #e5e7eb; 
-            border-radius: 16px; 
-            padding: 16px; 
-        }
-        main { 
-            display: grid; 
-            gap: 16px; 
-            align-content: start; 
-        }
+        .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+        aside { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; }
+        main { display: grid; gap: 16px; align-content: start; }
 
         /* Panels */
-        .panel { 
-            padding: 16px; 
-            border-radius: 12px; 
-            border: 1px solid #e5e7eb; 
-            background: #fff; 
-            min-height: 180px; 
-        }
-        .section-title { 
-            font-size: 12px; 
-            text-transform: uppercase; 
-            color: #64748b; 
-            margin-bottom: 6px; 
-            letter-spacing: .5px; 
-        }
+        .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
+        .section-title { font-size: 12px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: .5px; }
         h1, h2 { margin: 0 0 8px; }
         
         /* Notifications */
@@ -115,6 +59,10 @@
             cursor: pointer; 
             width: 100%; /* Make buttons full width */
             margin-bottom: 10px; /* Space between buttons */
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+        .btn:hover {
+            background: var(--accent); /* Change background color on hover */
         }
         .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
 
@@ -137,7 +85,21 @@
             display: none; /* Hidden by default */
         }
 
-        /* Mobile Styles */
+        /* Card styles for tabs */
+        .tab-card {
+            cursor: pointer;
+            padding: 16px;
+            border-radius: var(--radius);
+            background: var(--card);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .tab-card:hover {
+            transform: scale(1.02); /* Slightly enlarge on hover for feedback */
+        }
+
+        /* Responsive styles */
         @media (max-width: 768px) {
             .layout {
                 grid-template-columns: 1fr; /* Stack columns on smaller screens */

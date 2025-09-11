@@ -1,7 +1,18 @@
 
-const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // Replace with your Supabase project URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Replace with your Supabase anon key
+
+let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function fetchKeys() {
+    const response = await fetch('/api/keys');
+    const keys = await response.json();
+    SUPABASE_URL = keys.SUPABASE_URL;
+    SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
+    STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
+
+    // Initialize Supabase client with keys
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 async function loadUserData() {
     const { data: user } = await sb.auth.getUser();
@@ -73,5 +84,8 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
     }
 });
 
-// Load user data on page load
-window.addEventListener('load', loadUserData);
+// Load user data and keys on page load
+window.addEventListener('load', async () => {
+    await fetchKeys(); // Fetch keys first
+    await loadUserData(); // Then load user data
+});

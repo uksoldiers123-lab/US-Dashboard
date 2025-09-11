@@ -2,7 +2,7 @@
 
 let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 let sb; // Supabase client will be initialized after fetching keys
-let clientId; // Store user ID to use in payouts and other functions
+let clientId; // Store user ID to use in payments and other functions
 
 // Function to fetch keys from the server
 async function fetchKeys() {

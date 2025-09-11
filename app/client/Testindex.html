@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>Uniquity Solutions - Client Dashboard</title>
@@ -50,6 +51,12 @@
         /* Buttons & inputs */
         .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
         .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+
+        /* Search Input */
+        #invoice-search {
+            margin-bottom: 10px;
+            width: calc(100% - 20px);
+        }
     </style>
 </head>
 <body>
@@ -60,7 +67,7 @@
                     <span class="brand-mark"></span> Uniquity Solutions - Client Dashboard
                 </div>
                 <div class="nav-buttons">
-                    <button id="openStripe" class="btn">Open Stripe Dashboard</button>
+                    <button id="refreshBtn" class="btn">Refresh Data</button>
                     <button id="signOutBtn" class="btn btn-secondary">Sign out</button>
                 </div>
             </div>
@@ -95,14 +102,15 @@
                 </div>
 
                 <div class="panel">
-                    <div class="section-title">Settings</div>
+                    <div class="section-title">Profile</div>
                     <form id="settings-form">
+                        <input type="text" id="settings-name" placeholder="Display Name" class="input" />
                         <input type="email" id="settings-email" placeholder="Email" class="input" />
                         <input type="password" id="settings-password" placeholder="Password" class="input" />
-                        <input type="text" id="settings-name" placeholder="Display Name" class="input" />
                         <input type="text" id="settings-bank" placeholder="Bank Information" class="input" />
                         <input type="text" id="settings-account" placeholder="Account Number" class="input" />
-                        <button type="submit" class="btn">Update Settings</button>
+                        <input type="text" id="settings-phone" placeholder="Phone Number" class="input" />
+                        <button type="submit" class="btn">Update Profile</button>
                     </form>
                 </div>
 
@@ -126,6 +134,13 @@
                     <div id="notificationsList">No notifications</div>
                 </div>
 
+                <!-- Search for Invoices -->
+                <div class="panel">
+                    <div class="section-title">Search Invoices</div>
+                    <input type="text" id="invoice-search" placeholder="Search invoices..." class="input" />
+                    <button id="search-invoices" class="btn">Search</button>
+                </div>
+
                 <!-- Bottom Ad -->
                 <div class="panel" id="bottomAdsSection">
                     <div class="section-title">Advertisements</div>
@@ -143,6 +158,7 @@
         </main>
     </div>
 
+    <script src="https://unpkg.com/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script src="app/client/client.js"></script>
 </body>
 </html>

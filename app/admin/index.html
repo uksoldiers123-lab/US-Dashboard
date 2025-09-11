@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Uniquity Solutions - Admin Dashboard</title>
+  <link rel="stylesheet" href="../shared/global.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div id="admin-root" class="admin-root">
+    <aside class="ad ad-top" aria-label="Top ad placeholder"></aside>
+
+    <header class="nav">
+      <div class="brand">
+        <span class="brand-mark"></span> Uniquity Solutions - Admin
+      </div>
+      <div class="search-area">
+        <input id="adminSearch" type="text" placeholder="Search by business ID or owner" />
+        <button id="btnAdminSearch" class="btn">Search</button>
+      </div>
+      <button id="adminSignOut" class="btn btn-secondary">Sign out</button>
+    </header>
+
+    <main class="container layout">
+      <!-- Left Nav -->
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="section-title">Overview</div>
+          <div id="adminTotalClients">Total Clients: 0</div>
+          <div id="adminTotalRevenue" class="stat">Total Revenue: $0.00</div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">All Payments</div>
+          <table class="table" id="adminPaymentsTable">
+            <thead><tr><th>ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">Onboarding</div>
+          <div id="adminOnboardingStatus">Status: Unknown</div>
+        </div>
+
+        <aside class="ad ad-left" aria-label="Left ad placeholder"></aside>
+      </aside>
+
+      <!-- Right Content -->
+      <section class="main" id="adminMain">
+        <div class="panel" id="adminNotificationsPanel">
+          <div class="section-title">Post Notification (Admin)</div>
+          <input id="notifTitle" type="text" placeholder="Notification title" />
+          <textarea id="notifMessage" placeholder="Notification message"></textarea>
+          <select id="notifTarget">
+            <option value="all">All Tenants</option>
+            <option value="tenant">Single Tenant</option>
+            <option value="user">Single User</option>
+          </select>
+          <input id="notifTenantId" type="text" placeholder="Tenant ID (optional)" />
+          <input id="notifUserId" type="text" placeholder="User ID (optional)" />
+          <button id="btnCreateNotif" class="btn">Publish Notification</button>
+        </div>
+
+        <div class="panel" id="adminInvoicesPanel">
+          <div class="section-title">Treasury Invoices (000 prefix)</div>
+          <p>Treasury invoices are visible here for treasury accounting.</p>
+          <table class="table" id="adminInvoicesTable">
+            <thead><tr><th>Invoice</th><th>Owner</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="panel" id="adminSettingsPanel">
+          <div class="section-title">Admin Settings</div>
+          <button id="openAdminSettings" class="btn">Open Admin Settings</button>
+        </div>
+
+        <aside class="ad ad-right" aria-label="Right ad placeholder"></aside>
+      </section>
+    </main>
+
+    <aside class="ad ad-bottom" aria-label="Bottom ad placeholder"></aside>
+  </div>
+
+  <script src="../shared/global.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

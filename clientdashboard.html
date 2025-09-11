@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Uniquity Solutions - Client Dashboard</title>
+  <title>Uniquity Solutions - WiredDash</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -11,139 +11,263 @@
       --muted: #4b5563;
       --card: #ffffff;
       --primary: #e94b4b;
-      --primary-700: #d13f3f;
       --accent: #fbbf24;
-      --ring: rgba(0,0,0,.08);
       --shadow: 0 10px 30px rgba(2,6,23,.15);
       --radius: 18px;
       --nav-h: 56px;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
-    .nav { position: sticky; top: 0; z-index: 1100; background: rgba(0,0,0,.04); }
-    main { padding: 20px; }
+    .nav {
+      position: sticky; top: 0; z-index: 1100;
+      background: rgba(0,0,0,.04);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px;
+      backdrop-filter: blur(6px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fff; }
+    .brand-mark { width: 26px; height: 26px; border-radius: 6px;
+      background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+    aside { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
+    main { display: grid; gap: 16px; align-content: start; }
+    .panel { padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; min-height: 180px; }
+    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
+    h1, h2 { margin: 0 0 8px; }
+    .hero { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #e5e7eb; box-shadow: var(--shadow); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+    .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .chip { display:inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; }
   </style>
 </head>
 <body>
-  <!-- Minimal dashboard shell; replace with your real layout as needed -->
-  <nav class="nav" aria-label="Main navigation">
-    <div class="container" style="padding:10px 16px;">
-      <strong>Uniquity Solutions</strong> - Dashboard
+  <nav class="nav" aria-label="Main">
+    <div class="container brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Uniquity Solutions</span>
+    </div>
+    <div class="container" style="text-align:right;">
+      <a class="btn" href="#" id="openStripe">Open Stripe Dashboard</a>
     </div>
   </nav>
 
-  <main id="dashboard-content" aria-label="Dashboard">
-    <!-- Your actual dashboard panels would render here -->
-    <div style="padding:20px; background:#fff; border-radius:12px; border:1px solid #e5e7eb;">
-      <h1 style="margin:0 0 8px;">Dashboard</h1>
-      <p style="margin:0; color:#555;">Loading your data...</p>
-    </div>
-  </main>
+  <div class="container layout" id="layout">
+    <aside aria-label="Sidebar navigation">
+      <div class="section-title">Overview</div>
+      <div class="card" style="margin-bottom:12px;">
+        This panel shows your client data, including payments, payouts, and onboarding status.
+      </div>
+      <div class="section-title" style="margin-top:8px;">Navigation</div>
+      <ul style="list-style:none; padding:0; margin:0;">
+        <li><a href="#/overview">Overview</a></li>
+        <li><a href="#/payments">Payments</a></li>
+        <li><a href="#/payouts">Payouts</a></li>
+        <li><a href="#/onboarding">Onboarding</a></li>
+      </ul>
+    </aside>
 
-  <!-- Supabase JS (deferred) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <main aria-label="Main dashboard content">
+      <section class="hero panel" id="overviewPanel" style="display:flex; flex-direction:column;">
+        <div class="section-title" style="margin-bottom:6px;">Overview</div>
+        <h1>Overview</h1>
+        <p class="lead" style="color:#64748b;">
+          Uniquity Solutions UI showing your data, payments, and onboarding status.
+        </p>
+        <div class="grid" style="grid-template-columns:1fr 1fr;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Balance</div>
+            <div id="balance" style="font-size:22px; font-weight:700;">$0.00</div>
+            <div class="chip" id="balance-chip" style="margin-top:6px;">Available</div>
+          </div>
+          <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Last Payout</div>
+            <div id="last-payout" style="font-weight:700;">—</div>
+          </div>
+        </div>
+      </section>
 
-  <script>
-    // Replace with your actual values locally (keep these in env/config in prod)
+      <section class="panel" id="paymentsPanel">
+        <div class="section-title">Recent Payments</div>
+        <table id="payments-table">
+          <thead><tr><th>ID</th><th>Client</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="panel" id="payoutsPanel">
+        <div class="section-title">Payouts</div>
+        <div id="payouts-history">
+          <table>
+            <thead><tr><th>Payout ID</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="payouts-tbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;">
+          <input id="payout-amount" type="number" placeholder="Amount" />
+          <button class="btn" id="payout-now">Payout now</button>
+        </div>
+      </section>
+
+      <section class="panel" id="onboardingPanel">
+        <div class="section-title">Onboarding</div>
+        <div id="onboarding-content">
+          Onboard your Stripe Connect account. Onboarding status will appear here.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    // Replace with your actual Supabase project details
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
 
-    // Guard to prevent redirect loops
+    // Initialize Supabase
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Simple auth/redirect logic (adjust per your real flow)
     let redirected = false;
-    let sb;
-
-    // Initialize Supabase client
-    function initSupabase() {
-      if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-        console.warn('Supabase not loaded yet. Will retry.');
-        setTimeout(initSupabase, 100);
-        return;
-      }
-      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase initialized on dashboard:', !!sb);
-      ensureAuthAndRedirect();
-    }
-
-    // Wait for a valid session, then redirect to the appropriate dashboard
     async function ensureAuthAndRedirect() {
       if (redirected) return;
-
       try {
-        // Retry logic to handle sign-in timing
-        const MAX_RETRIES = 5;
-        let user = null;
-        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-          const { data: { session } = {} } = await sb.auth.getSession();
-          user = session?.user ?? null;
-          if (user && user.id) break;
-          await new Promise(res => setTimeout(res, 300));
-        }
+        const { data: { session } = {} } = await supabase.auth.getSession();
+        const user = session?.user ?? null;
 
-        // If still not authenticated, send to login
-        if (!user || !user.id) {
+        if (!user) {
           redirected = true;
-          window.location.href = 'login.html';
+          window.location.href = '/login.html';
           return;
         }
 
-        // Optional: fetch role for RBAC routing
-        let role = null;
-        try {
-          const { data: userRow } = await sb
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .maybeSingle();
-          if (userRow?.role) role = userRow.role;
-        } catch (e) {
-          console.warn('Role fetch failed or table unavailable:', e);
-        }
+        // Optional: fetch role to decide target dashboard
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
 
-        // Target dashboard based on role
-        const target = (role && String(role).toLowerCase() === 'admin')
-          ? 'AdminDashboard.html'
-          : 'clientdashboard.html';
+        const role = userRow?.role ?? 'client';
+        const target = (String(role).toLowerCase() === 'admin')
+          ? 'adminDashboard.html'
+          : 'clientDashboard.html';
 
-        // Robust path check
         const currentPath = (window.location.pathname.split('/').pop() || '').toLowerCase();
-        const normalizedTarget = target.toLowerCase();
-
-        if (currentPath !== normalizedTarget) {
+        if (currentPath !== target.toLowerCase()) {
           redirected = true;
           window.location.href = target;
-        } else {
-          console.log('Already on the correct dashboard:', target);
         }
-      } catch (err) {
-        console.error('Auth check failed:', err);
-        // On error, be safe and redirect to client dashboard
+      } catch (e) {
+        console.error('Auth check failed, redirecting to client dashboard.', e);
         redirected = true;
-        window.location.href = 'clientdashboard.html';
+        window.location.href = 'clientDashboard.html';
       }
     }
 
-    // Kick off initialization after CDN loads
-    setTimeout(initSupabase, 0);
-  </script>
+    // UI data loading
+    async function loadData() {
+      // Assuming you have a client context / token-based client_id
+      // For demo, fetch from a client_id derived from session or URL
+      const clientId = (new URLSearchParams(window.location.search)).get('client_id') || 'DEFAULT_CLIENT';
 
-  <!-- Optional: placeholders or extra sections can be kept or removed as needed -->
-  <script>
-    // Example: load some placeholder payments (replace with real data)
-    async function loadPayments() {
-      const tbody = document.querySelector("#payments-table tbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      const rows = [
-        { id: "pay_1", client: "Client A", amount: "20.00", currency: "USD", status: "succeeded", date: "2025-01-01" }
-      ];
-      rows.forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.id}</td><td>${r.client}</td><td>${r.amount}</td><td>${r.currency}</td><td>${r.status}</td><td>${r.date}</td>`;
-        tbody.appendChild(tr);
-      });
+      // Payments
+      try {
+        const { data: paymentsData } = await supabase
+          .from('payments')
+          .select('id, client_id, amount, currency, status, created_at')
+          .eq('client_id', clientId)
+          .order('created_at', { ascending: false });
+
+        const tbody = document.querySelector('#payments-table tbody');
+        tbody.innerHTML = (paymentsData || [])
+          .map(p => `<tr><td>${p.id || ''}</td><td>${p.client_id || ''}</td><td>${p.amount ?? ''}</td><td>${p.currency ?? ''}</td><td>${p.status ?? ''}</td><td>${p.created_at ?? ''}</td></tr>`)
+          .join('');
+      } catch (e) {
+        console.error('Failed to load payments', e);
+      }
+
+      // Payouts
+      try {
+        const { data: payoutsData } = await supabase
+          .from('payouts')
+          .select('payout_id, amount, currency, status, created_at')
+          .eq('client_id', clientId)
+          .order('created_at', { ascending: false });
+
+        const pBody = document.getElementById('payouts-tbody');
+        pBody.innerHTML = (payoutsData || [])
+          .map(pp => `<tr><td>${pp.payout_id || ''}</td><td>${pp.amount ?? ''}</td><td>${pp.currency ?? ''}</td><td>${pp.status ?? ''}</td><td>${pp.created_at ?? ''}</td></tr>`)
+          .join('');
+
+        const lastPayout = payoutsData?.[0]?.created_at;
+        document.getElementById('last-payout').textContent = lastPayout || '—';
+      } catch (e) {
+        console.error('Failed to load payouts', e);
+      }
+
+      // Onboarding status
+      try {
+        const { data: onboard } = await supabase
+          .from('onboarding_status')
+          .select('status, details')
+          .eq('client_id', clientId)
+          .maybeSingle();
+
+        document.getElementById('onboarding-content').textContent = onboard?.details || 'Onboarding status will appear here.';
+      } catch (e) {
+        console.error('Failed to load onboarding', e);
+      }
+
+      // Balance (example)
+      try {
+        const { data: bal } = await supabase
+          .from('balances')
+          .select('available')
+          .eq('client_id', clientId)
+          .maybeSingle();
+        const amount = bal?.available ?? 0;
+        document.getElementById('balance').textContent = `$${Number(amount).toFixed(2)}`;
+      } catch (e) {
+        console.error('Failed to load balance', e);
+      }
     }
 
-    window.addEventListener('load', loadPayments);
+    // Payout now handler
+    document.getElementById('payout-now').addEventListener('click', async () => {
+      const amount = Number(document.getElementById('payout-amount').value);
+      if (!amount) { alert('Enter an amount'); return; }
+
+      const clientId = 'DEFAULT_CLIENT';
+      try {
+        const { data } = await supabase
+          .from('payouts')
+          .insert([{ client_id: clientId, amount, currency: 'usd', status: 'pending' }]);
+        console.log('Payout requested:', data);
+        await loadData();
+      } catch (e) {
+        console.error('Payout request failed', e);
+      }
+    });
+
+    // Open Stripe Dashboard (optional)
+    document.getElementById('openStripe').addEventListener('click', (e) => {
+      e.preventDefault();
+      window.open('https://dashboard.stripe.com/connect/accounts/CONNECTED_ACCOUNT_ID', '_blank');
+    });
+
+    // Initialize
+    window.addEventListener('load', () => {
+      ensureAuthAndRedirect();
+      loadData();
+    });
   </script>
 </body>
 </html>

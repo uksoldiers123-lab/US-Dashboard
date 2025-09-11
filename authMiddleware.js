@@ -1,17 +1,17 @@
-
-const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 
+// Get Supabase URL from environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL; // e.g., https://xyzcompany.supabase.co
 const SUPABASE_JWKS_URI = `${SUPABASE_URL.replace('https://','https://www')}/.well-known/jwks.json`;
 
-// Cache and rate-limits for keys
+// Create a JWKS client for fetching signing keys
 const client = jwksClient({
   jwksUri: SUPABASE_JWKS_URI,
   cache: true,
   rateLimit: true,
 });
 
+// Function to retrieve the signing key using the key ID
 function getKey(header, cb) {
   client.getSigningKey(header.kid, function (err, key) {
     if (err) return cb(err);
@@ -20,6 +20,7 @@ function getKey(header, cb) {
   });
 }
 
+// Middleware function to authenticate requests
 async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -30,11 +31,12 @@ async function authMiddleware(req, res, next) {
 
   try {
     const decoded = await new Promise((resolve, reject) => {
-      // Decode header to get kid
+      // Decode the JWT header to extract the key ID (kid)
       const header = jwt.decode(token, { complete: true }).header;
       getKey(header, (err, key) => {
         if (err) return reject(err);
         try {
+          // Verify the token using the signing key
           const payload = jwt.verify(token, key, { algorithms: ['RS256'] });
           resolve(payload);
         } catch (e) {
@@ -43,8 +45,8 @@ async function authMiddleware(req, res, next) {
       });
     });
 
-    req.user = decoded;
-    next();
+    req.user = decoded; // Attach the decoded user info to the request
+    next(); // Proceed to the next middleware or route handler
   } catch (err) {
     console.error('JWT verification failed:', err);
     res.status(401).json({ error: 'Invalid token' });

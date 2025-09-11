@@ -1,8 +1,11 @@
+
 let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 let sb; // Supabase client will be initialized after fetching keys
+let clientId; // Store user ID to use in payouts and other functions
 
 // Function to fetch keys from the server
 async function fetchKeys() {
+    document.getElementById('status-bar').style.display = 'block'; // Show the status bar
     const response = await fetch('/api/keys');
     const keys = await response.json();
     SUPABASE_URL = keys.SUPABASE_URL;
@@ -11,12 +14,13 @@ async function fetchKeys() {
 
     // Initialize Supabase client with keys
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    document.getElementById('status-bar').style.display = 'none'; // Hide the status bar
 }
 
 // Load user data function
 async function loadUserData() {
     const { data: user } = await sb.auth.getUser();
-    const clientId = user.id;
+    clientId = user.id; // Set the user ID
 
     // Display user's greeting
     const clientName = user.user_metadata.name || user.user_metadata.businessId || "Client";
@@ -25,8 +29,11 @@ async function loadUserData() {
     // Load balance data
     const balanceResponse = await fetch(`/stripe/${clientId}/balance`);
     const balanceData = await balanceResponse.json();
+    
+    // Display balances
     document.getElementById('total-balance').textContent = `Total Balance: $${balanceData.total.toFixed(2)}`;
     document.getElementById('available-balance').textContent = `Available for Payout: $${balanceData.available.toFixed(2)}`;
+    document.getElementById('pending-balance').textContent = `Pending Balance: $${balanceData.pending.toFixed(2)}`; // New line for pending balance
 
     // Load user settings
     document.getElementById('settings-email').value = user.email;

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -91,7 +91,7 @@
             <aside class="sidebar">
                 <div class="panel">
                     <div class="section-title">Overview</div>
-                    <div id="clientGreeting">Welcome, Client!</div>
+                    <div id="clientGreeting">Welcome, ${clientId}!</div>
                     <div id="total-balance">Total Balance: $0.00</div>
                     <div id="available-balance">Available for Payout: $0.00</div>
                     <div id="pending-balance">Pending Balance: $0.00</div> <!-- New line for pending balance -->
@@ -126,6 +126,13 @@
                         <input type="text" id="settings-phone" placeholder="Phone Number" class="input" />
                         <button type="submit" class="btn">Update Profile</button>
                     </form>
+                </div>
+
+                <div class="panel">
+                    <div class="section-title">Tenant to Tenant Payment</div>
+                    <input type="text" id="recipient-id" placeholder="Recipient User ID" class="input" />
+                    <input type="number" id="tenant-payment-amount" placeholder="Enter amount" class="input" />
+                    <button id="send-payment" class="btn">Send Payment</button>
                 </div>
 
                 <!-- Left Ads Section -->

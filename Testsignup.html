@@ -107,8 +107,31 @@
                 <a href="#services">Services</a>
                 <a href="#partners">Partners</a>
                 <a href="#careers">Careers</a>
+                <div class="dropdown" data-dropdown>
+                    <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
+                        Get Started
+                        <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="drop-menu" data-menu role="menu">
+                        <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
+                        <a href="create-account.html" role="menuitem">Create Account (Merchants)</a>
+                        <a href="faq.html" role="menuitem">FAQ</a>
+                        <a href="pricing.html" role="menuitem">Pricing</a>
+                        <a href="developers.html" role="menuitem">Developers & API</a>
+                        <a href="integrations.html" role="menuitem">Integrations</a>
+                        <a href="compliance.html" role="menuitem">Compliance & Security</a>
+                        <a href="login.html" role="menuitem">Login Portal</a>
+                    </div>
+                </div>
                 <a href="#contact" class="cta">Contact</a>
             </div>
+            <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
@@ -143,7 +166,7 @@
         setTimeout(initSupabase, 0);
     </script>
 
-    <!-- Sign-up logic -->
+    <!-- Signup logic -->
     <script>
         (function() {
             window.bindSignupHandler = async function() {

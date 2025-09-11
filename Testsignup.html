@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Uniquity Solutions — Sign Up</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=8">
+    <style>
+        :root {
+            --bg: #f7f7f7;
+            --card: #fff;
+            --text: #111;
+            --primary: #4f46e5;
+            --muted: #888;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100%;
+        }
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        h2 {
+            margin: 0 0 12px;
+            font-size: 1.5rem;
+        }
+        label {
+            display: block;
+            font-size: 0.92rem;
+            margin: 12px 0 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            background: var(--primary);
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 12px;
+            min-height: 1.2em;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+        .login-link {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+        .banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: #111;
+            color: #fff;
+            padding: 10px 12px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="nav" aria-label="Primary">
+        <div class="container nav-inner">
+            <a class="brand" href="index.html">
+                <span class="brand-mark" aria-hidden="true"></span>
+                Uniquity Solutions
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#services">Services</a>
+                <a href="#partners">Partners</a>
+                <a href="#careers">Careers</a>
+                <a href="#contact" class="cta">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Init Supabase -->
+    <script>
+        const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
+        const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY'; // YOUR-ANON-KEY
+
+        function showBanner(text) {
+            const b = document.getElementById('qp-banner');
+            if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
+        }
+
+        function initSupabase() {
+            if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+                console.warn('Supabase library not loaded yet.');
+                showBanner('not ready');
+                setTimeout(initSupabase, 150);
+                return;
+            }
+            window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase initialized:', !!window.supabase);
+            showBanner('ready');
+            if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
+        }
+
+        setTimeout(initSupabase, 0);
+    </script>
+
+    <!-- Sign-up logic -->
+    <script>
+        (function() {
+            window.bindSignupHandler = async function() {
+                const form = document.getElementById('signup-form');
+                const status = document.getElementById('signup-status');
+                const btn = document.getElementById('signup-btn');
+                if (!form) return;
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!window.supabase) {
+                        alert('Please wait for the Sign Up module to finish initializing. Try again in a moment.');
+                        return;
+                    }
+
+                    const email = document.getElementById('signup-email').value.trim();
+                    const password = document.getElementById('signup-password').value;
+                    const name = document.getElementById('signup-name').value.trim();
+
+                    if (!email || !password) {
+                        status.textContent = 'Please provide email and password.';
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.textContent = 'Creating account...';
+                    status.textContent = '';
+
+                    try {
+                        const { user, session, error } = await window.supabase.auth.signUp(
+                            { email, password },
+                            { data: { display_name: name || '' } }
+                        );
+
+                        if (error) {
+                            status.textContent = 'Signup error: ' + (error.message || error);
+                        } else if (user) {
+                            status.textContent = 'Signup successful. Check email to verify.';
+                        } else {
+                            status.textContent = 'Signup complete. Please verify email.';
+                        }
+
+                        if (user && user.id) {
+                            const tableName = 'user'; // adjust if needed
+                            try {
+                                const { data: seed, error: seedError } = await window.supabase
+                                    .from(tableName)
+                                    .insert([{ id: user.id, email, display_name: name || '' }])
+                                    .single();
+                                if (seedError) {
+                                    status.textContent += ' | Seed error: ' + (seedError.message || seedError);
+                                } else {
+                                    status.textContent += ' | User row seeded';
+                                }
+                            } catch (seedCatch) {
+                                status.textContent += ' | Seed exception: ' + (seedCatch?.message || seedCatch);
+                            }
+                        }
+                    } catch (err) {
+                        status.textContent = 'Signup failed: ' + (err?.message || err);
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Create account';
+                    }
+                });
+            };
+
+            window.addEventListener('load', () => {
+                if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
+            });
+        })();
+    </script>
+
+    <!-- Signup form -->
+    <div class="container" aria-label="Sign up form container">
+        <div class="card">
+            <h2>Create an account</h2>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+            <form id="signup-form" autocomplete="on" aria-label="Sign up form">
+                <label for="signup-email">Email</label>
+                <input id="signup-email" type="email" required placeholder="you@example.com" />
+                <label for="signup-password">Password</label>
+                <input id="signup-password" type="password" required placeholder="Password" />
+                <label for="signup-name">Display name (optional)</label>
+                <input id="signup-name" type="text" placeholder="Your name" />
+                <button type="submit" id="signup-btn" aria-label="Create account">Create account</button>
+            </form>
+            <div id="signup-status" class="status" aria-live="polite"></div>
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login here</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

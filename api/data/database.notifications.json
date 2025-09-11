@@ -1,0 +1,23 @@
+{
+  "generated_at": "2025-09-11T12:00:00Z",
+  "notifications": [
+    {
+      "id": "n1",
+      "title": "New Invoice Ready",
+      "message": "Invoice INV-000-ABCDEF is now available.",
+      "type": "invoice",
+      "created_at": "2025-09-11T11:50:00Z",
+      "tenant_id": null,
+      "user_id": "USER_ID_PLACEHOLDER"
+    },
+    {
+      "id": "n2",
+      "title": "Stripe Onboarding",
+      "message": "Onboarding status updated: Pending verification.",
+      "type": "onboarding",
+      "created_at": "2025-09-11T11:30:00Z",
+      "tenant_id": null,
+      "user_id": "USER_ID_PLACEHOLDER"
+    }
+  ]
+}

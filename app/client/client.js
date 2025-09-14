@@ -1,5 +1,4 @@
 
-
 let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 let sb; // Supabase client will be initialized after fetching keys
 let clientId; // Store user ID to use in payments and other functions
@@ -44,6 +43,22 @@ async function loadUserData() {
     document.getElementById('settings-phone').value = user.user_metadata.phone || '';
 }
 
+// Load notifications
+async function loadNotifications() {
+    const response = await fetch('/api/notifications');
+    const notifications = await response.json();
+
+    const notificationsList = document.getElementById('notificationsList');
+    notificationsList.innerHTML = ''; // Clear existing notifications
+
+    notifications.forEach(notification => {
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'notification';
+        notificationDiv.innerText = notification.message; // Display the message
+        notificationsList.appendChild(notificationDiv);
+    });
+}
+
 // Sign out function
 async function signOut() {
     await sb.auth.signOut();
@@ -62,7 +77,6 @@ async function createPayout(amount) {
         body: JSON.stringify({ amount, currency: 'usd' })
     });
     const data = await response.json();
-    // Handle payout response here (e.g., show a success message)
     alert(data.message || 'Payout initiated successfully!');
 }
 
@@ -102,6 +116,7 @@ document.getElementById('send-payment').addEventListener('click', async () => {
     await sendPayment(recipientId, amount);
 });
 
+// Event listener for updating user settings
 document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('settings-email').value;
@@ -157,4 +172,5 @@ function displayInvoices(invoices) {
 window.addEventListener('load', async () => {
     await fetchKeys(); // Fetch keys first
     await loadUserData(); // Then load user data
+    await loadNotifications(); // Load notifications
 });

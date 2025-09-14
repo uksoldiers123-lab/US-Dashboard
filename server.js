@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const express = require("express");
 const { createClient } = require("@supabase/supabase-js");
@@ -20,17 +21,16 @@ app.use(cookieParser());
 app.use(express.static("public")); 
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "index.html")); // Serve the main HTML file
 });
 
-// Existing signup/login routes remain as-is
-// ...
-
-// New protected API route to fetch dashboard data
-app.get("/api/dashboard-data", authMiddleware, async (req, res) => {
-    const { data, error } = await supabase.from('dashboard').select('*').eq('owner_id', req.user?.sub);
-    if (error) return res.status(401).json({ error: error.message });
-    res.json({ data, user: req.user });
+// Endpoint to serve keys to the client
+app.get('/api/keys', (req, res) => {
+    res.json({
+        SUPABASE_URL: process.env.SUPABASE_URL,
+        SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+        STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY, // Only public key
+    });
 });
 
 // Endpoint to create a payment intent
@@ -40,7 +40,6 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency: 'usd',
-            // Additional parameters if needed...
         });
         res.json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
@@ -73,25 +72,14 @@ app.post("/api/send-payment", authMiddleware, async (req, res) => {
     }
 });
 
-// Optional: Keep your existing /private route if you want to continue using cookie-based flow
-app.get("/private", async (req, res) => {
-    const token = req.cookies.access_token;
-    if (!token) return res.redirect("/");
-
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error) return res.redirect("/");
-
-    const filePath = path.join(__dirname, "private.html");
-    fs.readFile(filePath, "utf8", (err, html) => {
-        if (err) {
-            console.error("Error: private.html could not be loaded!", err);
-            return res.status(500).send("Server error: private.html not found.");
-        }
-        const modifiedHtml = html.replace("{{userEmail}}", data.user.email);
-        res.send(modifiedHtml);
-    });
+// Example protected API route to fetch dashboard data
+app.get("/api/dashboard-data", authMiddleware, async (req, res) => {
+    const { data, error } = await supabase.from('dashboard').select('*').eq('owner_id', req.user?.sub);
+    if (error) return res.status(401).json({ error: error.message });
+    res.json({ data, user: req.user });
 });
 
+// Logout Route
 app.get("/logout", (req, res) => {
     res.clearCookie("access_token");
     res.redirect("/");

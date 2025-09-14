@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Uniquity Solutions — Sign Up</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
     <style>
         :root {
-            --bg: #f7f7f7;
-            --card: #fff;
-            --text: #111;
-            --primary: #4f46e5;
-            --muted: #888;
+            --bg: #f7f7fb;
+            --text: #1f2937;
+            --muted: #4b5563;
+            --card: #ffffff;
+            --primary: #e34b4b;
+            --shadow: 0 10px 30px rgba(2, 6, 23, 0.15);
+            --radius: 12px;
+        }
+        * {
+            box-sizing: border-box;
         }
         html, body {
+            height: 100%;
             margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
             color: var(--text);
-            min-height: 100%;
+            background: var(--bg);
         }
         .container {
             max-width: 420px;
@@ -30,14 +31,15 @@
         }
         .card {
             background: var(--card);
-            border-radius: 12px;
+            border-radius: var(--radius);
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            text-align: center;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
         }
         h2 {
             margin: 0 0 12px;
             font-size: 1.5rem;
+            text-align: center;
         }
         label {
             display: block;
@@ -50,7 +52,7 @@
             font-size: 1rem;
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-sizing: border-box;
+            margin-bottom: 12px; /* Space between inputs */
         }
         button {
             width: 100%;
@@ -61,7 +63,10 @@
             color: #fff;
             background: var(--primary);
             cursor: pointer;
-            margin-top: 10px;
+            transition: background 0.3s; /* Smooth transition */
+        }
+        button:hover {
+            background: #c0392b; /* Darken on hover */
         }
         button:disabled {
             opacity: 0.6;
@@ -72,11 +77,6 @@
             min-height: 1.2em;
             font-size: 0.95rem;
             color: var(--muted);
-        }
-        .login-link {
-            margin-top: 12px;
-            font-size: 0.9rem;
-            color: var(--primary);
         }
         .banner {
             position: fixed;
@@ -90,60 +90,35 @@
             text-align: center;
             font-family: monospace;
             font-size: 12px;
-            display: none;
+            display: none; /* Hidden by default */
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="nav" aria-label="Primary">
-        <div class="container nav-inner">
-            <a class="brand" href="index.html">
-                <span class="brand-mark" aria-hidden="true"></span>
-                Uniquity Solutions
-            </a>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="#services">Services</a>
-                <a href="#partners">Partners</a>
-                <a href="#careers">Careers</a>
-                <div class="dropdown" data-dropdown>
-                    <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
-                        Get Started
-                        <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <div class="drop-menu" data-menu role="menu">
-                        <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
-                        <a href="create-account.html" role="menuitem">Create Account (Merchants)</a>
-                        <a href="faq.html" role="menuitem">FAQ</a>
-                        <a href="pricing.html" role="menuitem">Pricing</a>
-                        <a href="developers.html" role="menuitem">Developers & API</a>
-                        <a href="integrations.html" role="menuitem">Integrations</a>
-                        <a href="compliance.html" role="menuitem">Compliance & Security</a>
-                        <a href="login.html" role="menuitem">Login Portal</a>
-                    </div>
-                </div>
-                <a href="#contact" class="cta">Contact</a>
-            </div>
-            <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </button>
+    <div class="container">
+        <div class="card">
+            <h2>Create an account</h2>
+            <form id="signup-form">
+                <label for="signup-email">Email</label>
+                <input type="email" id="signup-email" required>
+
+                <label for="signup-password">Password</label>
+                <input type="password" id="signup-password" required>
+
+                <label for="signup-name">Display name (optional)</label>
+                <input type="text" id="signup-name">
+
+                <button type="submit" id="signup-btn">Create account</button>
+                <div class="status" id="signup-status"></div>
+            </form>
         </div>
-    </nav>
+    </div>
+    <div class="banner" id="qp-banner"></div>
 
-    <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
-
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Init Supabase -->
     <script>
-        const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
-        const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY'; // YOUR-ANON-KEY
+        // Replace with your real values (do not expose real keys publicly in chat)
+        const SUPABASE_URL = 'https://your-supabase-url.supabase.co'; // YOUR-PROJECT URL
+        const SUPABASE_ANON_KEY = 'your-supabase-anon-key'; // YOUR-ANON-KEY
 
         function showBanner(text) {
             const b = document.getElementById('qp-banner');
@@ -163,11 +138,9 @@
             if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
         }
 
+        // Kick off init after CDN load
         setTimeout(initSupabase, 0);
-    </script>
 
-    <!-- Signup logic -->
-    <script>
         (function() {
             window.bindSignupHandler = async function() {
                 const form = document.getElementById('signup-form');
@@ -196,6 +169,7 @@
                     status.textContent = '';
 
                     try {
+                        // Primary signup (auth)
                         const { user, session, error } = await window.supabase.auth.signUp(
                             { email, password },
                             { data: { display_name: name || '' } }
@@ -209,13 +183,15 @@
                             status.textContent = 'Signup complete. Please verify email.';
                         }
 
+                        // Seed into your "user" table
                         if (user && user.id) {
-                            const tableName = 'user'; // adjust if needed
+                            const tableName = 'users'; // Adjust if needed
                             try {
                                 const { data: seed, error: seedError } = await window.supabase
                                     .from(tableName)
                                     .insert([{ id: user.id, email, display_name: name || '' }])
                                     .single();
+
                                 if (seedError) {
                                     status.textContent += ' | Seed error: ' + (seedError.message || seedError);
                                 } else {
@@ -234,33 +210,11 @@
                 });
             };
 
+            // Bind after load
             window.addEventListener('load', () => {
                 if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
             });
         })();
     </script>
-
-    <!-- Signup form -->
-    <div class="container" aria-label="Sign up form container">
-        <div class="card">
-            <h2>Create an account</h2>
-        </div>
-
-        <div class="card" style="margin-top:12px;">
-            <form id="signup-form" autocomplete="on" aria-label="Sign up form">
-                <label for="signup-email">Email</label>
-                <input id="signup-email" type="email" required placeholder="you@example.com" />
-                <label for="signup-password">Password</label>
-                <input id="signup-password" type="password" required placeholder="Password" />
-                <label for="signup-name">Display name (optional)</label>
-                <input id="signup-name" type="text" placeholder="Your name" />
-                <button type="submit" id="signup-btn" aria-label="Create account">Create account</button>
-            </form>
-            <div id="signup-status" class="status" aria-live="polite"></div>
-            <div class="login-link">
-                Already have an account? <a href="login.html">Login here</a>
-            </div>
-        </div>
-    </div>
 </body>
 </html>

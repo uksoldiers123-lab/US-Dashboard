@@ -1,4 +1,5 @@
 
+
 let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
 let sb; // Supabase client will be initialized after fetching keys
 let clientId; // Store user ID to use in payments and other functions
@@ -41,6 +42,9 @@ async function loadUserData() {
     document.getElementById('settings-bank').value = user.user_metadata.bank || '';
     document.getElementById('settings-account').value = user.user_metadata.account_number || '';
     document.getElementById('settings-phone').value = user.user_metadata.phone || '';
+
+    // Load notifications for the user
+    await loadNotifications();
 }
 
 // Load notifications

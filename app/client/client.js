@@ -1,13 +1,11 @@
-
-
-let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
+let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY
 let sb; // Supabase client will be initialized after fetching keys
 let clientId; // Store user ID to use in payments and other functions
 
 // Function to fetch keys from the server
 async function fetchKeys() {
     document.getElementById('status-bar').style.display = 'block'; // Show the status bar
-    const response = await fetch('/api/keys');
+    const response = await fetch('/api/keys'); // Adjust URL as needed
     const keys = await response.json();
     SUPABASE_URL = keys.SUPABASE_URL;
     SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
@@ -20,7 +18,11 @@ async function fetchKeys() {
 
 // Load user data function
 async function loadUserData() {
-    const { data: user } = await sb.auth.getUser();
+    const { data: user, error } = await sb.auth.getUser();
+    if (error) {
+        console.error('Error fetching user:', error.message);
+        return;
+    }
     clientId = user.id; // Set the user ID
 
     // Display user's greeting
@@ -49,7 +51,7 @@ async function loadUserData() {
 
 // Load notifications
 async function loadNotifications() {
-    const response = await fetch('/api/notifications');
+    const response = await fetch('/api/notifications'); //u Adjust URL as needed
     const notifications = await response.json();
 
     const notificationsList = document.getElementById('notificationsList');

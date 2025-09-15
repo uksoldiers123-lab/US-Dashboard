@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -93,6 +94,8 @@
       display: none; /* Hidden by default */
     }
   </style>
+  <!-- CDN: Supabase JS (UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
   <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
@@ -149,7 +152,7 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           if (!window.supabase) {
-            alert('Please wait for the Login module to finish initializing. Try again in a moment.');
+            alert('Please wait for initialization. Try again in a moment.');
             return;
           }
 
@@ -157,22 +160,42 @@
           const password = document.getElementById('login-password').value;
 
           btn.disabled = true;
-          btn.textContent = 'Logging in...';
+          btn.textContent = 'Signing in...';
           status.textContent = '';
 
           try {
-            const { user, session, error } = await window.supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-
+            const { data, user, session, error } = await window.supabase.auth.signInWithPassword({ email, password });
             if (error) {
               status.textContent = 'Login error: ' + (error.message || error);
-            } else if (user) {
-              status.textContent = 'Login successful! Redirecting...';
-              // Redirect or perform any action on successful login
-              // window.location.href = '/dashboard'; // Example redirect
+              btn.disabled = false;
+              btn.textContent = 'Sign In';
+              return;
             }
+            const currentUser = user || (data && data.user) || null;
+            // Fetch role from users table (id matches auth user id)
+            let role = null;
+            if (currentUser && currentUser.id) {
+              try {
+                const { data: userRow } = await window.supabase
+                  .from('users')
+                  .select('role')
+                  .eq('id', currentUser.id)
+                  .single();
+                if (userRow && userRow.role) role = userRow.role;
+              } catch (e) {
+                console.warn('Role fetch failed:', e);
+              }
+            }
+            // Decide target: admin -> AdminDashboard.html, otherwise clientdashboard.html
+            const target = (role && String(role).toLowerCase() === 'admin')
+              ? 'AdminDashboard.html'
+              : 'app/client/Testindex.html';
+            // Redirect reliably
+            status.textContent = 'Login successful. Redirecting...';
+            showBanner('redirecting to ' + target);
+            setTimeout(() => {
+              window.location.href = target;
+            }, 250);
           } catch (err) {
             status.textContent = 'Login failed: ' + (err?.message || err);
           } finally {
@@ -190,3 +213,4 @@
   </script>
 </body>
 </html>
+

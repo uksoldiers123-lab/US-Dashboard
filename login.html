@@ -1,9 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg: #f7f7fb;
@@ -92,33 +96,131 @@
       font-size: 12px;
       display: none; /* Hidden by default */
     }
+    /* Navbar styles */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 1100;
+      background: linear-gradient(to bottom, rgba(150, 163, 177, 0.9), rgba(150, 163, 177, 0.6));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, .15);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .2px;
+    }
+    .brand-mark {
+      width: 28px; 
+      height: 28px; 
+      border-radius: 8px;
+      background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, .8), rgba(255, 255, 255, 0) 40%), linear-gradient(135deg, #fbbf24, #e34b4b);
+      box-shadow: 0 6px 14px rgba(233, 75, 75, .35);
+    }
+    .nav-links {
+      display: flex; 
+      gap: 26px; 
+      align-items: center;
+    }
+    .nav-links a {
+      color: #eef2f7; 
+      opacity: .9; 
+      font-weight: 600; 
+      font-size: 14.5px;
+    }
+    .nav-links a:hover {
+      opacity: 1;
+    }
+    .cta {
+      background: var(--primary); 
+      color: white; 
+      padding: 10px 16px; 
+      border-radius: 999px; 
+      font-weight: 700; 
+      font-size: 14px;
+    }
+    .menu-btn {
+      display: none; 
+      border: 0; 
+      background: transparent; 
+      color: #fff;
+    }
   </style>
-  <!-- CDN: Supabase JS (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
-  <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
 
+  <!-- Navbar -->
+  <nav class="nav" aria-label="Primary">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Uniquity Solutions
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#services">Services</a>
+        <a href="#partners">Partners</a>
+        <a href="#careers">Careers</a>
+        <div class="dropdown" data-dropdown>
+          <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
+            Get Started
+            <svg class="drop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="drop-menu" data-menu role="menu">
+            <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
+            <a href="https://www.dashboard.uniquitysolutions.com/signup.html" role="menuitem">Create Account (Merchants)</a>
+            <a href="faq.html" role="menuitem">FAQ</a>
+            <a href="pricing.html" role="menuitem">Pricing</a>
+            <a href="developers.html" role="menuitem">Developers & API</a>
+            <a href="integrations.html" role="menuitem">Integrations</a>
+            <a href="compliance.html" role="menuitem">Compliance & Security</a>
+            <a href="https://www.dashboard.uniquitysolutions.com/login.html" role="menuitem">Login Portal</a>
+          </div>
+        </div>
+        <a href="#contact" class="cta">Contact</a>
+      </div>
+
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Init status banner -->
+  <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
   <div class="container">
     <div class="card">
       <h2>Login</h2>
       <form id="login-form" autocomplete="username">
         <label for="login-email">Email</label>
         <input type="email" id="login-email" placeholder="you@example.com" required />
-
         <label for="login-password">Password</label>
         <input type="password" id="login-password" placeholder="Your password" required />
-
         <button type="submit" id="login-btn">Sign In</button>
-        <div class="status" id="login-status"></div>
       </form>
+      <div class="status" id="login-status"></div>
     </div>
   </div>
 
+  <!-- CDN: Supabase JS (UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script>
-    // Replace with your real values (do not expose real keys publicly in chat)
-    const SUPABASE_URL = 'https://ziltrcaehpshkwganlcy.supabase.co'; // YOUR-PROJECT URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHRyY2FlaHBzaGt3Z2FubGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4NjM0NzMsImV4cCI6MjA3MDQzOTQ3M30.8CLBXrknu3kea7OMdJKOBSNayXBOu3lJFu_H4PqI0vg'; // YOUR-ANON-KEY
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // Replace with your Supabase URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Replace with your Supabase anon key
 
     function showBanner(text) {
       const b = document.getElementById('qp-banner');
@@ -204,7 +306,6 @@
         });
       };
 
-      // Bind after load
       window.addEventListener('load', () => {
         if (typeof window.bindLoginHandler === 'function') window.bindLoginHandler();
       });

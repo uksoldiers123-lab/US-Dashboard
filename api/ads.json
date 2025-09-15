@@ -1,6 +1,50 @@
 {
   "top": { "enabled": true, "src": "<top-ad-creative-or-iframe>" },
-  "bottom": { "enabled": true, "src": "<bottom-ad-creative-or-iframe>" },
+  "bottom": { "enabled": true, "src": "<
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostSpoof Advertisement</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00FFFF; /* Neon cyan */
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #00FFFF; /* Neon cyan */
+            font-size: 2.5em;
+        }
+        .content {
+            background-color: #B0B0B0; /* Smoke gray */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        p {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to GhostSpoof!</h1>
+        <div class="content">
+            <p>More Minutes for Less Money!</p>
+            <p>Best Value vs. SpoofCard & Hushed</p>
+            <p>No Contracts, Just Pay-as-You-Go!</p>
+            <p>Why Choose GhostSpoof?</p>
+        </div>
+    </div>
+</body>
+</html>
+>" },
   "left": { "enabled": true, "src": "<left-ad-creative-or-iframe>" },
   "right": { "enabled": true, "src": "<right-ad-creative-or-iframe>" }
 }

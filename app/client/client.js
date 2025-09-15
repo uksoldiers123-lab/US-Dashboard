@@ -26,8 +26,8 @@ async function loadUserData() {
     clientId = user.id; // Store user ID
 
     // Display user’s greeting with both name and business ID
-    const clientName = user.user_metadata.name || "Client";
-    const businessId = user.user_metadata.businessId ? ` (${user.user_metadata.businessId})` : "";
+    const clientName = user.user_metadata.name || "Client"; // Default to "Client" if name is not available
+    const businessId = user.user_metadata.businessId ? ` (${user.user_metadata.businessId})` : ""; // Append business ID if it exists
     document.getElementById('clientGreeting').textContent = `Welcome, ${clientName}${businessId}!`;
 
     // Load balance data from your backend API
@@ -44,9 +44,34 @@ async function loadUserData() {
         console.error('Invalid balance data received.');
     }
 
-    // Load user settings (if necessary)
-    document.getElementById('settings-email').value = user.email;
-    document.getElementById('settings-name').value = user.user_metadata.display_name || '';
+    // Load notifications
+    await loadNotifications();
+}
+
+// Function to load notifications from Supabase
+async function loadNotifications() {
+    const { data: notifications, error } = await sb
+        .from('notifications') // Replace 'notifications' with your actual table name
+        .select('*'); // Select all columns
+
+    if (error) {
+        console.error('Error fetching notifications:', error.message);
+        return;
+    }
+
+    const notificationsList = document.getElementById('notificationsList');
+    notificationsList.innerHTML = ''; // Clear existing notifications
+
+    if (notifications.length > 0) {
+        notifications.forEach(notification => {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'notification';
+            notificationDiv.textContent = notification.message; // Adjust based on your notification structure
+            notificationsList.appendChild(notificationDiv);
+        });
+    } else {
+        notificationsList.textContent = 'No notifications'; // Display if no notifications exist
+    }
 }
 
 // Send payment to another tenant

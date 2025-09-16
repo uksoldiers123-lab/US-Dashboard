@@ -1,187 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Uniquity Solutions - Client Dashboard</title>
-    <link rel="stylesheet" href="../shared/global.css" />
-    <link rel="stylesheet" href="app/client/client.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-        :root {
-            --bg: #96A3B1; 
-            --text: #1f2937; 
-            --muted: #4b5563; 
-            --card: #ffffff; 
-            --primary: #e94b4b; 
-            --accent: #fbbf24; 
-            --shadow: 0 10px 30px rgba(2,6,23,.15); 
-            --radius: 18px; 
-            --nav-h: 56px; 
-        }
-        * { box-sizing: border-box; }
-        html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
-        
-        /* Top nav */
-        .nav {
-            position: sticky; top: 0; z-index: 1100;
-            background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(255,255,255,.15);
-            height: var(--nav-h);
-        }
-        .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
-        .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display: inline-block; }
-        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-        
-        /* Layout: sidebar + main content */
-        .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
-        aside { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; }
-        main { display: grid; gap: 16px; align-content: start; }
-        /* Panels */
-        .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
-        .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
-        h1, h2 { margin: 0 0 8px; }
-        
-        /* Notifications */
-        #notificationsList { margin-top: 10px; }
-        .notification { padding: 8px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 6px; }
-        
-        /* Buttons & inputs */
-        .btn { 
-            background: var(--primary); 
-            color: #fff; 
-            border: 0; 
-            padding: 10px 14px; 
-            border-radius: 8px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            width: 100%; /* Make buttons full width */
-            margin-bottom: 10px; /* Space between buttons */
-            transition: background-color 0.3s; /* Smooth transition */
-        }
-        .btn:hover { background: var(--accent); }
-        .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
-        
-        /* Search Input */
-        #invoice-search {
-            margin-bottom: 10px;
-            width: calc(100% - 20px);
-        }
-        /* Status bar for initialization */
-        #status-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--primary);
-            color: white;
-            text-align: center;
-            padding: 10px;
-            display: none; /* Hidden by default */
-        }
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .layout { grid-template-columns: 1fr; }
-            .nav-inner { flex-direction: column; }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <title>Uniquity Solutions - Client Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #96A3B1;
+      --text: #1f2937;
+      --muted: #4b5563;
+      --card: #ffffff;
+      --primary: #e34b4b;
+      --accent: #fbbf24;
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;
+      --nav-h: 56px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+    /* Top nav */
+    .nav {
+      position: sticky; top: 0; z-index: 1100;
+      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+      height: var(--nav-h);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display: inline-block; }
+
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+    /* Layout: sidebar + main content */
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
+    aside { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; }
+    main { display: grid; gap: 16px; align-content: start; }
+    /* Panels */
+    .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
+    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 6px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
+    th { color: #64748b; font-weight: 600; }
+
+    .btn { background: var(--primary); color: white; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 10px; }
+    .btn:hover { background: var(--accent); }
+    .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .nav-inner { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-    <div id="client-root" class="client-root">
-        <header class="nav">
-            <div class="nav-inner">
-                <div class="brand">
-                    <span class="brand-mark"></span> Uniquity Solutions - Client Dashboard
-                </div>
-                <div class="nav-buttons">
-                    <button id="refreshBtn" class="btn">Refresh Data</button>
-                    <button id="signOutBtn" class="btn btn-secondary" style="display:none;">Sign out</button>
-                </div>
-            </div>
-        </header>
+  <div id="client-root" class="client-root">
+    <header class="nav">
+      <div class="nav-inner">
+        <div class="brand">
+          <span class="brand-mark"></span> Uniquity Solutions - Client Dashboard
+        </div>
+        <div id="status-bar" style="display:none; color:white; padding:8px 12px; border-radius:6px; background:#e34b4b;">
+          Loading keys and user data...
+        </div>
+      </div>
+    </header>
 
-        <main class="container layout">
-            <!-- Left Nav -->
-            <aside class="sidebar">
-                <div class="panel">
-                    <div class="section-title">Overview</div>
-                    <!-- Dynamic greeting -->
-                    <div id="clientGreeting" style="font-size: 1.1rem; font-weight: 700;">
-                        Welcome, Client!
-                    </div>
-                    <!-- Optional Business ID line -->
-                    <div id="business-id" style="margin-top:6px; color:#4b5563;">
-                        <!-- e.g., Business ID: 12345 -->
-                    </div>
-                    <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
-                    <div id="available-balance">Available for Payout: $0.00</div>
-                    <div id="pending-balance">Pending Balance: $0.00</div>
-                </div>
+    <main class="container layout">
+      <!-- Left Sidebar -->
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="section-title">Overview</div>
+          <!-- Dynamic greeting: "Welcome, {name} | Business ID: {id}" -->
+          <div id="clientGreeting" style="font-size:1.1rem; font-weight:700;">Welcome, Client!</div>
+          <div id="business-id" style="margin-top:6px; color:#4b5563;"></div>
+          <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
+          <div id="available-balance">Available for Payout: $0.00</div>
+          <div id="pending-balance">Pending Balance: $0.00</div>
+        </div>
 
-                <div class="panel">
-                    <div class="section-title">Notifications</div>
-                    <div id="notificationsList">No notifications</div>
-                </div>
+        <div class="panel">
+          <div class="section-title">Notifications</div>
+          <div id="notificationsList">No notifications</div>
+        </div>
 
-                <div class="panel">
-                    <div class="section-title">Recent Payments</div>
-                    <table class="table" id="payments-table" aria-label="Payments">
-                        <thead>
-                            <tr>
-                                <th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="panel">
-                    <div class="section-title">Tenant to Tenant Payment</div>
-                    <input type="text" id="recipient-id" placeholder="Recipient User ID" class="input" />
-                    <input type="number" id="tenant-payment-amount" placeholder="Enter amount" class="input" />
-                    <button id="send-payment" class="btn">Send Payment</button>
-                </div>
-            </aside>
+        <div class="panel">
+          <div class="section-title">Recent Payments</div>
+          <table id="payments-table" aria-label="Payments">
+            <thead>
+              <tr>
+                <th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th>
+              </tr>
+            </thead>
+            <tbody><!-- populated by JS --></tbody>
+          </table>
+        </div>
 
-            <!-- Right Content -->
-            <section class="main" id="clientMain">
-                <div class="panel" id="topAdsSection">
-                    <div class="section-title">Advertisements</div>
-                    <div id="topAdsList">Loading ads...</div>
-                </div>
+        <div class="panel">
+          <div class="section-title">Tenant to Tenant Payment</div>
+          <input type="text" id="recipient-id" placeholder="Recipient User ID" class="input" />
+          <input type="number" id="tenant-payment-amount" placeholder="Enter amount" class="input" />
+          <button id="send-payment" class="btn">Send Payment</button>
+        </div>
+      </aside>
 
-                <div class="panel" id="clientNotificationsPanel">
-                    <div class="section-title">Notifications</div>
-                    <div id="notificationsListTwo">No notifications</div>
-                </div>
+      <!-- Right Content -->
+      <section class="main" id="clientMain">
+        <div class="panel" id="topAdsSection">
+          <div class="section-title">Advertisements</div>
+          <div id="topAdsList">Loading ads...</div>
+        </div>
 
-                <div class="panel">
-                    <div class="section-title">Search Invoices</div>
-                    <input type="text" id="invoice-search" placeholder="Search invoices..." class="input" />
-                    <button id="search-invoices" class="btn">Search</button>
-                </div>
+        <div class="panel" id="clientNotificationsPanel">
+          <div class="section-title">Notifications</div>
+          <div id="notificationsListTwo">No notifications</div>
+        </div>
 
-                <div class="panel" id="bottomAdsSection">
-                    <div class="section-title">Advertisements</div>
-                    <div id="bottomAdsList">Loading ads...</div>
-                </div>
-            </section>
+        <div class="panel">
+          <div class="section-title">Search Invoices</div>
+          <input type="text" id="invoice-search" placeholder="Search invoices..." class="input" />
+          <button id="search-invoices" class="btn">Search</button>
+        </div>
 
-            <aside class="sidebar">
-                <div class="panel" id="rightAdsSection">
-                    <div class="section-title">Advertisements</div>
-                    <div id="rightAdsList">Loading ads...</div>
-                </div>
-            </aside>
-        </main>
+        <div class="panel" id="bottomAdsSection">
+          <div class="section-title">Advertisements</div>
+          <div id="bottomAdsList">Loading ads...</div>
+        </div>
+      </section>
 
-        <div id="status-bar">Loading keys and user data...</div>
-    </div>
+      <aside class="sidebar">
+        <div class="panel" id="rightAdsSection">
+          <div class="section-title">Advertisements</div>
+          <div id="rightAdsList">Loading ads...</div>
+        </div>
+      </aside>
+    </main>
 
-    <script src="https://unpkg.com/@supabase/supabase-js/dist/umd/supabase.js"></script>
-    <script src="app/client/client.js"></script>
+    <div id="status-bar-bottom" style="display:none; text-align:center; padding:6px; background:#333; color:#fff;"></div>
+  </div>
+
+  <!-- Supabase (UMD) and inline JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Configuration: fetch keys from your backend, then initialize Supabase
+    let SUPABASE_URL = null;
+    let SUPABASE_ANON_KEY = null;
+    let STRIPE_PUBLIC_KEY = null;
+
+    let sb = null;           // Supabase client
+    let clientId = null;       // Auth user id
+    let clientName = '';       // For greeting
+    let clientBusinessId = ''; // Business ID for the client
+
+    // Helpers
+    function $(sel) { return document.querySelector(sel); }
+    function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
+    function showStatus(msg) {
+      const bar = document.getElementById('status-bar');
+      if (bar) { bar.style.display = 'block'; bar.textContent = msg; }
+    }
+    function hideStatus() {
+      const bar = document.getElementById('status-bar');
+      if (bar) bar.style.display = 'none';
+    }
+
+    // Initialize
+    async function initKeysAndClient() {
+      try {
+        showStatus('Loading API keys...');
+        const res = await fetch('/api/keys');
+        const keys = await res.json();
+        SUPABASE_URL = keys.SUPABASE_URL;
+        SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
+        STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
+
+        // Init Supabase
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Load user
+        await loadUserData();
+
+        // Load balances & payments
+        await loadBalanceData();
+        await loadPaymentsData();
+
+        // Optional: tenant search placeholder
+        setupTenantSearchUI();
+      } catch (err) {
+        console.error('Initialization error:', err);
+        showStatus('Initialization failed. Check console for details.');
+      } finally {
+        hideStatus();
+      }
+    }
+
+    // Load user (name + business_id)
+    async function loadUserData() {
+      const { data: { user } = {}, error } = await sb.auth.getUser();
+      if (error) {
+        console.error('Error fetching user:', error.message);
+        return;
+      }
+      clientId = user?.id || null;
+      const meta = user?.user_metadata || {};
+      clientName = meta.name || '';
+      clientBusinessId = meta.business_id || meta.businessId || '';
+
+      // Greeting with interpolation
+      const greetingEl = document.getElementById('clientGreeting');
+      if (greetingEl) {
+        const namePart = clientName || 'Client';
+        const bizPart = clientBusinessId ? ` | Business ID: ${clientBusinessId}` : '';
+        greetingEl.textContent = `Welcome, ${namePart}${bizPart}!`;
+      }
+
+      // Optional business-id element
+      const bizEl = document.getElementById('business-id');
+      if (bizEl) {
+        bizEl.textContent = clientBusinessId ? `Business ID: ${clientBusinessId}` : '';
+      }
+    }
+
+    // Load balance data
+    async function loadBalanceData() {
+      if (!clientId) return;
+      try {
+        const resp = await fetch(`/stripe/${encodeURIComponent(clientId)}/balance`);
+        const data = await resp.json();
+        const total = Number(data.total ?? 0).toFixed(2);
+        const available = Number(data.available ?? 0).toFixed(2);
+        const pending = Number(data.pending ?? 0).toFixed(2);
+
+        const totalEl = document.getElementById('total-balance');
+        const availEl = document.getElementById('available-balance');
+        const pendEl = document.getElementById('pending-balance');
+
+        if (totalEl) totalEl.textContent = `Total Balance: $${total}`;
+        if (availEl) availEl.textContent = `Available for Payout: $${available}`;
+        if (pendEl) pendEl.textContent = `Pending Balance: $${pending}`;
+      } catch (e) {
+        console.error('Failed to load balance data:', e);
+      }
+    }
+
+    // Load payments
+    async function loadPaymentsData() {
+      if (!clientId && !clientBusinessId) return;
+      const endpoint = `/payments?business_id=${encodeURIComponent(clientBusinessId || clientId)}`;
+      try {
+        const resp = await fetch(endpoint);
+        const payments = await resp.json();
+        const tbody = document.querySelector('#payments-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (Array.isArray(payments) && payments.length) {
+          payments.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${p.id ?? ''}</td>
+              <td>${p.invoice ?? ''}</td>
+              <td>${p.amount != null ? '$' + Number(p.amount).toFixed(2) : ''}</td>
+              <td>${p.currency ?? 'USD'}</td>
+              <td>${p.status ?? ''}</td>
+              <td>${p.date ? new Date(p.date).toLocaleDateString() : ''}</td>
+              <td>${p.customer_name ?? ''}</td>
+              <td>${p.payment_method ?? ''}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 8;
+          td.textContent = 'No payments found';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        }
+      } catch (e) {
+        console.error('Failed to load payments:', e);
+      }
+    }
+
+    // Tenant search UI (live)
+    function setupTenantSearchUI() {
+      const input = document.getElementById('recipient-id');
+      let resultsBox = document.getElementById('tenant-search-results');
+      if (!resultsBox) {
+        resultsBox = document.createElement('div');
+        resultsBox.id = 'tenant-search-results';
+        resultsBox.style.borderTop = '1px solid #eee';
+        resultsBox.style.marginTop = '6px';
+        document.querySelector('.sidebar')?.appendChild(resultsBox);
+      }
+      if (input) {
+        input.addEventListener('input', async (e) => {
+          const q = e.target.value.trim();
+          if (!q) { resultsBox.innerHTML = ''; return; }
+          try {
+            const r = await fetch(`/tenants/search?query=${encodeURIComponent(q)}`);
+            const results = await r.json();
+            resultsBox.innerHTML = '';
+            if (Array.isArray(results) && results.length) {
+              results.forEach(t => {
+                const div = document.createElement('div');
+                div.textContent = `${t.name || 'Unknown'} (${t.email || ''})`;
+                div.style.padding = '6px 0';
+                resultsBox.appendChild(div);
+              });
+            } else {
+              resultsBox.textContent = 'No matches';
+            }
+          } catch (err) {
+            resultsBox.textContent = 'Error loading results';
+          }
+        });
+      }
+    }
+
+    // Init
+    window.addEventListener('load', () => {
+      initKeysAndClient();
+    });
+  </script>
 </body>
 </html>

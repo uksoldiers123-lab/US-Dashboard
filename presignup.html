@@ -10,6 +10,7 @@
   <!-- Fonts (as in your snippets) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
   <style>
     :root {
       --bg: #96A3B1;
@@ -26,7 +27,12 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    html, body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    html, body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
 
     /* Navbar / header (kept consistent with your snippets) */
     .nav{ position: sticky; top:0; z-index:1100;
@@ -48,18 +54,26 @@
     .nav-links a{ color:#eef2f7; font-weight:600; font-size:14.5px; text-decoration:none; }
     .cta{ background:var(--primary); color:white; padding:10px 16px; border-radius:999px; font-weight:700; font-size:14px;
       box-shadow:0 8px 18px rgba(233,75,75,.35); border:1px solid rgba(0,0,0,.05); }
+
     /* Hamburger (mobile) */
     .menu-btn{ display:none; border:0; background:transparent; color:#fff; padding:0; cursor:pointer; }
+
     /* Mobile overlay menu (optional) */
     .mobile-menu{ display:none; position:fixed; left:0; right:0; top: var(--nav-h,56px); bottom:0;
       z-index:9999; background: rgba(17,24,39,.7); backdrop-filter: blur(6px);
       padding:12px 12px 24px; overflow-y:auto;
     }
     .mobile-menu.open{ display:block; }
-    /* Content / cards */
+    .mobile-menu .menu-label{ color:#fff; opacity:.9; font-weight:800; font-size:12px; letter-spacing:.08em;
+      text-transform:uppercase; margin:8px 6px 6px; }
+
+    .mobile-menu a{ display:block; background:#fff; color:#111827; margin:8px 4px; padding:12px 14px; border-radius:10px; border:1px solid #e5e7eb; }
+
+    /* Card / content area */
     .container{ width:min(1120px, calc(100% - 32px)); margin:0 auto; padding: 20px; }
     .heading{ text-align:center; font-size:1.75rem; font-weight:700; margin:8px 0 10px; }
     .subtitle{ text-align:center; color:var(--muted); margin-bottom:28px; }
+
     .card-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:22px; align-items:stretch; }
     .card{ background:var(--card); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow);
       border:1px solid rgba(0,0,0,.05); display:flex; flex-direction:column; justify-content:space-between; min-height:210px;
@@ -67,11 +81,17 @@
     .card h3{ margin:0 0 8px; font-size:1.25rem; }
     .card p{ margin:0 0 12px; color:var(--muted); }
     .cta{ margin-top:auto; display:flex; gap:10px; align-items:center; }
+
     .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
       padding:12px 16px; border-radius:12px; font-weight:700; text-decoration:none; border:1px solid transparent; cursor:pointer;
     }
     .btn-primary{ background:var(--primary); color:#fff; }
     .btn-outline{ background:#fff; color:#111; border:1px solid #ddd; }
+
+    @media (max-width:860px){
+      .nav-links{ display:none; } /* hide desktop links on small screens */
+      .menu-btn{ display:inline-flex; }
+    }
     @media (max-width:600px){
       .container{ padding:20px 12px; }
     }
@@ -88,10 +108,10 @@
 
       <!-- Desktop navigation (matches index header look) -->
       <nav class="nav-links" aria-label="Header navigation">
-        <a href="index.html">Home</a>
-        <a href="#services">Services</a>
-        <a href="#partners">Partners</a>
-        <a href="#careers">Careers</a>
+        <a href="https://www.uniquitysolutions.com/index.html">Home</a>
+        <a href="https://www.uniquitysolutions.com/index.html#services">Services</a>
+        <a href="https://www.uniquitysolutions.com/index.html#partners">Partners</a>
+        <a href="https://www.uniquitysolutions.com/index.html#careers">Careers</a>
         <div class="dropdown" data-dropdown>
           <button class="drop-toggle" type="button" data-toggle aria-haspopup="true" aria-expanded="false">
             Get Started
@@ -102,19 +122,23 @@
           <div class="drop-menu" data-menu role="menu">
             <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" role="menuitem">Make a Payment</a>
             <a href="https://www.dashboard.uniquitysolutions.com/presignup.html" role="menuitem">Create Account (Merchants)</a>
-            <a href="faq.html" role="menuitem">FAQ</a>
-            <a href="pricing.html" role="menuitem">Pricing</a>
-            <a href="developers.html" role="menuitem">Developers & API</a>
-            <a href="integrations.html" role="menuitem">Integrations</a>
-            <a href="compliance.html" role="menuitem">Compliance & Security</a>
-            <a href="https://www.dashboard.uniquitysolutions.com/login.html" role="menuitem">Login Portal</a>
+            <a href="https://www.uniquitysolutions.com/faq.html" role="menuitem">FAQ</a>
+            <a href="https://www.uniquitysolutions.com/pricing.html" role="menuitem">Pricing</a>
+            <a href="https://www.uniquitysolutions.com/developers.html" role="menuitem">Developers & API</a>
+            <a href="https://www.uniquitysolutions.com/integrations.html" role="menuitem">Integrations</a>
+            <a href="https://www.uniquitysolutions.com/compliance.html" role="menuitem">Compliance & Security</a>
+            <a href="https://www.uniquitysolutions.com/login.html" role="menuitem">Login Portal</a>
           </div>
         </div>
         <!-- Optional CTA in header (keep for parity with index) -->
         <a href="#contact" class="cta">Contact</a>
+        <!-- New: ALREADY HAVE AN ACCOUNT? LOGIN NOW button (external login) -->
+        <a href="https://www.dashboard.uniquitysolutions.com/login.html" class="btn btn-outline" target="_blank" rel="noopener" aria-label="Login to Dashboard (already have account)">
+          Login Now
+        </a>
       </nav>
 
-      <!-- Mobile menu button (optional; your CSS supports a no-scroll overlay) -->
+      <!-- Mobile menu button (for overlay) -->
       <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" title="Menu">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
@@ -124,29 +148,32 @@
     </div>
   </header>
 
-  <!-- Mobile overlay menu (OUTSIDE the header) -->
+  <!-- Mobile overlay menu (outside the header) -->
   <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
     <div class="menu-label">On this page</div>
-    <a href="index.html">Home</a>
-    <a href="#services">Services</a>
-    <a href="#partners">Partners</a>
-    <a href="#careers">Careers</a>
-    <a href="#contact" class="cta">Contact</a>
+    <a href="https://www.uniquitysolutions.com/index.html">Home</a>
+    <a href="https://www.uniquitysolutions.com/index.html#services">Services</a>
+    <a href="https://www.uniquitysolutions.com/index.html#partners">Partners</a>
+    <a href="https://www.uniquitysolutions.com/index.html#careers">Careers</a>
+    <a href="https://www.uniquitysolutions.com/index.html#contact" class="cta">Contact</a>
     <div class="menu-label">More pages</div>
     <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
     <a href="https://www.dashboard.uniquitysolutions.com/presignup.html">Create Account (Merchants)</a>
-    <a href="faq.html">FAQ</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="developers.html">Developers & API</a>
-    <a href="integrations.html">Integrations</a>
-    <a href="compliance.html">Compliance & Security</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/faq.html">FAQ</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/pricing.html">Pricing</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/developers.html">Developers & API</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/integrations.html">Integrations</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/compliance.html">Compliance & Security</a>
     <a href="https://www.dashboard.uniquitysolutions.com/login.html" target="_blank" rel="noopener">Login Portal</a>
   </div>
 
-  <!-- Page Content: two cards (example placeholders; adapt as needed) -->
+  <!-- Page Content -->
   <main class="container" role="main" style="padding: 20px 0 60px;">
     <h1 class="heading" style="margin:0 0 6px;">Create your account</h1>
-    <p class="subtitle" style="margin:0 0 20px; text-align:center;">Choose whether you’re signing up as a business or an individual to continue.</p>
+    <p class="subtitle" style="margin:0 0 20px; text-align:center;">
+      Choose whether you’re signing up as a business or an individual to continue.
+    </p>
+
     <section class="card-grid" aria-label="Account type options">
       <!-- Business Card -->
       <article class="card" aria-labelledby="business-title">

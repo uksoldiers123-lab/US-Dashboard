@@ -19,11 +19,8 @@
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
-    /* Top nav */
-    .nav {
-      position: sticky; top: 0; z-index: 1100;
+    .nav { position: sticky; top: 0; z-index: 1100;
       background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
-      backdrop-filter: blur(8px);
       border-bottom: 1px solid rgba(255,255,255,.15);
       height: var(--nav-h);
     }
@@ -33,14 +30,12 @@
 
     .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
-    /* Layout: sidebar + main content */
     .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
     aside { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; }
     main { display: grid; gap: 16px; align-content: start; }
-    /* Panels */
-    .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
-    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: .5px; }
 
+    .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
+    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 8px 6px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
     th { color: #64748b; font-weight: 600; }
@@ -73,7 +68,6 @@
       <aside class="sidebar">
         <div class="panel">
           <div class="section-title">Overview</div>
-          <!-- Dynamic greeting: "Welcome, {name} | Business ID: {id}" -->
           <div id="clientGreeting" style="font-size:1.1rem; font-weight:700;">Welcome, Client!</div>
           <div id="business-id" style="margin-top:6px; color:#4b5563;"></div>
           <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
@@ -89,11 +83,7 @@
         <div class="panel">
           <div class="section-title">Recent Payments</div>
           <table id="payments-table" aria-label="Payments">
-            <thead>
-              <tr>
-                <th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th>
-              </tr>
-            </thead>
+            <thead><tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th></tr></thead>
             <tbody><!-- populated by JS --></tbody>
           </table>
         </div>
@@ -115,7 +105,7 @@
 
         <div class="panel" id="clientNotificationsPanel">
           <div class="section-title">Notifications</div>
-          <div id="notificationsListTwo">No notifications</div>
+          <div id="notificationsList">No notifications</div>
         </div>
 
         <div class="panel">
@@ -141,122 +131,94 @@
     <div id="status-bar-bottom" style="display:none; text-align:center; padding:6px; background:#333; color:#fff;"></div>
   </div>
 
-  <!-- Supabase (UMD) and inline JS -->
+  <!-- Supabase (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Configuration: fetch keys from your backend, then initialize Supabase
     let SUPABASE_URL = null;
     let SUPABASE_ANON_KEY = null;
     let STRIPE_PUBLIC_KEY = null;
 
-    let sb = null;           // Supabase client
-    let clientId = null;       // Auth user id
-    let clientName = '';       // For greeting
-    let clientBusinessId = ''; // Business ID for the client
+    let sb = null;
+    let clientId = null;
+    let clientName = '';
+    let clientBusinessId = '';
 
-    // Helpers
-    function $(sel) { return document.querySelector(sel); }
-    function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
-    function showStatus(msg) {
-      const bar = document.getElementById('status-bar');
-      if (bar) { bar.style.display = 'block'; bar.textContent = msg; }
-    }
-    function hideStatus() {
-      const bar = document.getElementById('status-bar');
-      if (bar) bar.style.display = 'none';
-    }
+    function $(s){ return document.querySelector(s); }
 
-    // Initialize
-    async function initKeysAndClient() {
-      try {
+    function showStatus(msg){
+      const bar = document.getElementById('status-bar');
+      if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
+    }
+    function hideStatus(){ const bar = document.getElementById('status-bar'); if(bar) bar.style.display='none'; }
+
+    async function initKeysAndClient(){
+      try{
         showStatus('Loading API keys...');
         const res = await fetch('/api/keys');
         const keys = await res.json();
         SUPABASE_URL = keys.SUPABASE_URL;
         SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
         STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
+        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Init Supabase
-        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Load user
         await loadUserData();
-
-        // Load balances & payments
         await loadBalanceData();
         await loadPaymentsData();
-
-        // Optional: tenant search placeholder
-        setupTenantSearchUI();
-      } catch (err) {
-        console.error('Initialization error:', err);
-        showStatus('Initialization failed. Check console for details.');
+        // tenant search already wired in by loadUserData or on-demand
+      } catch(err){
+        console.error('Init error', err);
+        showStatus('Initialization failed. Check console.');
       } finally {
         hideStatus();
       }
     }
 
-    // Load user (name + business_id)
-    async function loadUserData() {
+    async function loadUserData(){
       const { data: { user } = {}, error } = await sb.auth.getUser();
-      if (error) {
-        console.error('Error fetching user:', error.message);
-        return;
-      }
+      if(error){ console.error('User error', error.message); return; }
       clientId = user?.id || null;
       const meta = user?.user_metadata || {};
       clientName = meta.name || '';
       clientBusinessId = meta.business_id || meta.businessId || '';
 
-      // Greeting with interpolation
-      const greetingEl = document.getElementById('clientGreeting');
-      if (greetingEl) {
+      const greet = document.getElementById('clientGreeting');
+      if(greet){
         const namePart = clientName || 'Client';
         const bizPart = clientBusinessId ? ` | Business ID: ${clientBusinessId}` : '';
-        greetingEl.textContent = `Welcome, ${namePart}${bizPart}!`;
+        greet.textContent = `Welcome, ${namePart}${bizPart}!`;
       }
-
-      // Optional business-id element
       const bizEl = document.getElementById('business-id');
-      if (bizEl) {
-        bizEl.textContent = clientBusinessId ? `Business ID: ${clientBusinessId}` : '';
+      if(bizEl) bizEl.textContent = clientBusinessId ? `Business ID: ${clientBusinessId}` : '';
+    }
+
+    async function loadBalanceData(){
+      if(!clientId) return;
+      try{
+        const r = await fetch(`/stripe/${encodeURIComponent(clientId)}/balance`);
+        const d = await r.json();
+        const total = Number(d.total ?? 0).toFixed(2);
+        const avail = Number(d.available ?? 0).toFixed(2);
+        const pend = Number(d.pending ?? 0).toFixed(2);
+        const t = document.getElementById('total-balance');
+        const a = document.getElementById('available-balance');
+        const p = document.getElementById('pending-balance');
+        if(t) t.textContent = `Total Balance: $${total}`;
+        if(a) a.textContent = `Available for Payout: $${avail}`;
+        if(p) p.textContent = `Pending Balance: $${pend}`;
+      } catch(e){
+        console.error('Balance error', e);
       }
     }
 
-    // Load balance data
-    async function loadBalanceData() {
-      if (!clientId) return;
-      try {
-        const resp = await fetch(`/stripe/${encodeURIComponent(clientId)}/balance`);
-        const data = await resp.json();
-        const total = Number(data.total ?? 0).toFixed(2);
-        const available = Number(data.available ?? 0).toFixed(2);
-        const pending = Number(data.pending ?? 0).toFixed(2);
-
-        const totalEl = document.getElementById('total-balance');
-        const availEl = document.getElementById('available-balance');
-        const pendEl = document.getElementById('pending-balance');
-
-        if (totalEl) totalEl.textContent = `Total Balance: $${total}`;
-        if (availEl) availEl.textContent = `Available for Payout: $${available}`;
-        if (pendEl) pendEl.textContent = `Pending Balance: $${pending}`;
-      } catch (e) {
-        console.error('Failed to load balance data:', e);
-      }
-    }
-
-    // Load payments
-    async function loadPaymentsData() {
-      if (!clientId && !clientBusinessId) return;
+    async function loadPaymentsData(){
+      if(!clientId && !clientBusinessId) return;
       const endpoint = `/payments?business_id=${encodeURIComponent(clientBusinessId || clientId)}`;
-      try {
+      try{
         const resp = await fetch(endpoint);
         const payments = await resp.json();
         const tbody = document.querySelector('#payments-table tbody');
-        if (!tbody) return;
         tbody.innerHTML = '';
-
-        if (Array.isArray(payments) && payments.length) {
+        if(Array.isArray(payments) && payments.length){
           payments.forEach(p => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -279,48 +241,11 @@
           tr.appendChild(td);
           tbody.appendChild(tr);
         }
-      } catch (e) {
-        console.error('Failed to load payments:', e);
+      } catch(e){
+        console.error('Payments error', e);
       }
     }
 
-    // Tenant search UI (live)
-    function setupTenantSearchUI() {
-      const input = document.getElementById('recipient-id');
-      let resultsBox = document.getElementById('tenant-search-results');
-      if (!resultsBox) {
-        resultsBox = document.createElement('div');
-        resultsBox.id = 'tenant-search-results';
-        resultsBox.style.borderTop = '1px solid #eee';
-        resultsBox.style.marginTop = '6px';
-        document.querySelector('.sidebar')?.appendChild(resultsBox);
-      }
-      if (input) {
-        input.addEventListener('input', async (e) => {
-          const q = e.target.value.trim();
-          if (!q) { resultsBox.innerHTML = ''; return; }
-          try {
-            const r = await fetch(`/tenants/search?query=${encodeURIComponent(q)}`);
-            const results = await r.json();
-            resultsBox.innerHTML = '';
-            if (Array.isArray(results) && results.length) {
-              results.forEach(t => {
-                const div = document.createElement('div');
-                div.textContent = `${t.name || 'Unknown'} (${t.email || ''})`;
-                div.style.padding = '6px 0';
-                resultsBox.appendChild(div);
-              });
-            } else {
-              resultsBox.textContent = 'No matches';
-            }
-          } catch (err) {
-            resultsBox.textContent = 'Error loading results';
-          }
-        });
-      }
-    }
-
-    // Init
     window.addEventListener('load', () => {
       initKeysAndClient();
     });

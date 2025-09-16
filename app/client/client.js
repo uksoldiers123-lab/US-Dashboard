@@ -1,115 +1,195 @@
 
-let SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_PUBLIC_KEY;
-let sb; // Supabase client will be initialized after fetching keys
-let clientId; // Store user ID to use in payments and other functions
+// Updated client dashboard script (per-client data, enhanced payments, live tenant search)
 
-// Function to fetch keys from the server
+let SUPABASE_URL = null;
+let SUPABASE_ANON_KEY = null;
+let STRIPE_PUBLIC_KEY = null;
+
+let sb = null;           // Supabase client
+let clientId = null;       // Auth user id or internal client id
+let clientName = '';       // For greeting
+let clientBusinessId = ''; // Business ID for the client
+
+// DOM helpers
+function $(sel) { return document.querySelector(sel); }
+function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
+
 async function fetchKeys() {
-    document.getElementById('status-bar').style.display = 'block'; // Show the status bar
-    const response = await fetch('/api/keys'); // Ensure this API endpoint is secure
-    const keys = await response.json();
-    SUPABASE_URL = keys.SUPABASE_URL;
-    SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
-    STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
-    // Initialize Supabase client with keys
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    document.getElementById('status-bar').style.display = 'none'; // Hide the status bar
+  const statusBar = document.getElementById('status-bar');
+  if (statusBar) statusBar.style.display = 'block';
+  const res = await fetch('/api/keys');
+  const keys = await res.json();
+  SUPABASE_URL = keys.SUPABASE_URL;
+  SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
+  STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
+
+  // Initialize Supabase client
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  if (statusBar) statusBar.style.display = 'none';
 }
 
-// Load user data function
 async function loadUserData() {
-    const { data: user, error } = await sb.auth.getUser(); // Fetch user data from Supabase
-    if (error) {
-        console.error('Error fetching user:', error.message);
-        return; // Exit if there's an error
-    }
-    clientId = user.id; // Store user ID
+  const { data: user, error } = await sb.auth.getUser();
+  if (error) {
+    console.error('Error fetching user:', error.message);
+    return;
+  }
+  clientId = user.id;
+  // Prefer name, then business_id, else "Client"
+  clientName = user.user_metadata?.name || '';
+  clientBusinessId = user.user_metadata?.business_id || user.user_metadata?.businessId || '';
 
-    // Display user’s greeting with both name and business ID
-    const clientName = user.user_metadata.name || "Client"; // Default to "Client" if name is not available
-    const businessId = user.user_metadata.businessId ? ` (${user.user_metadata.businessId})` : ""; // Append business ID if it exists
-    document.getElementById('clientGreeting').textContent = `Welcome, ${clientName}${businessId}!`;
+  const greeting = document.getElementById('clientGreeting');
+  if (greeting) {
+    greeting.textContent = `Welcome, ${clientName || 'Client'}${clientBusinessId ? ` (Business ID: ${clientBusinessId})` : ''}!`;
+  }
 
-    // Load balance data from your backend API
-    const balanceResponse = await fetch(`/stripe/${clientId}/balance`);
-    const balanceData = await balanceResponse.json();
-
-    // Check if balance data is valid
-    if (balanceData) {
-        // Display balances
-        document.getElementById('total-balance').textContent = `Total Balance: $${balanceData.total.toFixed(2)}`;
-        document.getElementById('available-balance').textContent = `Available for Payout: $${balanceData.available.toFixed(2)}`;
-        document.getElementById('pending-balance').textContent = `Pending Balance: $${balanceData.pending.toFixed(2)}`;
-    } else {
-        console.error('Invalid balance data received.');
-    }
-
-    // Load notifications
-    await loadNotifications();
+  await loadBalanceData();
+  await loadPaymentsData();
+  // Optional: prepare tenant search UI center
+  setupTenantSearchUI();
 }
 
-// Function to load notifications from Supabase
-async function loadNotifications() {
-    const { data: notifications, error } = await sb
-        .from('notifications') // Replace 'notifications' with your actual table name
-        .select('*'); // Select all columns
+async function loadBalanceData() {
+  if (!clientId) return;
+  try {
+    const r = await fetch(`/stripe/${encodeURIComponent(clientId)}/balance`);
+    const data = await r.json();
+    document.getElementById('total-balance').textContent = `Total Balance: $${(data.total ?? 0).toFixed(2)}`;
+    document.getElementById('available-balance').textContent = `Available for Payout: $${(data.available ?? 0).toFixed(2)}`;
+    document.getElementById('pending-balance').textContent = `Pending Balance: $${(data.pending ?? 0).toFixed(2)}`;
+  } catch (e) {
+    console.error('Failed to load balance data:', e);
+  }
+}
 
-    if (error) {
-        console.error('Error fetching notifications:', error.message);
+// 4) Payments panel: per-client payments with extra fields
+async function loadPaymentsData() {
+  if (!clientId && !clientBusinessId) return;
+  // Use server-side filtering if possible
+  // Try business_id endpoint first; fallback to client_id if needed
+  const endpoint =
+    `/payments?business_id=${encodeURIComponent(clientBusinessId || clientId)}`;
+  try {
+    const resp = await fetch(endpoint);
+    const payments = await resp.json();
+
+    const tbody = document.querySelector('#payments-table tbody');
+    tbody.innerHTML = '';
+
+    if (Array.isArray(payments) && payments.length) {
+      payments.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.id ?? ''}</td>
+          <td>${p.invoice ?? ''}</td>
+          <td>${p.amount != null ? '$' + Number(p.amount).toFixed(2) : ''}</td>
+          <td>${p.currency ?? 'USD'}</td>
+          <td>${p.status ?? ''}</td>
+          <td>${p.date ? new Date(p.date).toLocaleDateString() : ''}</td>
+          <td>${p.customer_name ?? ''}</td>
+          <td>${p.payment_method ?? ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 8;
+      td.textContent = 'No payments found';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    console.error('Failed to load payments:', e);
+  }
+}
+
+// 5) Tenant-to-tenant live search
+function setupTenantSearchUI() {
+  const input = document.getElementById('recipient-id');
+  let resultsBox = document.getElementById('tenant-search-results');
+  if (!resultsBox) {
+    resultsBox = document.createElement('div');
+    resultsBox.id = 'tenant-search-results';
+    resultsBox.style.borderTop = '1px solid #eee';
+    resultsBox.style.marginTop = '6px';
+    document.querySelector('.sidebar')?.appendChild(resultsBox);
+  }
+
+  if (input) {
+    input.addEventListener('input', async (e) => {
+      const q = e.target.value.trim();
+      if (!q) {
+        resultsBox.innerHTML = '';
         return;
-    }
-
-    const notificationsList = document.getElementById('notificationsList');
-    notificationsList.innerHTML = ''; // Clear existing notifications
-
-    if (notifications.length > 0) {
-        notifications.forEach(notification => {
-            const notificationDiv = document.createElement('div');
-            notificationDiv.className = 'notification';
-            notificationDiv.textContent = notification.message; // Adjust based on your notification structure
-            notificationsList.appendChild(notificationDiv);
+      }
+      const r = await fetch(`/tenants/search?query=${encodeURIComponent(q)}`);
+      const list = await r.json();
+      resultsBox.innerHTML = '';
+      if (Array.isArray(list) && list.length) {
+        list.forEach(t => {
+          const row = document.createElement('div');
+          row.className = 'tenant-row';
+          row.style.cursor = 'pointer';
+          row.textContent = `${t.name || t.email || ''} • ${t.business_id || ''}`;
+          row.addEventListener('click', () => {
+            // You may want to fill recipient id with internal id or business_id
+            input.value = t.id || t.business_id || '';
+            resultsBox.innerHTML = '';
+          });
+          resultsBox.appendChild(row);
         });
-    } else {
-        notificationsList.textContent = 'No notifications'; // Display if no notifications exist
-    }
-}
-
-// Send payment to another tenant
-async function sendPayment(recipientId, amount) {
-    if (!recipientId || !amount) {
-        alert('Please enter a valid recipient and amount.'); // Alert if inputs are invalid
-        return; // Exit if inputs are invalid
-    }
-
-    const response = await fetch(`/api/send-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipientId, amount, currency: 'usd' })
+      } else {
+        resultsBox.textContent = 'No matches';
+      }
     });
-
-    const data = await response.json();
-    if (data.success) {
-        alert('Payment sent successfully!');
-        loadUserData(); // Reload user data to reflect changes
-    } else {
-        alert('Failed to send payment: ' + data.error);
-    }
+  }
 }
 
-// Event listeners
+// 6) Sign out
 document.getElementById('signOutBtn').addEventListener('click', async () => {
-    await sb.auth.signOut(); // Sign out the user
-    window.location.href = "login.html"; // Redirect to login page after signing out
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
 });
 
+// 7) Send payment
+async function sendPayment(recipientId, amount) {
+  if (!recipientId || !amount) {
+    alert('Please enter a valid recipient and amount.');
+    return;
+  }
+  const resp = await fetch('/api/send-payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ recipientId, amount: Number(amount), currency: 'usd' })
+  });
+  const data = await resp.json();
+  if (data.success) {
+    alert('Payment sent successfully!');
+    // Refresh balances and payments to reflect changes
+    await loadBalanceData();
+    await loadPaymentsData();
+  } else {
+    alert('Failed to send payment: ' + (data.error ?? 'Unknown error'));
+  }
+}
 document.getElementById('send-payment').addEventListener('click', async () => {
-    const recipientId = document.getElementById('recipient-id').value;
-    const amount = document.getElementById('tenant-payment-amount').value;
-    await sendPayment(recipientId, amount); // Call the sendPayment function
+  const recipientId = document.getElementById('recipient-id').value;
+  const amount = document.getElementById('tenant-payment-amount').value;
+  await sendPayment(recipientId, amount);
 });
 
-// Load user data and keys on page load
+// 8) Optional: payments search (server-side)
+document.getElementById('invoice-search')?.addEventListener('input', async (e) => {
+  const term = e.target.value;
+  // If you implement server-side search, call /payments/search?client_id=...&q=...
+  // For now, you could filter loaded payments in memory if you keep a cache.
+});
+
+// 9) Page load orchestration
 window.addEventListener('load', async () => {
-    await fetchKeys(); // Fetch keys first
-    await loadUserData(); // Then load user data
+  await fetchKeys();          // Get keys first
+  await loadUserData();         // Then load user data
 });

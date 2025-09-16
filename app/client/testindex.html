@@ -131,20 +131,18 @@
     <div id="status-bar-bottom" style="display:none; text-align:center; padding:6px; background:#333; color:#fff;"></div>
   </div>
 
-  <!-- Supabase (UMD) -->
+  <!-- Supabase UI (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     let SUPABASE_URL = null;
     let SUPABASE_ANON_KEY = null;
     let STRIPE_PUBLIC_KEY = null;
-
     let sb = null;
     let clientId = null;
     let clientName = '';
     let clientBusinessId = '';
 
-    function $(s){ return document.querySelector(s); }
-
+    function $(sel){ return document.querySelector(sel); }
     function showStatus(msg){
       const bar = document.getElementById('status-bar');
       if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
@@ -159,12 +157,12 @@
         SUPABASE_URL = keys.SUPABASE_URL;
         SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
         STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
+
         sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         await loadUserData();
         await loadBalanceData();
         await loadPaymentsData();
-        // tenant search already wired in by loadUserData or on-demand
       } catch(err){
         console.error('Init error', err);
         showStatus('Initialization failed. Check console.');

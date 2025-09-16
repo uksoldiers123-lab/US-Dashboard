@@ -6,31 +6,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #f6f8fa;
-      --card: #ffffff;
-      --text: #1f2937;
-      --brand: #2563eb;
-      --green: #16a34a;
-      --muted: #6b7280;
+      --bg: #96A3B1;           /* blueish grey background from your theme */
+      --text: #1f2937;          /* slate */
+      --muted: #4b5563;         /* muted text */
+      --card: #ffffff;          /* card background */
+      --primary: #e34b4b;       /* red highlight */
+      --primary-700: #d13f3f;  /* darker red */
+      --accent: #fbbf24;        /* yellow highlight */
+      --ring: rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;           /* rounded corners */
+      --nav-h: 56px;            /* default nav height */
     }
     * { box-sizing: border-box; }
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-      background: linear-gradient(135deg, #f0f4ff 0%, #fff 60%);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
-      min-height: 100vh;
+      background: var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .card {
       background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       max-width: 520px;
       width: 90%;
       padding: 28px;
+      margin: 20px auto;
     }
     .header {
       display: flex;
@@ -42,7 +48,7 @@
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: var(--brand);
+      background: var(--primary);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -76,24 +82,24 @@
       flex-wrap: wrap;
     }
     a.btn, button.btn {
-      appearance: none;
-      border: none;
-      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 700;
       text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.02s ease;
+      transition: background-color 0.2s ease;
     }
     a.btn.primary {
-      background: var(--brand);
+      background: var(--primary);
       color: white;
-      text-decoration: none;
+      border: 1px solid transparent;
     }
     a.btn.secondary {
       background: #f1f5f9;
       color: #0f172a;
-      text-decoration: none;
+      border: 1px solid transparent;
     }
     a.btn.primary:hover, a.btn.primary:focus {
       opacity: 0.95;

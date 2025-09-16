@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uniquity Solutions — Sign Up</title>
+
+  <!-- Use your existing CSS tokens / styles -->
+  <link rel="stylesheet" href="styles.css?v=9" />
+
+  <!-- Fonts (as in your snippets) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #96A3B1;
+      --text: #1f2937;
+      --muted: #4b5563;
+      --card: #ffffff;
+      --primary: #e34b4b;
+      --primary-700: #d13f3f;
+      --accent: #fbbf24;
+      --ring: rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;
+      --nav-h: 56px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html, body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+    /* Navbar / header (kept consistent with your snippets) */
+    .nav{ position: sticky; top:0; z-index:1100;
+      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .nav-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 0;
+      width:100%; max-width:1120px; margin:0 auto;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; font-weight:700; color:#fff; text-decoration:none; }
+    .brand-mark{
+      width:28px; height:28px; border-radius:8px;
+      background: radial-gradient(circle at 70% 30%, rgba(255,255,255,.8), rgba(255,255,255,0) 40%),
+                  linear-gradient(135deg, var(--accent), var(--primary));
+      box-shadow:0 6px 14px rgba(233,75,75,.35);
+    }
+    .nav-links{ display:flex; gap:26px; align-items:center; }
+    .nav-links a{ color:#eef2f7; font-weight:600; font-size:14.5px; text-decoration:none; }
+    .cta{ background:var(--primary); color:white; padding:10px 16px; border-radius:999px; font-weight:700; font-size:14px;
+      box-shadow:0 8px 18px rgba(233,75,75,.35); border:1px solid rgba(0,0,0,.05); }
+
+    /* Hamburger (mobile) */
+    .menu-btn{ display:none; border:0; background:transparent; color:#fff; padding:0; cursor:pointer; }
+
+    /* Mobile overlay menu (optional) */
+    .mobile-menu{ display:none; position:fixed; left:0; right:0; top: var(--nav-h,56px); bottom:0;
+      z-index:9999; background: rgba(17,24,39,.7); backdrop-filter: blur(6px);
+      padding:12px 12px 24px; overflow-y:auto;
+    }
+    .mobile-menu.open{ display:block; }
+
+    /* Content / cards */
+    .container{ width:min(1120px, calc(100% - 32px)); margin:0 auto; padding: 20px; }
+    .heading{ text-align:center; font-size:1.75rem; font-weight:700; margin:8px 0 10px; }
+    .subtitle{ text-align:center; color:var(--muted); margin-bottom:28px; }
+
+    .card-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:22px; align-items:stretch; }
+
+    .card{ background:var(--card); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,.05); display:flex; flex-direction:column; justify-content:space-between; min-height:210px;
+    }
+    .card h3{ margin:0 0 8px; font-size:1.25rem; }
+    .card p{ margin:0 0 12px; color:var(--muted); }
+    .cta{ margin-top:auto; display:flex; gap:10px; align-items:center; }
+
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:12px 16px; border-radius:12px; font-weight:700; text-decoration:none; border:1px solid transparent; cursor:pointer;
+    }
+    .btn-primary{ background:var(--primary); color:#fff; }
+    .btn-outline{ background:#fff; color:#111; border:1px solid #ddd; }
+
+    @media (max-width:600px){
+      .container{ padding:20px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header / Nav (exact structure preserved) -->
+  <nav class="nav" aria-label="Primary">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html" aria-label="Uniquity Solutions Home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Uniquity Solutions
+      </a>
+
+      <!-- Hamburger (top-left) -->
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" title="Menu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Login / Sign Up in header (include explicit login link) -->
+      <div class="nav-links" aria-label="Header actions">
+        <a href="/login.html" aria-current="page">Login</a>
+        <a href="/signup.html">Sign Up</a>
+        <!-- Exact login button as requested -->
+        <a href="https://www.dashboard.uniquitysolutions.com/login.html" class="btn btn-outline" target="_blank" rel="noopener" aria-label="Login to Dashboard">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile overlay menu (optional) -->
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
+    <div class="menu-label" style="color:#fff; font-weight:800; text-transform:uppercase; font-size:12px;">On this page</div>
+    <a href="https://www.uniquitysolutions.com/index.html">Home</a>
+    <a href="https://www.uniquitysolutions.com/index.html#services">Services</a>
+    <a href="https://www.uniquitysolutions.com/index.html#partners">Partners</a>
+    <a href="https://www.uniquitysolutions.com/index.html#careers">Careers</a>
+    <a href="https://www.uniquitysolutions.com/index.html#contact" class="cta">Contact</a>
+    <div class="menu-label" style="color:#fff; font-weight:800; text-transform:uppercase; font-size:12px;">More pages</div>
+    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/signup.html">Create Account (Merchants)</a>
+    <a href="https://www.uniquitysolutions.com/faq.html">FAQ</a>
+    <a href="https://www.uniquitysolutions.com/pricing.html">Pricing</a>
+    <a href="https://www.uniquitysolutions.com/developers.html">Developers & API</a>
+    <a href="https://www.uniquitysolutions.com/integrations.html">Integrations</a>
+    <a href="https://www.uniquitysolutions.com/compliance.html">Compliance & Security</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/login.html" target="_blank" rel="noopener">Login Portal</a>
+  </div>
+
+  <!-- Page Content: two cards -->
+  <main class="container" role="main" style="padding: 20px 0 60px;">
+    <h1 class="heading" style="margin:0 0 6px;">Create your account</h1>
+    <p class="subtitle" style="margin:0 0 20px; text-align:center;">Choose whether you’re signing up as a business or an individual to continue.</p>
+
+    <section class="card-grid" aria-label="Account type options">
+      <!-- Business Card -->
+      <article class="card" aria-labelledby="business-title">
+        <div>
+          <h3 id="business-title" style="margin:0 0 8px;">Business</h3>
+          <p style="margin:0; color:var(--muted);">Sign up on behalf of your company. This route is best for corporate accounts, teams, and business workflows.</p>
+        </div>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://connect.stripe.com/d/setup/e/_T0pkXGHyWX9EvTLg2WNojW2FVM/YWNjdF8xUzRvNUhKQllnZEo3dFJ3/3936aa2c4e7f7d16a" target="_blank" rel="noopener" aria-label="Continue with Business">
+            Continue with Business
+          </a>
+        </div>
+      </article>
+
+      <!-- Individual Card -->
+      <article class="card" aria-labelledby="individual-title">
+        <div>
+          <h3 id="individual-title" style="margin:0 0 8px;">Individual</h3>
+          <p style="margin:0; color:var(--muted);">Sign up as an individual user. This path is for personal accounts and solo usage.</p>
+        </div>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://www.dashboard.uniquitysolutions.com/signup.html" target="_blank" rel="noopener" aria-label="Continue with Individual">
+            Continue with Individual
+          </a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- Optional: simple mobile menu toggle script -->
+  <script>
+    (function(){
+      const btn = document.getElementById('menuBtn');
+      const menu = document.getElementById('mobileMenu');
+      if(!btn || !menu) return;
+      btn.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    })();
+  </script>
+</body>
+</html>

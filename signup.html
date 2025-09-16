@@ -10,15 +10,93 @@
 
   <!-- Fonts and CSS (reuse login/theme CSS tokens) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=9" />
 
   <!-- Runtime config BEFORE your app code -->
   <script src="/env.js" defer></script>
+
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --text: #1f2937;
+      --muted: #4b5563;
+      --card: #ffffff;
+      --primary: #e34b4b;
+      --primary-700: #d13f3f;
+      --accent: #fbbf24;
+      --ring: rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;
+      --nav-h: 56px;
+    }
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    html, body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+    /* Navbar / header */
+    .nav{
+      position: sticky; top:0; z-index:1100;
+      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between; padding:14px 0;
+      width:100%; max-width:1120px; margin:0 auto;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; font-weight:700; color:#fff; text-decoration:none; }
+    .brand-mark {
+      width:28px; height:28px; border-radius:8px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      box-shadow:0 6px 14px rgba(0,0,0,.15);
+    }
+    .nav-links{ display:flex; gap:26px; align-items:center; }
+    .nav-links a{ color:#eef2f7; font-weight:600; font-size:14.5px; text-decoration:none; }
+
+    /* Hamburger (visible on all viewports for this request) */
+    .menu-btn{ display:inline-flex; border:0; background:transparent; color:#fff; padding:0; cursor:pointer; }
+
+    /* Mobile overlay menu (overlay shown when hamburger clicked) */
+    .mobile-menu{
+      display:none;
+      position:fixed; left:0; right:0; top: var(--nav-h,56px); bottom:0;
+      z-index:9999; background: rgba(17,24,39,.7); backdrop-filter: blur(6px);
+      padding:12px 12px 24px; overflow-y:auto;
+    }
+    .mobile-menu.open{ display:block; }
+
+    /* Card / form styles (signup uses a clean card) */
+    .card{ background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin: 20px auto; max-width: 720px; }
+    .label{ font-weight:600; color:#374151; font-size:14px; }
+    .input, .select, .textarea{
+      width:100%; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font:inherit;
+    }
+    .input:focus, .select:focus, .textarea:focus{
+      outline:2px solid transparent; border-color:#cbd5e1; box-shadow:0 0 0 3px rgba(233,75,75,.15);
+    }
+    .btn{ display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:12px; font-weight:700; border:1px solid transparent; cursor:pointer; }
+    .btn-primary{ background:var(--primary); color:#fff; box-shadow:0 12px 24px rgba(233,75,75,.35); }
+    .btn-ghost{ background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.25); }
+
+    /* Status area and banner */
+    .status{ margin-top:12px; min-height:1.2em; font-size:0.95rem; color:var(--muted); }
+    .banner{
+      position: fixed; bottom:0; left:0; right:0; z-index:9999;
+      background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace;
+      font-size:12px; display:none;
+    }
+
+    /* Content wrapper styling (kept minimal) */
+    .container{ max-width: 980px; margin: 0 auto; padding: 20px; }
+
+    @media (max-width: 860px){
+      .nav-links{ display:none; } /* keep hamburger visible on small screens */
+    }
+  </style>
 </head>
 <body>
 
-  
   <!-- Navbar with icon + hamburger (hamburger visible on all viewports) -->
   <nav class="nav" aria-label="Primary">
     <div class="container nav-inner">
@@ -60,6 +138,7 @@
     <a href="https://www.uniquitysolutions.com/compliance.html">Compliance & Security</a>
     <a href="https://www.dashboard.uniquitysolutions.com/login.html">Login Portal</a>
   </div>
+
   <!-- Sign-up Card (fields + Supabase flow) -->
   <div class="container" style="padding: 20px 0 60px;">
     <div class="card" aria-label="Sign up form">
@@ -180,9 +259,21 @@
   <div id="qp-banner" class="banner" aria-live="polite" role="status" style="display:none;"></div>
 
   <script>
-  // CDN: Supabase JS is already loaded above via script tag
+  // Replace with your actual values
   const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+
+  // Redirect URL after success
+  const SIGNUP_SUCCESS_URL = '/signup_success.html';
+
+  function redirectOnSuccess(url, delayMs = 500) {
+    const b = document.getElementById('qp-banner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = 'Sign-up successful. Redirecting...';
+    }
+    setTimeout(() => { window.location.href = url; }, delayMs);
+  }
 
   function showBanner(text) {
     const b = document.getElementById('qp-banner');
@@ -206,11 +297,10 @@
   setTimeout(initSupabase, 0);
 
   (function() {
-    // Sign-up handler (exactly as requested)
+    // Sign-up handler (extensible to insert into users table)
     window.bindSignupHandler = async function() {
       const form = document.getElementById('signup-form');
       const status = document.getElementById('signup-status');
-      const btn = document.getElementById('signup-btn');
       if (!form) return;
 
       form.addEventListener('submit', async (e) => {
@@ -220,105 +310,135 @@
           return;
         }
 
-        // Gather values
-        const data = {
-          email: document.getElementById('signup-email').value.trim(),
-          password: document.getElementById('signup-password').value,
-          display_name: document.getElementById('signup-name').value,
-          full_legal_name: document.getElementById('full_legal_name').value,
-          first_name: document.getElementById('first_name').value,
-          last_name: document.getElementById('last_name').value,
-          billing_street: document.getElementById('billing_street').value,
-          billing_apartment: document.getElementById('billing_apartment').value,
-          billing_city: document.getElementById('billing_city').value,
-          billing_state: document.getElementById('billing_state').value,
-          billing_zip: document.getElementById('billing_zip').value,
-          billing_country: document.getElementById('billing_country').value,
-          contact_email: document.getElementById('contact_email').value,
-          phone: document.getElementById('phone').value,
-          date_of_birth: document.getElementById('date_of_birth').value,
-          business_id: document.getElementById('business_id').value
-        };
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const displayName = document.getElementById('signup-name').value;
+        const fullLegal = document.getElementById('full_legal_name').value;
+        const firstName = document.getElementById('first_name').value;
+        const lastName = document.getElementById('last_name').value;
+        // Collect billing fields as needed
+        const billingStreet = document.getElementById('billing_street').value;
+        const billingCity = document.getElementById('billing_city').value;
+        const billingState = document.getElementById('billing_state').value;
+        const billingZip = document.getElementById('billing_zip').value;
+        const billingCountry = document.getElementById('billing_country').value;
+        // Optional: confirm email
+        const contactEmail = document.getElementById('contact_email')?.value || email;
+        const phone = document.getElementById('phone').value;
+        const dateOfBirth = document.getElementById('date_of_birth').value;
+        const businessId = document.getElementById('business_id').value;
 
-        // Simple client-side validation to mirror required fields check
-        const requiredKeys = [
-          'email','password','full_legal_name','first_name','last_name',
-          'billing_street','billing_city','billing_state','billing_zip','billing_country',
-          'contact_email','phone','date_of_birth','business_id'
-        ];
-        for (const k of requiredKeys) {
-          if (!data[k] || (typeof data[k] === 'string' && data[k].trim() === '')) {
-            status.textContent = 'Please complete all required fields.';
-            if (document.getElementById(k)) document.getElementById(k).focus();
-            return;
-          }
-        }
-
-        // UX: disable and indicate processing
+        const btn = document.getElementById('signup-btn');
         btn.disabled = true;
-        btn.textContent = 'Creating...';
+        btn.textContent = 'Creating account...';
         status.textContent = '';
 
         try {
-          // Sign up with email/password
-          const { user, session, error } = await window.supabase.auth.signUp({
-            email: data.email,
-            password: data.password
-          });
-
+          // 1) Create user in Auth
+          const { data, error } = await window.supabase.auth.signUp({ email, password });
           if (error) {
-            status.textContent = 'Sign up failed: ' + (error.message || error);
+            status.textContent = 'Sign-up error: ' + (error.message || error);
             btn.disabled = false;
             btn.textContent = 'Create account';
             return;
           }
 
-          // After sign up, you may want to write the rest of the user data to a users table
-          // If you have a users table with id as the auth user id
-          if (user && user.id) {
-            const payload = {
-              id: user.id,
-              display_name: data.display_name || '',
-              full_legal_name: data.full_legal_name || '',
-              first_name: data.first_name || '',
-              last_name: data.last_name || '',
-              billing_street: data.billing_street || '',
-              billing_apartment: data.billing_apartment || '',
-              billing_city: data.billing_city || '',
-              billing_state: data.billing_state || '',
-              billing_zip: data.billing_zip || '',
-              billing_country: data.billing_country || '',
-              contact_email: data.contact_email || '',
-              phone: data.phone || '',
-              date_of_birth: data.date_of_birth || '',
-              business_id: data.business_id || ''
-            };
-            try {
-              await window.supabase.from('users').insert(payload).single();
-            } catch (e) {
-              // Non-fatal: log but continue
-              console.warn('Failed to save user metadata:', e);
-            }
+          // 2) Insert into users table (extra fields)
+          const userId = data?.user?.id;
+          // Build the user row
+          const userRow = {
+            id: userId,
+            email: email,
+            display_name: displayName || null,
+            full_legal_name: fullLegal || null,
+            first_name: firstName || null,
+            last_name: lastName || null,
+            billing_street: billingStreet || null,
+            billing_city: billingCity || null,
+            billing_state: billingState || null,
+            billing_zip: billingZip || null,
+            billing_country: billingCountry || null,
+            contact_email: contactEmail || null,
+            phone: phone || null,
+            date_of_birth: dateOfBirth || null,
+            business_id: businessId || null,
+            // default role; you can also decide based on email as per rules
+            role: determineRoleFromEmail(email)
+          };
+
+          // Insert; ensure your table name matches exactly
+          const { data: inserted, error: insertError } = await window.supabase
+            .from('users')
+            .insert([userRow])
+            .single();
+
+          if (insertError) {
+            // Optional: you could rollback the sign-up by deleting the user from auth
+            status.textContent = 'User profile jot failed: ' + (insertError.message || insertError);
+            btn.disabled = false;
+            btn.textContent = 'Create account';
+            return;
           }
 
-          // Supabase will handle email verification if enabled on signup
-          status.textContent = 'Signup successful. Check your email to verify your account.';
-          showBanner('signup-success');
+          // 3) Role-based redirect
+          // If you want separate admin/superadmin dashboards, compute target from email/domain
+          const target = determineDashboardTargetFromEmail(email);
+          status.textContent = 'Sign-up complete. Redirecting...';
+          redirectOnSuccess(target ? target : '/signup_success.html', 800);
+
         } catch (err) {
-          status.textContent = 'Signup failed: ' + (err?.message || err);
-        } finally {
+          status.textContent = 'Sign-up failed: ' + (err?.message || err);
           btn.disabled = false;
           btn.textContent = 'Create account';
         }
       });
     };
 
-    // ensure the handler binds when page loads
-    window.addEventListener('load', () => {
-      if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
-    });
-  })();
-  </script>
+    // Helper: determine role from email domain or exact address
+    function determineRoleFromEmail(email) {
+      const domain = email.split('@')[1]?.toLowerCase() || '';
+      // Example: admin from exact admin@ or any @uniquitysolutions.com is admin
+      if (domain.endsWith('uniquitysolutions.com') || email.toLowerCase().endsWith('@uniquitysolutions.com')) {
+        // Here we decide admin vs superadmin based on exact address
+        const local = email.split('@')[0].toLowerCase();
+        if (local === 'admin' || local === 'support' || domain === 'uniquitysolutions.com') {
+          // You can choose to map some addresses to superadmin explicitly
+          // Example: if local === 'superadmin' treat as superadmin
+          if (local === 'superadmin') return 'superadmin';
+          return 'admin';
+        }
+      }
+      // Default
+      return 'client';
+    }
 
+    // Helper: choose dashboard target
+    function determineDashboardTargetFromEmail(email) {
+      const domain = email.split('@')[1]?.toLowerCase() || '';
+      const local = email.split('@')[0].toLowerCase();
+
+      // Superadmin
+      if (local === 'superadmin' || domain === 'uniquitysolutions.com' /* tweak per your policy */) {
+        return '/admin/adminDashboard.html'; // superadmin with full admin capabilities
+      }
+      // Admin via domain rule
+      if (domain.endsWith('uniquitysolutions.com') || email.endsWith('@uniquitysolutions.com')) {
+        return '/admin/adminDashboard.html';
+      }
+      // Default client dashboard
+      return '/client/index.html';
+    }
+
+    // Initialize menu toggle
+    (function setupMenu() {
+      const btn = document.getElementById('menuBtn');
+      const mnu = document.getElementById('mobileMenu');
+      if (!btn || !mnu) return;
+      btn.addEventListener('click', () => {
+        const isOpen = mnu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(isOpen));
+      });
+    })();
+  </script>
 </body>
 </html>

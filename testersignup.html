@@ -13,18 +13,18 @@
   <!-- Runtime config BEFORE your app code -->
   <script src="/env.js" defer></script>
 </head>
-<body class="no-scroll-ready">
+<body>
 
-  <!-- Header (logo icon top-left + hamburger; no desktop menu) -->
-  <nav class="nav" aria-label="Primary">
+  <!-- Header (icon top-left + hamburger; desktop menu shown as hamburger as requested) -->
+  <nav aria-label="Primary" class="nav">
     <div class="container nav-inner">
-      <!-- Uniquity Solutions icon + brand on left -->
+      <!-- Uniquity icon + brand on left (top-left) -->
       <a class="brand" href="index.html" aria-label="Uniquity Solutions Home">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>Uniquity Solutions</span>
+        Uniquity Solutions
       </a>
 
-      <!-- Hamburger (top-left) to toggle mobile menu -->
+      <!-- Hamburger always visible (desktop too) -->
       <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" title="Menu">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
@@ -33,13 +33,13 @@
 
       <!-- Login / Sign Up actions (right side) -->
       <div class="nav-links" aria-label="Header actions">
-        <a href="/login.html" class="login-link">Login</a>
-        <a href="/signup.html" class="signup-link" aria-current="page">Sign Up</a>
+        <a href="/login.html">Login</a>
+        <a href="/signup.html" aria-current="page">Sign Up</a>
       </div>
     </div>
   </nav>
 
-  <!-- Mobile overlay menu (no desktop header menu) -->
+  <!-- Mobile overlay menu (overlay shown when hamburger clicked) -->
   <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
     <div class="menu-label">On this page</div>
     <a href="index.html">Home</a>
@@ -48,7 +48,7 @@
     <a href="#careers">Careers</a>
     <a href="#contact" class="cta">Contact</a>
     <div class="menu-label">More pages</div>
-    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" >Make a Payment</a>
+    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
     <a href="https://www.dashboard.uniquitysolutions.com/signup.html">Create Account (Merchants)</a>
     <a href="faq.html">FAQ</a>
     <a href="pricing.html">Pricing</a>
@@ -58,51 +58,134 @@
     <a href="https://www.dashboard.uniquitysolutions.com/login.html">Login Portal</a>
   </div>
 
-  <!-- Hero / Sign Up Card -->
-  <header class="hero" style="padding-top: 20px;">
-    <div class="container content" style="padding: 0; background: transparent; border:0; box-shadow:none;">
-      <div class="card" aria-label="Sign up form" style="max-width:720px; margin:40px auto 40px;">
-        <h2 style="text-align:center; margin:0 0 8px;">Create an account</h2>
-        <p style="text-align:center; margin:0 0 20px; color:var(--muted);">Join Uniquity Solutions to accelerate your payments.</p>
+  <!-- Sign-up Card (form includes required fields: phone, business_id) -->
+  <div class="container" style="padding: 20px 0 60px;">
+    <div class="card" aria-label="Sign up form">
+      <h2 style="text-align:center; margin:0 0 12px;">Create an account</h2>
+      <form id="signup-form" autocomplete="off" novalidate>
 
-        <form id="signup-form" autocomplete="off" novalidate>
-          <!-- Account basics -->
-          <fieldset aria-labelledby="account-fieldset">
-            <legend id="account-fieldset" style="font-weight:600;">Account details</legend>
+        <!-- Account basics -->
+        <fieldset aria-labelledby="account-fieldset">
+          <legend id="account-fieldset" style="font-weight:600;">Account details</legend>
 
-            <label for="signup-email" class="label">Email</label>
-            <input class="input" type="email" id="signup-email" name="email" placeholder="name@example.com" required>
+          <label for="signup-email" class="label">Email</label>
+          <input class="input" type="email" id="signup-email" name="email" placeholder="name@example.com" required>
 
-            <label for="signup-password" class="label" style="margin-top:6px;">Password</label>
-            <input class="input" type="password" id="signup-password" name="password" placeholder="Your password" required>
+          <label for="signup-password" class="label" style="margin-top:6px;">Password</label>
+          <input class="input" type="password" id="signup-password" name="password" placeholder="Your password" required>
 
-            <label for="signup-name" class="label" style="margin-top:6px;">Display name (optional)</label>
-            <input class="input" type="text" id="signup-name" name="display_name" placeholder="Your display name">
-          </fieldset>
+          <label for="signup-name" class="label" style="margin-top:6px;">Display name (optional)</label>
+          <input class="input" type="text" id="signup-name" name="display_name" placeholder="Your display name">
+        </fieldset>
 
-          <!-- Cardholder/user details (omitted for brevity in this example; you can extend as needed) -->
-          <!-- Billing address / Contact information / etc. can be added similarly to your existing form -->
+        <!-- Cardholder/user details (excluding Name on Card) -->
+        <fieldset aria-labelledby="cardholder-fieldset" style="margin-top:14px;">
+          <legend id="cardholder-fieldset" style="font-weight:600;">Cardholder details</legend>
 
-          <button type="submit" id="signup-btn" class="btn btn-primary" style="margin-top:12px; width: 100%;">Create account</button>
-          <div class="status" id="signup-status" aria-live="polite" style="margin-top:8px; min-height:1.2em;"></div>
-        </form>
-      </div>
+          <label for="full_legal_name" class="label">Legal name (as on government ID)</label>
+          <input class="input" type="text" id="full_legal_name" name="full_legal_name" placeholder="Full legal name" required>
+
+          <div class="row" style="margin-top:12px;">
+            <div>
+              <label for="first_name" class="label">First name</label>
+              <input class="input" type="text" id="first_name" name="first_name" placeholder="First name" required>
+            </div>
+            <div>
+              <label for="last_name" class="label">Last name</label>
+              <input class="input" type="text" id="last_name" name="last_name" placeholder="Last name" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Billing address -->
+        <fieldset aria-labelledby="billing-fieldset" style="margin-top:14px;">
+          <legend id="billing-fieldset" style="font-weight:600;">Billing address</legend>
+
+          <div class="row">
+            <div>
+              <label for="billing_street" class="label">Street address</label>
+              <input class="input" type="text" id="billing_street" name="billing_street" placeholder="Street address" required>
+            </div>
+            <div>
+              <label for="billing_apartment" class="label">Apartment, unit, or other</label>
+              <input class="input" type="text" id="billing_apartment" name="billing_apartment" placeholder="Apartment, unit, or other">
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:8px;">
+            <div>
+              <label for="billing_city" class="label">City</label>
+              <input class="input" type="text" id="billing_city" name="billing_city" placeholder="City" required>
+            </div>
+            <div>
+              <label for="billing_state" class="label">State</label>
+              <input class="input" type="text" id="billing_state" name="billing_state" placeholder="State" required>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:8px;">
+            <div>
+              <label for="billing_zip" class="label">Zip code</label>
+              <input class="input" type="text" id="billing_zip" name="billing_zip" placeholder="Zip code" required>
+            </div>
+            <div>
+              <label for="billing_country" class="label">Country</label>
+              <select id="billing_country" name="billing_country" required>
+                <option value="US" selected>United States</option>
+                <!-- Add other countries as needed -->
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Contact information -->
+        <fieldset aria-labelledby="contact-fieldset" style="margin-top:14px;">
+          <legend id="contact-fieldset" style="font-weight:600;">Contact information</legend>
+
+          <label for="contact_email" class="label">Email (confirm)</label>
+          <input class="input" type="email" id="contact_email" name="contact_email" placeholder="name@example.com" required>
+
+          <label for="phone" class="label" style="margin-top:6px;">Phone number</label>
+          <input class="input" type="tel" id="phone" name="phone" placeholder="(123) 456-7890" required>
+
+          <span class="note" style="display:block; margin-top:6px;">
+            By providing a phone number, you agree to receive informational SMS messages. Msg & data rates may apply.
+          </span>
+        </fieldset>
+
+        <!-- Date of birth -->
+        <fieldset aria-labelledby="dob-fieldset" style="margin-top:14px;">
+          <legend id="dob-fieldset" style="font-weight:600;">Date of birth</legend>
+          <label for="date_of_birth" class="label">Date of birth</label>
+          <input class="input" type="date" id="date_of_birth" name="date_of_birth" required>
+        </fieldset>
+
+        <!-- Business identifier -->
+        <fieldset aria-labelledby="business-fieldset" style="margin-top:14px;">
+          <legend id="business-fieldset" style="font-weight:600;">Business identifier</legend>
+
+          <label for="business_id" class="label">Business ID</label>
+          <input class="input" type="text" id="business_id" name="business_id" placeholder="Enter your business identifier" required>
+        </fieldset>
+
+        <button type="submit" id="signup-btn" class="btn btn-primary" style="margin-top:14px; width:100%;">Create account</button>
+        <div class="status" id="signup-status" aria-live="polite" style="margin-top:8px;"></div>
+      </form>
     </div>
-  </header>
+  </div>
 
-  <!-- Simple footer placeholder (optional) -->
   <footer class="footer" id="contact" aria-label="Footer" style="padding:40px 0 60px;">
     <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
-      <div class="brand" aria-label="Brand mark" style="gap:8px;">
+      <div class="brand" style="gap:8px;">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>Uniquity Solutions</span>
+        Uniquity Solutions
       </div>
-      <small>© 2004–2025 Uniquity Solutions. All rights reserved.</small>
+      <small>© 2004–2025 Uniquity Solutions.Contact US at support@uniquitysolutions.com. All rights reserved.</small>
     </div>
   </footer>
 
   <script>
-    // Minimal mobile menu toggle, matching the index behavior
+    // Hamburger mobile menu toggle (simple)
     (function() {
       const btn = document.getElementById('menuBtn');
       const menu = document.getElementById('mobileMenu');
@@ -114,12 +197,12 @@
       }
 
       btn.addEventListener('click', toggle);
-      // Close when a link is clicked inside the menu
       menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
         menu.classList.remove('open');
         btn.setAttribute('aria-expanded', 'false');
       }));
     })();
   </script>
+
 </body>
 </html>

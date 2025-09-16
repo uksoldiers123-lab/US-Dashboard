@@ -1,153 +1,125 @@
 <!DOCTYPE html>
-<
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sign Up</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root { --bg:#f7f7f7; --card:#fff; --text:#111; --primary:#4f46e5; }
-    html, body { margin:0; padding:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100%; }
-    .container { max-width:420px; margin:0 auto; padding:20px; }
-    .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
-    h2 { margin:0 0 12px; font-size:1.25rem; text-align:center; }
-    label { display:block; font-size:0.92rem; margin:12px 0 6px; }
-    input { width:100%; padding:12px; font-size:1rem; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; }
-    button { width:100%; padding:14px; font-size:1rem; border-radius:8px; border:none; color:#fff; background:var(--primary); cursor:pointer; }
-    button:disabled { opacity:0.6; cursor:not-allowed; }
-    .status { margin-top:12px; min-height:1.2em; font-size:0.95rem; color:#333; }
-    .banner { position: fixed; bottom:0; left:0; right:0; z-index:9999; background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace; font-size:12px; display:none; }
-  </style>
+  <title>Uniquity Solutions — Sign Up</title>
+
+  <!-- Fonts and CSS (reuse login/theme CSS tokens) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=9">
+
+  <!-- Runtime config BEFORE your app code -->
+  <script src="/env.js" defer></script>
 </head>
-<body>
-  <div id="qp-banner" class="banner" aria-live="polite" role="status"></div>
+<body class="no-scroll-ready">
 
-  <!-- 1) Supabase CDN (UMD) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Header (logo icon top-left + hamburger; no desktop menu) -->
+  <nav class="nav" aria-label="Primary">
+    <div class="container nav-inner">
+      <!-- Uniquity Solutions icon + brand on left -->
+      <a class="brand" href="index.html" aria-label="Uniquity Solutions Home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Uniquity Solutions</span>
+      </a>
 
-  <!-- 2) Init (guaranteed after CDN loads) -->
+      <!-- Hamburger (top-left) to toggle mobile menu -->
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" title="Menu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Login / Sign Up actions (right side) -->
+      <div class="nav-links" aria-label="Header actions">
+        <a href="/login.html" class="login-link">Login</a>
+        <a href="/signup.html" class="signup-link" aria-current="page">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile overlay menu (no desktop header menu) -->
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
+    <div class="menu-label">On this page</div>
+    <a href="index.html">Home</a>
+    <a href="#services">Services</a>
+    <a href="#partners">Partners</a>
+    <a href="#careers">Careers</a>
+    <a href="#contact" class="cta">Contact</a>
+    <div class="menu-label">More pages</div>
+    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000" >Make a Payment</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/signup.html">Create Account (Merchants)</a>
+    <a href="faq.html">FAQ</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="developers.html">Developers & API</a>
+    <a href="integrations.html">Integrations</a>
+    <a href="compliance.html">Compliance & Security</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/login.html">Login Portal</a>
+  </div>
+
+  <!-- Hero / Sign Up Card -->
+  <header class="hero" style="padding-top: 20px;">
+    <div class="container content" style="padding: 0; background: transparent; border:0; box-shadow:none;">
+      <div class="card" aria-label="Sign up form" style="max-width:720px; margin:40px auto 40px;">
+        <h2 style="text-align:center; margin:0 0 8px;">Create an account</h2>
+        <p style="text-align:center; margin:0 0 20px; color:var(--muted);">Join Uniquity Solutions to accelerate your payments.</p>
+
+        <form id="signup-form" autocomplete="off" novalidate>
+          <!-- Account basics -->
+          <fieldset aria-labelledby="account-fieldset">
+            <legend id="account-fieldset" style="font-weight:600;">Account details</legend>
+
+            <label for="signup-email" class="label">Email</label>
+            <input class="input" type="email" id="signup-email" name="email" placeholder="name@example.com" required>
+
+            <label for="signup-password" class="label" style="margin-top:6px;">Password</label>
+            <input class="input" type="password" id="signup-password" name="password" placeholder="Your password" required>
+
+            <label for="signup-name" class="label" style="margin-top:6px;">Display name (optional)</label>
+            <input class="input" type="text" id="signup-name" name="display_name" placeholder="Your display name">
+          </fieldset>
+
+          <!-- Cardholder/user details (omitted for brevity in this example; you can extend as needed) -->
+          <!-- Billing address / Contact information / etc. can be added similarly to your existing form -->
+
+          <button type="submit" id="signup-btn" class="btn btn-primary" style="margin-top:12px; width: 100%;">Create account</button>
+          <div class="status" id="signup-status" aria-live="polite" style="margin-top:8px; min-height:1.2em;"></div>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- Simple footer placeholder (optional) -->
+  <footer class="footer" id="contact" aria-label="Footer" style="padding:40px 0 60px;">
+    <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="brand" aria-label="Brand mark" style="gap:8px;">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Uniquity Solutions</span>
+      </div>
+      <small>© 2004–2025 Uniquity Solutions. All rights reserved.</small>
+    </div>
+  </footer>
+
   <script>
-    // Replace with your real values (do not expose real keys publicly in chat)
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co'; // YOUR-PROJECT URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // YOUR-ANON-KEY
-
-    function showBanner(text){
-      const b = document.getElementById('qp-banner');
-      if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
-    }
-
-    function initSupabase(){
-      if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-        console.warn('Supabase library not loaded yet.');
-        showBanner('not ready');
-        setTimeout(initSupabase, 150);
-        return;
-      }
-      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase initialized:', !!window.supabase);
-      showBanner('ready');
-      if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
-    }
-
-    // Kick off init after CDN load
-    setTimeout(initSupabase, 0);
-  </script>
-
-  <!-- 3) Sign-up logic (bind after init) -->
-  <script>
+    // Minimal mobile menu toggle, matching the index behavior
     (function() {
-      window.bindSignupHandler = async function() {
-        const form = document.getElementById('signup-form');
-        const status = document.getElementById('signup-status');
-        const btn = document.getElementById('signup-btn');
-        if (!form) return;
+      const btn = document.getElementById('menuBtn');
+      const menu = document.getElementById('mobileMenu');
+      if (!btn || !menu) return;
 
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          if (!window.supabase) {
-            alert('Please wait for the Sign Up module to finish initializing. Try again in a moment.');
-            return;
-          }
+      function toggle() {
+        const open = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
 
-          const email = document.getElementById('signup-email').value.trim();
-          const password = document.getElementById('signup-password').value;
-          const name = document.getElementById('signup-name').value.trim();
-
-          if (!email || !password) {
-            status.textContent = 'Please provide email and password.';
-            return;
-          }
-
-          btn.disabled = true;
-          btn.textContent = 'Creating account...';
-          status.textContent = '';
-
-          try {
-            // Primary signup (auth)
-            const { user, session, error } = await window.supabase.auth.signUp(
-              { email, password },
-              { data: { display_name: name || '' } }
-            );
-
-            if (error) {
-              status.textContent = 'Signup error: ' + (error.message || error);
-            } else if (user) {
-              status.textContent = 'Signup successful. Check email to verify.';
-            } else {
-              status.textContent = 'Signup complete. Please verify email.';
-            }
-
-            // Optional: seed into your "user" table
-            if (user && user.id) {
-              const tableName = 'user'; // adjust if needed
-              try {
-                const { data: seed, error: seedError } = await window.supabase
-                  .from(tableName)
-                  .insert([{ id: user.id, email, display_name: name || '' }])
-                  .single();
-                if (seedError) {
-                  status.textContent += ' | Seed error: ' + (seedError.message || seedError);
-                } else {
-                  status.textContent += ' | User row seeded';
-                }
-              } catch (seedCatch) {
-                status.textContent += ' | Seed exception: ' + (seedCatch?.message || seedCatch);
-              }
-            }
-          } catch (err) {
-            status.textContent = 'Signup failed: ' + (err?.message || err);
-          } finally {
-            btn.disabled = false;
-            btn.textContent = 'Create account';
-          }
-        });
-      };
-
-      // Bind after load
-      window.addEventListener('load', () => {
-        if (typeof window.bindSignupHandler === 'function') window.bindSignupHandler();
-      });
+      btn.addEventListener('click', toggle);
+      // Close when a link is clicked inside the menu
+      menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }));
     })();
   </script>
-
-  <!-- 4) Page content (signup form) -->
-  <div class="container" aria-label="Sign up form container">
-    <div class="card" style="text-align:center;">
-      <h2>Create an account</h2>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <form id="signup-form" autocomplete="on" aria-label="Sign up form">
-        <label for="signup-email">Email</label>
-        <input id="signup-email" type="email" required placeholder="you@example.com" />
-        <label for="signup-password">Password</label>
-        <input id="signup-password" type="password" required placeholder="Password" />
-        <label for="signup-name">Display name (optional)</label>
-        <input id="signup-name" type="text" placeholder="Your name" />
-        <button type="submit" id="signup-btn" aria-label="Create account">Create account</button>
-      </form>
-      <div id="signup-status" class="status" aria-live="polite"></div>
-    </div>
-  </div>
 </body>
 </html>

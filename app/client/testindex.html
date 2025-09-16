@@ -48,18 +48,23 @@
       .layout { grid-template-columns: 1fr; }
       .nav-inner { flex-direction: column; }
     }
+
+    /* Status bar at bottom */
+    #status-bar-bottom {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      background: #333; color: #fff; text-align: center;
+      padding: 8px; z-index: 1200;
+    }
   </style>
 </head>
 <body>
   <div id="client-root" class="client-root">
     <header class="nav">
-      <div class="nav-inner">
+      <div class="nav-inner" style="justify-content: space-between;">
         <div class="brand">
           <span class="brand-mark"></span> Uniquity Solutions - Client Dashboard
         </div>
-        <div id="status-bar" style="display:none; color:white; padding:8px 12px; border-radius:6px; background:#e34b4b;">
-          Loading keys and user data...
-        </div>
+        <button id="logoutBtn" class="btn" style="width:auto; background:#b91c1c;">Logout</button>
       </div>
     </header>
 
@@ -68,7 +73,7 @@
       <aside class="sidebar">
         <div class="panel">
           <div class="section-title">Overview</div>
-          <div id="clientGreeting" style="font-size:1.1rem; font-weight:700;">Welcome, Client!</div>
+          <div id="clientGreeting" style="font-weight:700;">Welcome,  </div> id='Client'` | Business ID: ${clientBusinessId}`Client!</div>
           <div id="business-id" style="margin-top:6px; color:#4b5563;"></div>
           <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
           <div id="available-balance">Available for Payout: $0.00</div>
@@ -128,26 +133,29 @@
       </aside>
     </main>
 
-    <div id="status-bar-bottom" style="display:none; text-align:center; padding:6px; background:#333; color:#fff;"></div>
+    <div id="status-bar-bottom" class="hidden" style="display:none;"></div>
   </div>
 
-  <!-- Supabase UI (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase (UMD) -->
+  <script src="https://unpkg.com/@supabase/supabase-js/dist/umd/supabase.js"></script>
   <script>
+    // Keys are loaded from /api/keys
     let SUPABASE_URL = null;
     let SUPABASE_ANON_KEY = null;
     let STRIPE_PUBLIC_KEY = null;
+
     let sb = null;
     let clientId = null;
     let clientName = '';
     let clientBusinessId = '';
 
     function $(sel){ return document.querySelector(sel); }
+
     function showStatus(msg){
-      const bar = document.getElementById('status-bar');
+      const bar = document.getElementById('status-bar-bottom');
       if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
     }
-    function hideStatus(){ const bar = document.getElementById('status-bar'); if(bar) bar.style.display='none'; }
+    function hideStatus(){ const bar = document.getElementById('status-bar-bottom'); if(bar){ bar.style.display = 'none'; } }
 
     async function initKeysAndClient(){
       try{
@@ -163,12 +171,14 @@
         await loadUserData();
         await loadBalanceData();
         await loadPaymentsData();
+
+        // Final readiness message
+        showStatus('Dashboard ready. Data loaded.');
+        setTimeout(() => hideStatus(), 1500);
       } catch(err){
         console.error('Init error', err);
         showStatus('Initialization failed. Check console.');
-      } finally {
-        hideStatus();
-      }
+      } 
     }
 
     async function loadUserData(){
@@ -197,12 +207,9 @@
         const total = Number(d.total ?? 0).toFixed(2);
         const avail = Number(d.available ?? 0).toFixed(2);
         const pend = Number(d.pending ?? 0).toFixed(2);
-        const t = document.getElementById('total-balance');
-        const a = document.getElementById('available-balance');
-        const p = document.getElementById('pending-balance');
-        if(t) t.textContent = `Total Balance: $${total}`;
-        if(a) a.textContent = `Available for Payout: $${avail}`;
-        if(p) p.textContent = `Pending Balance: $${pend}`;
+        if(document.getElementById('total-balance')) document.getElementById('total-balance').textContent = `Total Balance: $${total}`;
+        if(document.getElementById('available-balance')) document.getElementById('available-balance').textContent = `Available for Payout: $${avail}`;
+        if(document.getElementById('pending-balance')) document.getElementById('pending-balance').textContent = `Pending Balance: $${pend}`;
       } catch(e){
         console.error('Balance error', e);
       }
@@ -244,8 +251,28 @@
       }
     }
 
+    // Logout button (redirect after sign-out)
+    function setupLogout() {
+      const logoutBtn = document.getElementById('logoutBtn') || document.getElementById('signOutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          if (window.sb) {
+            window.sb.auth.signOut().then(() => {
+              window.location.href = 'https://www.dashboard.uniquitysolutions.com/login.html';
+            }).catch(() => {
+              window.location.href = 'https://www.dashboard.uniquitysolutions.com/login.html';
+            });
+          } else {
+            window.location.href = 'https://www.dashboard.uniquitysolutions.com/login.html';
+          }
+        });
+      }
+    }
+
+    // Init
     window.addEventListener('load', () => {
       initKeysAndClient();
+      setupLogout();
     });
   </script>
 </body>

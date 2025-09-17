@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stripe Checkout Transactions Lookup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; }
+    input, button, select { padding: 0.5rem; margin: 0.25rem 0; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>Stripe Transactions Lookup</h1>
+
+  <div id="auth-note" style="color: #555;">
+    This page uses Supabase anonymous access. Ensure your Row Level Security (RLS) is configured to allow reads as needed.
+  </div>
+
+  <div id="search" aria-label="search-form">
+    <label>
+      Search by:
+      <select id="searchMode" aria-label="Search mode">
+        <option value="id">Transaction ID</option>
+        <option value="session">Checkout Session ID</option>
+        <option value="payment_intent">Payment Intent</option>
+        <option value="customer_email">Customer Email</option>
+        <option value="business_id">Business ID</option>
+        <option value="invoice">Invoice</option>
+        <option value="date">Date (YYYY-MM-DD)</option>
+      </select>
+    </label>
+    <br/>
+    <input id="query" placeholder="Enter your search value" />
+    <button id="searchBtn">Search</button>
+  </div>
+
+  <div id="results"></div>
+
+  <!-- Include the Supabase JS library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Replace with your actual values
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+
+    const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const searchBtn = document.getElementById('searchBtn');
+    const queryInput = document.getElementById('query');
+    const searchMode = document.getElementById('searchMode');
+    const resultsDiv = document.getElementById('results');
+
+    function renderTable(rows) {
+      if (!rows || rows.length === 0) {
+        resultsDiv.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+      const header = ['id', 'stripe_payment_intent', 'stripe_charge_id', 'checkout_session_id', 'amount', 'currency', 'status', 'customer_email', 'description', 'business_id', 'invoice', 'created_at'];
+      let html = '<table><thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+      for (const r of rows) {
+        html += '<tr>' +
+          header.map(h => `<td>${r[h] ?? ''}</td>`).join('') +
+          '</tr>';
+      }
+      html += '</tbody></table>';
+      resultsDiv.innerHTML = html;
+    }
+
+    async function search() {
+      const mode = searchMode.value;
+      const q = queryInput.value.trim();
+      if (!q) return;
+
+      // Map mode to column
+      let column;
+      switch (mode) {
+        case 'id': column = 'id'; break;
+        case 'session': column = 'checkout_session_id'; break;
+        case 'payment_intent': column = 'stripe_payment_intent'; break;
+        case 'customer_email': column = 'customer_email'; break;
+        case 'business_id': column = 'business_id'; break;
+        case 'invoice': column = 'invoice'; break;
+        case 'date': /* handled separately */ break;
+        default: column = 'id';
+      }
+
+      let { data, error } = await fetchTransactions(mode, q, column);
+      if (error) {
+        resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+        return;
+      }
+      renderTable(data);
+    }
+
+    async function fetchTransactions(mode, q, column) {
+      if (mode === 'date') {
+        const date = new Date(q);
+        if (isNaN(date)) {
+          return { data: [], error: { message: 'Invalid date format' } };
+        }
+        const start = new Date(date);
+        start.setHours(0,0,0,0);
+        const end = new Date(start);
+        end.setDate(end.getDate() + 1);
+
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .gte('created_at', start.toISOString())
+          .lt('created_at', end.toISOString())
+          .order('created_at', { ascending: false });
+        return { data, error };
+      } else {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq(column, q)
+          .order('created_at', { ascending: false });
+        return { data, error };
+      }
+    }
+
+    searchBtn.addEventListener('click', search);
+  </script>
+
+  <p>Note: This page reads from Supabase. Ensure you configure RLS policies appropriately to protect data.</p>
+</body>
+</html>

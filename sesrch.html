@@ -20,6 +20,9 @@
     header { padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
     .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
     h1 { font-size: 1.25rem; margin: 0; }
+    /* Init / Progress bar */
+    .init-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
+    .init-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #1e40af, #2563eb); transition: width 0.25s ease; }
     .status-bar { height: 12px; border-radius: 6px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
     .status-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.25s ease; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
@@ -35,7 +38,6 @@
     tfoot td { font-weight: 600; }
     .note { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
     .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; background: #eef2ff; color: #3730a3; }
-    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   </style>
 </head>
 <body>
@@ -45,7 +47,10 @@
       <span class="badge" id="statusLabel" aria-live="polite">Idle</span>
     </div>
     <div class="container" aria-label="status-bar" style="padding-top:0;">
-      <div class="status-bar" id="statusBar" title="Status progress">
+      <div class="init-bar" aria-label="init-progress-bar" title="Initialization progress">
+        <div class="init-fill" id="initFill"></div>
+      </div>
+      <div class="status-bar" id="statusBar" title="Status progress" style="margin-top:6px;">
         <div class="status-fill" id="statusFill"></div>
       </div>
     </div>
@@ -94,7 +99,7 @@
   </main>
 
   <!-- Supabase JS library via CDN -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Replace with your actual values
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
@@ -106,11 +111,18 @@
     const searchBtn = document.getElementById('searchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const statusBtn = document.getElementById('statusBtn');
+    const initFill = document.getElementById('initFill');
+    const statusFill = document.getElementById('statusFill');
     const queryInput = document.getElementById('query');
     const searchMode = document.getElementById('searchMode');
     const resultsDiv = document.getElementById('results');
-    const statusFill = document.getElementById('statusFill');
     const statusLabel = document.getElementById('statusLabel');
+    const statusBar = document.getElementById('statusBar');
+
+    function setInitProgress(p, text) {
+      initFill.style.width = Math.max(0, Math.min(100, p)) + '%';
+      if (text) statusLabel.textContent = text;
+    }
 
     function setStatus(percent, text) {
       statusFill.style.width = Math.max(0, Math.min(100, percent)) + '%';
@@ -173,7 +185,6 @@
         return;
       }
 
-      // Map mode to column
       let column;
       switch (mode) {
         case 'id': column = 'id'; break;
@@ -186,7 +197,11 @@
         default: column = 'id';
       }
 
-      setStatus(10, 'Initiating search...');
+      // Init progress
+      setInitProgress(0, 'Starting search...');
+      setStatus(10, 'Querying database...');
+      // Simulate gradual progress for nicer UX; real progress depends on network
+      setInitProgress(25);
       let data, error;
       if (mode === 'date') {
         const res = await fetchTransactions(mode, q, 'created_at');
@@ -197,20 +212,24 @@
         data = res.data;
         error = res.error;
       }
-
+      setInitProgress(60, 'Processing results...');
       if (error) {
         resultsDiv.innerHTML = `<p style="color:var(--red);">Error: ${error.message}</p>`;
+        setInitProgress(0, 'Idle');
         setStatus(0, 'Idle');
         return;
       }
       renderTable(data);
+      setInitProgress(100, 'Done');
       setStatus(100, 'Done');
-      setTimeout(() => setStatus(0, 'Idle'), 1500);
+      // Reset progress after a short delay
+      setTimeout(() => { setInitProgress(0); setStatus(0, 'Idle'); }, 1200);
     }
 
     resetBtn.addEventListener('click', async () => {
       queryInput.value = '';
       resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
+      setInitProgress(0);
       setStatus(0, 'Idle');
     });
 
@@ -219,14 +238,15 @@
     });
 
     statusBtn.addEventListener('click', () => {
-      // Simple manual status check reset/refresh
+      setInitProgress(0);
       setStatus(0, 'Idle');
       resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
     });
 
-    // Initialize
+    // Initialize with a friendly message
     document.addEventListener('DOMContentLoaded', () => {
       resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
+      setInitProgress(0);
       setStatus(0, 'Idle');
     });
   </script>

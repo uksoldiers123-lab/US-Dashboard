@@ -20,7 +20,7 @@
     header { padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
     .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
     h1 { font-size: 1.25rem; margin: 0; }
-    .status-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
+    .status-bar { height: 12px; border-radius: 6px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
     .status-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.25s ease; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
     .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: end; }
@@ -31,10 +31,11 @@
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { border: 1px solid var(--border); padding: 8px 8px; text-align: left; font-size: 0.92rem; }
-    th { background: #f8fafc; position: sticky; top: 60px; z-index: 1; }
+    th { background: #f8fafc; position: sticky; top: 100px; z-index: 1; }
     tfoot td { font-weight: 600; }
     .note { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
     .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; background: #eef2ff; color: #3730a3; }
+    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   </style>
 </head>
 <body>
@@ -99,7 +100,7 @@
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Replace with your anon key
 
-    // Initialize Supabase client using CDN import
+    // Initialize via CDN
     const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const searchBtn = document.getElementById('searchBtn');
@@ -167,7 +168,10 @@
     async function search() {
       const mode = searchMode.value;
       const q = (queryInput.value || '').trim();
-      if (!q && mode !== 'date') return;
+      if (!q && mode !== 'date') {
+        resultsDiv.innerHTML = '<p>Please enter a search query.</p>';
+        return;
+      }
 
       // Map mode to column
       let column;

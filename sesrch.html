@@ -8,7 +8,7 @@
     :root {
       --bg: #f7f7fb;
       --card: #ffffff;
-      --text: #1f2937;
+      --text: #1f2430;
       --muted: #6b7280;
       --accent: #2563eb;
       --green: #16a34a;
@@ -23,7 +23,7 @@
     .status-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
     .status-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.25s ease; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: end; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: end; }
     label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
     input, select { width: 100%; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; }
     button { padding: 0.65rem 1rem; border-radius: 6px; border: 1px solid #0b5ed7; background: #1e6af7; color: #fff; cursor: pointer; font-weight: 600; }
@@ -31,7 +31,7 @@
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { border: 1px solid var(--border); padding: 8px 8px; text-align: left; font-size: 0.92rem; }
-    th { background: #f8fafc; position: sticky; top: 54px; z-index: 1; }
+    th { background: #f8fafc; position: sticky; top: 60px; z-index: 1; }
     tfoot td { font-weight: 600; }
     .note { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
     .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; background: #eef2ff; color: #3730a3; }
@@ -52,7 +52,7 @@
 
   <main class="container">
     <section class="card" aria-label="search-form">
-      <div class="row">
+      <div class="grid" style="align-items: end;">
         <div>
           <label for="searchMode">Search by</label>
           <select id="searchMode" aria-label="Search mode">
@@ -75,7 +75,7 @@
         </div>
       </div>
       <div class="note" style="margin-top: 8px;">
-        Tip: You can search no matter when the transactions occurred (all-time). Dates are matched against created_at.
+        Tip: You can search across all time. Dates are matched against created_at.
       </div>
     </section>
 
@@ -83,6 +83,7 @@
       <div id="results"></div>
       <div style="margin-top: 12px; text-align: right;">
         <button id="resetBtn" class="secondary" type="button">Reset</button>
+        <button id="statusBtn" class="secondary" type="button" style="margin-left:8px;">Status</button>
       </div>
     </section>
 
@@ -91,17 +92,19 @@
     </p>
   </main>
 
-  <!-- Supabase JS library -->
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS library via CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <script>
     // Replace with your actual values
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // <- Replace with your anon key
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Replace with your anon key
 
+    // Initialize Supabase client using CDN import
     const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const searchBtn = document.getElementById('searchBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const statusBtn = document.getElementById('statusBtn');
     const queryInput = document.getElementById('query');
     const searchMode = document.getElementById('searchMode');
     const resultsDiv = document.getElementById('results');
@@ -109,7 +112,7 @@
     const statusLabel = document.getElementById('statusLabel');
 
     function setStatus(percent, text) {
-      statusFill.style.width = percent + '%';
+      statusFill.style.width = Math.max(0, Math.min(100, percent)) + '%';
       statusLabel.textContent = text || (percent >= 100 ? 'Done' : 'Loading');
     }
 
@@ -152,7 +155,6 @@
           .order('created_at', { ascending: false });
         return { data, error };
       } else {
-        // If you want "all-time", we still apply a filter if column is provided; otherwise, fetch all
         const { data, error } = await supabase
           .from('transactions')
           .select('*')
@@ -165,7 +167,9 @@
     async function search() {
       const mode = searchMode.value;
       const q = (queryInput.value || '').trim();
-      // If date, we want to search by date; otherwise, by column
+      if (!q && mode !== 'date') return;
+
+      // Map mode to column
       let column;
       switch (mode) {
         case 'id': column = 'id'; break;
@@ -177,8 +181,6 @@
         case 'date': column = null; break;
         default: column = 'id';
       }
-
-      if (!mode) return;
 
       setStatus(10, 'Initiating search...');
       let data, error;
@@ -210,6 +212,12 @@
 
     searchBtn.addEventListener('click', async () => {
       await search();
+    });
+
+    statusBtn.addEventListener('click', () => {
+      // Simple manual status check reset/refresh
+      setStatus(0, 'Idle');
+      resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
     });
 
     // Initialize

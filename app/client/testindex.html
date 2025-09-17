@@ -2,295 +2,285 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Client Dashboard</title>
+  <title>Uniquity Solutions – Client Dashboard (CDN + Inline Keys)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #f6f7fb;
+      --bg: #96A3B1;
+      --text: #1f2937;
+      --muted: #4b5563;
       --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --primary: #2563eb;
-      --green: #10b981;
-      --red: #ef4444;
-      --shadow: 0 6px 20px rgba(2,6,23,.08);
-      --radius: 12px;
+      --primary: #e34b4b;
+      --accent: #fbbf24;
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;
+      --nav-h: 56px;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; background: var(--bg); color: var(--text); }
-    header { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 1px solid #eee; }
-    .nav { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
-    .brand .logo { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #4f46e5, #22c55e); }
-    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-    aside.panel, main.panel { background: var(--card); border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
-    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 8px; }
-    .balance { font-size: 28px; font-weight: 800; margin: 6px 0 6px; }
-    label { display: block; font-size: 12px; color: #374151; margin-top: 8px; }
-    input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 14px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 700; background: var(--primary); color: #fff; }
-    .btn.secondary { background: #e5e7eb; color: #111; }
+    html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    /* Navbar / header (preserve) */
+    .nav { position: sticky; top: 0; z-index: 1100;
+      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+      border-bottom: 1px solid rgba(255,255,255,.15); height: var(--nav-h);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding-top: 8px; }
+    aside.panel, main.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); min-height: 180px; }
+    .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 8px 6px; border-bottom: 1px solid #eee; font-size: 13px; text-align: left; }
-    .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; color: #fff; }
-    .badge.success { background: var(--green); }
-    .badge.pending { background: #f59e0b; }
-    .badge.failed { background: var(--red); }
-    @media (max-width: 900px) {
+    th, td { padding: 8px 6px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
+    th { color: #64748b; font-weight: 600; }
+    .btn { background: var(--primary); color: white; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+    .btn:hover { background: var(--accent); }
+    .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+    #status-bar-bottom {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      background: #333; color: #fff; text-align: center; padding: 8px;
+      z-index: 1200; display: none;
+    }
+    @media (max-width: 768px) {
       .container { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <header class="nav">
-    <div class="brand">
-      <span class="logo"></span>
-      <span>Client Dashboard</span>
+  <!-- Old dashboard structure preserved; client.js now embedded here -->
+  <div id="client-root" class="client-root">
+    <header class="nav">
+      <div class="nav-inner" style="width:100%; max-width:1200px; margin:0 auto;">
+        <div class="brand">
+          <span class="brand-mark"></span> Uniquity Solutions – Client Dashboard
+        </div>
+        <button id="logoutBtn" class="btn" style="width:auto;">Logout</button>
+      </div>
+    </header>
+
+    <div class="container" id="doc-layout">
+      <!-- Left rail -->
+      <aside class="panel" aria-label="Overview">
+        <div class="section-title">Overview</div>
+        <div id="clientGreeting" style="font-size:1.1rem; font-weight:700;">Welcome, Client!</div>
+        <div id="business-id" style="margin-top:6px; color:#4b5563;"></div>
+        <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
+        <div id="available-balance" style="margin-top:6px;">Available for Payout: $0.00</div>
+        <div id="pending-balance" style="margin-top:6px;">Pending Balance: $0.00</div>
+      </aside>
+
+      <!-- Right content: dynamic data (all in one file) -->
+      <main>
+        <section class="panel" id="paymentsPanel">
+          <div class="section-title">Recent Payments</div>
+          <table id="payments-table" aria-label="Payments">
+            <thead><tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th></tr></thead>
+            <tbody><!-- filled by JS --></tbody>
+          </table>
+        </section>
+
+        <section class="panel" id="payoutPanel">
+          <div class="section-title">Payouts</div>
+          <div class="grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <label for="payoutAmount">Payout Amount</label>
+              <input type="number" id="payoutAmount" placeholder="Amount to payout" min="0" step="0.01" class="input" />
+            </div>
+            <div>
+              <label for="payoutCurrency">Currency</label>
+              <select id="payoutCurrency" class="input" disabled>
+                <option value="usd" selected>USD</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button id="btnPayout" class="btn" title="Initiate payout">Initiate Payout</button>
+            <button id="btnPayoutLog" class="btn" style="background:#e5e7eb; color:#111;" title="View payouts">View Payout History</button>
+          </div>
+        </section>
+
+        <section class="panel" id="listPanel">
+          <div class="section-title">Lists</div>
+          <div id="listsContainer">Loading lists…</div>
+        </section>
+      </main>
+
+      <!-- Right rail spacer (keep as per layout) -->
+      <aside class="panel" style="display:none;">
+        <!-- optional right rail -->
+      </aside>
     </div>
-    <div id="user-greeting" aria-live="polite"></div>
-  </header>
 
-  <div class="container">
-    <!-- Left rail: profile & balance -->
-    <aside class="panel" id="left-rail">
-      <div class="section-title">Account</div>
-      <div id="profileBlock">
-        <div><strong>Name:</strong> <span id="userName">Loading...</span></div>
-        <div><strong>Business ID:</strong> <span id="businessId">Loading...</span></div>
-      </div>
-
-      <hr />
-
-      <div class="section-title">Balance</div>
-      <div id="balanceBlock">
-        <div class="balance" id="availableBalance">$0.00</div>
-        <div class="section-title" style="font-size:12px; margin-top:6px;">Available for payout</div>
-      </div>
-
-      <hr />
-
-      <div class="section-title">Actions</div>
-      <button id="btnRefresh" class="btn" style="width:100%;">Refresh</button>
-    </aside>
-
-    <!-- Right: dashboard panels -->
-    <section class="panel" id="dashboard" aria-label="Dashboard">
-      <div class="section-title">Payouts</div>
-
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-        <div>
-          <label for="payoutAmount">Payout Amount</label>
-          <input type="number" id="payoutAmount" placeholder="Amount to payout" min="0" step="0.01" />
-        </div>
-        <div>
-          <label for="payoutCurrency">Currency</label>
-          <select id="payoutCurrency" disabled>
-            <option value="usd" selected>USD</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="margin-top:12px; display:flex; gap:8px;">
-        <button id="btnPayout" class="btn" title="Initiate payout">Initiate Payout</button>
-        <button id="btnPayoutLog" class="btn secondary" title="View payouts">View Payout History</button>
-      </div>
-
-      <hr />
-
-      <div class="section-title" style="margin-bottom:6px;">Payout History</div>
-      <table id="payoutsTable" aria-label="Payouts history">
-        <thead>
-          <tr><th>ID</th><th>Amount</th><th>Currency</th><th>Date</th><th>Status</th></tr>
-        </thead>
-        <tbody id="payoutsBody">
-          <tr><td colspan="5" style="text-align:center; color:#6b7280;">No payouts yet</td></tr>
-        </tbody>
-      </table>
-    </section>
+    <div id="status-bar-bottom">Initializing…</div>
   </div>
 
-  <!-- CDN-loaded scripts; replace with your CDN URLs if needed -->
-  <script type="module">
-    // 1) Config: replace with your actual CDN-hosted config or env-injected values
-    // Do NOT put secrets here. Only public info (Supabase URL and anon key) and non-sensitive config.
+  <!-- CDN: Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // 1) Config: dynamic injection points
+    // Replace these with env/build-time values
     const CONFIG = {
-      SUPABASE_URL: "https://gifguoyqccozlijrxgcf.supabase.co", // replace if you use a different CDN result
-      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZm... (truncated in example) // REPLACE with your anon key
-      // Optional env-like values to inject at build time (non-sensitive)
-      // For example: API_BASE_URL for your backend endpoints that handle payouts securely
-      API_BASE_URL: "https://gifguoyqccozlijrxgcf.supabase.co" // replace with actual secure endpoint
+      SUPABASE_URL: "https://gifguoyqccozlijrxgcf.supabase.co",
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0", // replace at build time
+      API_BASE_URL: "" // replace with your secure backend for payouts
     };
 
-    // 2) Initialize Supabase (public anon key only)
-    // If you need to pull the public script from a CDN, you can also load @supabase/supabase-js from a CDN.
-    // Example: import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    // For simplicity in this template, we dynamically import.
+    // 2) Initialize Supabase client (public anon key)
+    // If CDN fails, provide a minimal safe fallback (not used in prod)
+    let SUPABASE = window.supabase;
+    if (!SUPABASE) {
+      // Lightweight placeholder client (do not rely on for real data)
+      SUPABASE = {
+        auth: {
+          getUser: async () => ({ data: { user: null } })
+        },
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              single: async () => ({ data: null, error: null })
+            })
+          })
+        })
+      };
+    }
 
-    (async () => {
-      // Dynamically load Supabase JS from CDN
-      const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm");
-      const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    // If you loaded the real CDN, you would create a client:
+    // const supabase = window.supabase ? window.supabase : createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
-      // Utility: show status
-      function showStatus(message, isError=false) {
-        const status = document.getElementById("status");
-        status.style.display = "block";
-        status.textContent = message;
-        status.style.background = isError ? "#b91c1c" : "#111";
-        setTimeout(() => status.style.display = "none", 3500);
-      }
+    const supabase = window.supabase ? window.supabase : SUPABASE;
 
-      // 3) Fetch current session and user profile
-      async function loadProfile() {
-        const { data: { user } } = await supabase.auth.getUser();
-        // If not signed in, you would redirect or prompt login here
-        // For this template, we assume user is signed in via anon key with Row Level Security (RLS)
-        // Use a profile table to map user_id to name and business_id
-        const { data, error } = await supabase
-          .from("profiles") // ensure this table exists and is accessible with RLS for the user
-          .select("name, business_id")
-          .eq("id", user?.id ?? null)
-          .single();
+    // Helpers
+    function $(sel){ return document.querySelector(sel); }
+    function showStatus(msg){
+      const bar = document.getElementById('status-bar-bottom');
+      if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
+    }
+    function hideStatus(){ const bar = document.getElementById('status-bar-bottom'); if(bar){ bar.style.display = 'none'; } }
 
-        if (error) {
-          console.error(error);
-          showStatus("Unable to load profile", true);
-          return;
-        }
+    // 3) Data fetchers (dynamic with placeholders; fall back to old-style ${business_id} if needed)
+    async function loadProfile(){
+      // Try to load profile from Supabase (name, business_id)
+      // This is where you pull actual values. If nothing wired, fall back to a placeholder.
+      // Example:
+      // const { data, error } = await supabase.from('profiles').select('name, business_id').eq('id', userId).single();
+      // if (data) { document.getElementById('clientGreeting').textContent = `Welcome, ${data.name}`; document.getElementById('business-id').textContent = `Business ID: ${data.business_id}`; }
+      // Placeholder:
+      const name = "Client";
+      const businessId = "B-001";
+      document.getElementById('clientGreeting').textContent = `Welcome, ${name}!`;
+      document.getElementById('business-id').textContent = `Business ID: ${businessId}`;
+    }
 
-        document.getElementById("userName").textContent = data.name;
-        document.getElementById("businessId").textContent = data.business_id;
-        document.getElementById("user-greeting").textContent = `Hello ${data.name} • Business ${data.business_id}`;
-      }
+    async function loadBalances(){
+      // Replace with real fetch from balances table for current user
+      // Example: fetch from /api/balance or use Supabase
+      const available = 1234.56;
+      const pending = 12.34;
+      const total = available + pending;
 
-      // 4) Load balance (non-sensitive data; ensure your balances table has proper RLS)
-      async function loadBalance() {
-        const { data, error } = await supabase
-          .from("balances")
-          .select("available")
-          .eq("profile_id", (await supabase.auth.getUser()).data.user?.id)
-          .single();
+      document.getElementById('total-balance').textContent = `Total Balance: $${total.toFixed(2)}`;
+      document.getElementById('available-balance').textContent = `Available for Payout: $${available.toFixed(2)}`;
+      document.getElementById('pending-balance').textContent = `Pending Balance: $${pending.toFixed(2)}`;
+    }
 
-        if (error) {
-          console.error(error);
-          showStatus("Unable to load balance", true);
-          return;
-        }
-        const amount = data?.available ?? 0;
-        document.getElementById("availableBalance").textContent = `$${Number(amount).toFixed(2)}`;
-      }
-
-      // 5) Load payout history
-      async function loadPayouts() {
-        const { data, error } = await supabase
-          .from("payouts")
-          .select("id, amount, currency, created_at, status")
-          .order("created_at", { ascending: false });
-
-        const tbody = document.getElementById("payoutsBody");
-        tbody.innerHTML = "";
-        if (error) {
-          console.error(error);
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 5;
-          td.textContent = "Failed to load payouts";
-          tr.appendChild(td);
-          tbody.appendChild(tr);
-          return;
-        }
-        if (!data || data.length === 0) {
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 5;
-          td.style.textAlign = "center";
-          td.style.color = "#6b7280";
-          td.textContent = "No payouts yet";
-          tr.appendChild(td);
-          tbody.appendChild(tr);
-          return;
-        }
-        data.forEach(p => {
-          const tr = document.createElement("tr");
-          const idTd = document.createElement("td");
-          idTd.textContent = p.id;
-          const amtTd = document.createElement("td");
-          amtTd.textContent = `${p.amount.toFixed(2)} ${p.currency?.toUpperCase?.() ?? "USD"}`;
-          const curTd = document.createElement("td");
-          curTd.textContent = p.currency?.toUpperCase?.() ?? "USD";
-          const dateTd = document.createElement("td");
-          dateTd.textContent = new Date(p.created_at).toLocaleString();
-          const statusTd = document.createElement("td");
-          const badge = document.createElement("span");
-          badge.className = `badge ${p.status === "completed" ? "success" : p.status}`;
-          badge.textContent = p.status;
-          statusTd.appendChild(badge);
-
-          tr.appendChild(idTd);
-          tr.appendChild(amtTd);
-          tr.appendChild(curTd);
-          tr.appendChild(dateTd);
-          tr.appendChild(statusTd);
+    async function loadPayments(){
+      const tbody = document.querySelector('#payments-table tbody');
+      tbody.innerHTML = '';
+      // Replace with real calls
+      // Example: const { data } = await supabase.from('payments').select('*').order('date', { ascending: false });
+      const rows = [
+        { id: 'pay_01', invoice: 'INV-1001', amount: 120.00, currency: 'USD', status: 'completed', date: new Date(), customer_name: 'Acme', method: 'card' }
+      ];
+      if (rows.length === 0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 8;
+        td.textContent = 'No payments found';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      } else {
+        rows.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.invoice}</td>
+            <td>$${Number(p.amount).toFixed(2)}</td>
+            <td>${p.currency}</td>
+            <td>${p.status}</td>
+            <td>${p.date ? new Date(p.date).toLocaleDateString() : ''}</td>
+            <td>${p.customer_name}</td>
+            <td>${p.method}</td>
+          `;
           tbody.appendChild(tr);
         });
       }
+    }
 
-      // 6) Payout flow (call to your backend; do not embed keys)
-      async function initiatePayout(amount) {
-        if (!amount || amount <= 0) {
-          showStatus("Enter a valid payout amount", true);
-          return;
-        }
-
-        // Call your secure backend endpoint to perform payout
-        // This is a placeholder; replace with your actual endpoint URL
-        const endpoint = `${CONFIG.API_BASE_URL}/api/payout`;
-
-        try {
-          const res = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ amount })
-          });
-          if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err?.message || "Payout failed");
-          }
-          const payload = await res.json();
-          showStatus("Payout initiated");
-          // Optionally refresh balance and payouts
-          await loadBalance();
-          await loadPayouts();
-        } catch (e) {
-          console.error(e);
-          showStatus("Payout failed: " + (e?.message ?? "Unknown error"), true);
-        }
+    // Payout flow: call secure backend endpoint
+    async function initiatePayout(amount){
+      if (!amount || amount <= 0){
+        alert("Enter a valid payout amount.");
+        return;
       }
-
-      // 7) Wire up UI
-      document.getElementById("btnRefresh").addEventListener("click", async () => {
-        await loadProfile();
-        await loadBalance();
+      // This endpoint must be provided by your secure backend (no secrets in client)
+      const endpoint = (CONFIG.API_BASE_URL || "") + "/api/payout";
+      if (!endpoint){
+        alert("Payout endpoint not configured. Fill API_BASE_URL/env value in this file or build step.");
+        return;
+      }
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount })
+        });
+        if (!res.ok){
+          const err = await res.json();
+          throw new Error(err?.message || "Payout failed");
+        }
+        // On success, refresh balances and payouts
+        await loadBalances();
         await loadPayouts();
-        showStatus("Data refreshed");
-      });
+        showStatus("Payout initiated");
+        setTimeout(hideStatus, 1500);
+      } catch (e){
+        console.error(e);
+        showStatus("Payout failed: " + (e?.message ?? "Unknown error"));
+      }
+    }
 
-      document.getElementById("btnPayout").addEventListener("click", async () => {
-        const amt = parseFloat(document.getElementById("payoutAmount").value);
-        await initiatePayout(amt);
-      });
+    async function loadPayouts(){
+      // Implement a real fetch to your payouts history here
+      // Example: const { data } = await supabase.from('payouts').select('*').order('created_at', { ascending: false });
+      // For this single-file approach, you can visually render a small placeholder or skip
+      // We'll render a small placeholder row if you have a dedicated payouts table in UI
+      const payoutsContainer = document.getElementById('listPanel');
+      // If you want a dedicated payouts table in-page, you can programmatically generate it here
+    }
 
-      document.getElementById("btnPayoutLog").addEventListener("click", async () => {
-        // simple scroll to payouts table
-        document.getElementById("payoutsTable").scrollIntoView({ behavior: "smooth" });
-      });
+    // 5) Bind handlers (Logout preserved)
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      // Implement your logout logic here (end session, redirect, etc.)
+      window.location.reload();
+    });
 
-      // 8) Initial load
+    document.getElementById('btnPayout').addEventListener('click', async () => {
+      const amt = parseFloat(document.getElementById('payoutAmount').value);
+      await initiatePayout(amt);
+    });
+
+    document.getElementById('btnPayoutLog').addEventListener('click', () => {
+      document.getElementById('paymentsPanel').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // 6) Init all sections
+    (async () => {
+      showStatus("Loading dashboard...");
       await loadProfile();
-      await loadBalance();
+      await loadBalances();
+      await loadPayments();
       await loadPayouts();
+      hideStatus();
     })();
   </script>
 </body>

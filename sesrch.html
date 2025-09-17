@@ -42,7 +42,7 @@
 <body>
   <header>
     <div class="container" style="display:flex; align-items: center; justify-content: space-between;">
-      <h1>Stripe Transactions Lookup</h1>
+      <h1>Stripe Transactions Lookup (Testing CDN)</h1>
       <span class="badge" id="statusLabel" aria-live="polite">Idle</span>
     </div>
     <div class="container" aria-label="status-bar" style="padding-top:0;">
@@ -101,12 +101,13 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
   <script>
-    // Replace with your actual values
+    // 1) CDN, URL and Anon Key for testing (hard-coded for testing)
+    // Replace with your actual values if you want to test with real data
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
-    // Read endpoint
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // <- replace with your actual anon key for testing
     const READ_ENDPOINT = 'https://gifguoyqccozlijrxgcf.supabase.co/functions/v1/transactions-read';
 
+    // Initialize via CDN
     const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const searchBtn = document.getElementById('searchBtn');
@@ -134,6 +135,7 @@
       const url = new URL(READ_ENDPOINT);
       url.searchParams.set('mode', mode);
       if (value) url.searchParams.set('value', value);
+
       const res = await fetch(url.toString(), {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
@@ -164,6 +166,7 @@
       const mode = (searchMode.value || 'id').toLowerCase();
       const value = (queryInput.value || '').trim();
 
+      // Allow all-time if you want: if (!value && mode !== 'date') { show message }
       if (!value && mode !== 'date') {
         resultsDiv.innerHTML = '<p>Please enter a search value.</p>';
         return;

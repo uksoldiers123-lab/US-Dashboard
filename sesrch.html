@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Stripe Transactions Lookup</title>
+  <title>Stripe Transactions Lookup (Tester)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -14,14 +14,16 @@
       --green: #16a34a;
       --red: #e11d48;
       --border: #e5e7eb;
+      --chip: #eef2ff;
+      --chipText: #3730a3;
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto; background: var(--bg); color: var(--text); }
     header { padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
     .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
     h1 { font-size: 1.25rem; margin: 0; }
-    .init-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin: 6px 0; }
-    .init-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #1e40af, #2563eb); transition: width 0.25s ease; }
+    .init-bar-bottom { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin: 12px 0 0; }
+    .init-fill-bottom { height: 100%; width: 0%; background: linear-gradient(90deg, #1e40af, #2563eb); transition: width 0.25s ease; }
     .status-bar { height: 12px; border-radius: 6px; background: #e5e7eb; overflow: hidden; margin: 6px 0; }
     .status-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.25s ease; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
@@ -33,21 +35,22 @@
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { border: 1px solid var(--border); padding: 8px 8px; text-align: left; font-size: 0.92rem; }
-    th { background: #f8fafc; position: sticky; top: 100px; z-index: 1; }
+    th { background: #f8fafc; position: sticky; top: 160px; z-index: 1; }
     tfoot td { font-weight: 600; }
-    .note { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+    .section-title { font-weight: 700; margin: 8px 0 6px; font-size: 1rem; }
+    .results-area { min-height: 180px; padding: 6px; }
     .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; background: #eef2ff; color: #3730a3; }
   </style>
 </head>
 <body>
   <header>
     <div class="container" style="display:flex; align-items: center; justify-content: space-between;">
-      <h1>Stripe Transactions Lookup (Testing CDN)</h1>
+      <h1>Stripe Transactions Lookup (Tester)</h1>
       <span class="badge" id="statusLabel" aria-live="polite">Idle</span>
     </div>
     <div class="container" aria-label="status-bar" style="padding-top:0;">
-      <div class="init-bar" aria-label="init-progress-bar" title="Initialization progress">
-        <div class="init-fill" id="initFill"></div>
+      <div class="init-bar-bottom" aria-label="init-progress-bar-bottom" title="Initialization progress (bottom)">
+        <div class="init-fill-bottom" id="initFillBottom"></div>
       </div>
       <div class="status-bar" id="statusBar" title="Status progress" style="margin-top:6px;">
         <div class="status-fill" id="statusFill"></div>
@@ -56,6 +59,7 @@
   </header>
 
   <main class="container">
+    <!-- TEST INPUTS -->
     <section class="card" aria-label="search-form">
       <div class="grid" style="align-items: end;">
         <div>
@@ -84,16 +88,19 @@
       </div>
     </section>
 
+    <!-- TEST RESULTS SECTION -->
     <section class="card" aria-label="results-section" id="resultsSection" style="margin-top:12px;">
-      <div id="results"></div>
+      <div class="section-title">Test Results</div>
+      <div id="results" class="results-area"></div>
       <div style="margin-top: 12px; text-align: right;">
         <button id="resetBtn" class="secondary" type="button">Reset</button>
         <button id="statusBtn" class="secondary" type="button" style="margin-left:8px;">Status</button>
       </div>
     </section>
 
+    <!-- TEST ENDPOINT / READ INTEGRATION -->
     <p class="note" style="margin-top:8px;">
-      Note: This page uses a backend edge function for reads; no direct anon key reads are performed from the frontend.
+      This tester page hits the read endpoint below. For tester mode you can also trigger the webhook directly if desired.
     </p>
   </main>
 
@@ -101,19 +108,20 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 
   <script>
-    // 1) CDN, URL and Anon Key for testing (hard-coded for testing)
-    // Replace with your actual values if you want to test with real data
+    // TEST VALUES (put your real testing values here)
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // <- replace with your actual anon key for testing
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Put your tester anon key here
     const READ_ENDPOINT = 'https://gifguoyqccozlijrxgcf.supabase.co/functions/v1/transactions-read';
+    // Optional: TEST webhook URL (you can trigger it if you have a tester flow)
+    const TEST_WEBHOOK_URL = 'https://gifguoyqccozlijrxgcf.supabase.co/functions/v1/stripe-webhook';
 
-    // Initialize via CDN
     const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const searchBtn = document.getElementById('searchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const statusBtn = document.getElementById('statusBtn');
-    const initFill = document.getElementById('initFill');
+    const initFillBottom = document.getElementById('initFillBottom');
+    const initBarBottom = document.querySelector('[aria-label="init-progress-bar-bottom"]');
     const statusFill = document.getElementById('statusFill');
     const queryInput = document.getElementById('query');
     const searchMode = document.getElementById('searchMode');
@@ -121,9 +129,8 @@
     const statusLabel = document.getElementById('statusLabel');
     const statusBar = document.getElementById('statusBar');
 
-    function setInitProgress(p, text) {
-      initFill.style.width = Math.max(0, Math.min(100, p)) + '%';
-      if (text) statusLabel.textContent = text;
+    function setInitProgressBottom(p) {
+      initFillBottom.style.width = Math.max(0, Math.min(100, p)) + '%';
     }
 
     function setStatus(percent, text) {
@@ -135,11 +142,7 @@
       const url = new URL(READ_ENDPOINT);
       url.searchParams.set('mode', mode);
       if (value) url.searchParams.set('value', value);
-
-      const res = await fetch(url.toString(), {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const res = await fetch(url.toString(), { method: 'GET', headers: { 'Content-Type': 'application/json' } });
       if (!res.ok) {
         const err = await res.text();
         throw new Error('Read API error: ' + err);
@@ -148,7 +151,7 @@
       return json.data ?? [];
     }
 
-    async function renderTable(rows) {
+    function renderTable(rows) {
       if (!rows || rows.length === 0) {
         resultsDiv.innerHTML = '<p>No results found.</p>';
         return;
@@ -166,37 +169,36 @@
       const mode = (searchMode.value || 'id').toLowerCase();
       const value = (queryInput.value || '').trim();
 
-      // Allow all-time if you want: if (!value && mode !== 'date') { show message }
+      // All-time by default if tester wants: require a value for non-date
       if (!value && mode !== 'date') {
         resultsDiv.innerHTML = '<p>Please enter a search value.</p>';
         return;
       }
 
-      setInitProgress(0, 'Starting search...');
+      setInitProgressBottom(0);
       setStatus(10, 'Fetching data...');
 
       try {
         const data = await runRead(mode, value);
-        await renderTable(data);
+        renderTable(data);
         setStatus(100, 'Done');
-        setInitProgress(100, 'Done');
       } catch (e) {
         resultsDiv.innerHTML = `<p style="color: #e11d48;">Error: ${e.message}</p>`;
         setStatus(0, 'Idle');
-        setInitProgress(0);
       }
 
-      setTimeout(() => {
-        setStatus(0, 'Idle');
-        setInitProgress(0);
-      }, 1200);
+      // bottom init finish
+      setInitProgressBottom(100);
+      setTimeout(() => setInitProgressBottom(0), 800);
+      // reset status after a moment
+      setTimeout(() => setStatus(0, 'Idle'), 900);
     }
 
     resetBtn.addEventListener('click', async () => {
       queryInput.value = '';
-      resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
+      resultsDiv.innerHTML = '<p>Enter a search value and press Search to see results.</p>';
       setStatus(0, 'Idle');
-      setInitProgress(0);
+      setInitProgressBottom(0);
     });
 
     searchBtn.addEventListener('click', async () => {
@@ -205,14 +207,14 @@
 
     statusBtn.addEventListener('click', () => {
       setStatus(0, 'Idle');
-      setInitProgress(0);
+      setInitProgressBottom(0);
     });
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
-      resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
+      resultsDiv.innerHTML = '<p>Enter a search value and press Search to see results.</p>';
       setStatus(0, 'Idle');
-      setInitProgress(0);
+      setInitProgressBottom(0);
     });
   </script>
 </body>

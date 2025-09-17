@@ -5,157 +5,74 @@
   <title>Stripe Transactions Lookup</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #f7f7fb;
-      --card: #ffffff;
-      --text: #1f2430;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --green: #16a34a;
-      --red: #e11d48;
-      --border: #e5e7eb;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto; background: var(--bg); color: var(--text); }
-    header { padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-    h1 { font-size: 1.25rem; margin: 0; }
-    /* Init / Progress bar */
-    .init-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
-    .init-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #1e40af, #2563eb); transition: width 0.25s ease; }
-    .status-bar { height: 12px; border-radius: 6px; background: #e5e7eb; overflow: hidden; margin: 12px 0 6px; }
-    .status-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.25s ease; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: end; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
-    input, select { width: 100%; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; }
-    button { padding: 0.65rem 1rem; border-radius: 6px; border: 1px solid #0b5ed7; background: #1e6af7; color: #fff; cursor: pointer; font-weight: 600; }
-    button.secondary { background: #fff; color: #374151; border: 1px solid var(--border); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status-bar { height: 8px; background: #e5e7eb; border-radius: 6px; overflow: hidden; }
+    .status-fill { height: 100%; width: 0%; background: #2563eb; transition: width 0.25s; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid var(--border); padding: 8px 8px; text-align: left; font-size: 0.92rem; }
-    th { background: #f8fafc; position: sticky; top: 100px; z-index: 1; }
-    tfoot td { font-weight: 600; }
-    .note { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
-    .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; background: #eef2ff; color: #3730a3; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+    .badge { padding: 2px 6px; border-radius: 4px; background: #eef2ff; color: #3730a3; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container" style="display:flex; align-items: center; justify-content: space-between;">
-      <h1>Stripe Transactions Lookup</h1>
-      <span class="badge" id="statusLabel" aria-live="polite">Idle</span>
-    </div>
-    <div class="container" aria-label="status-bar" style="padding-top:0;">
-      <div class="init-bar" aria-label="init-progress-bar" title="Initialization progress">
-        <div class="init-fill" id="initFill"></div>
-      </div>
-      <div class="status-bar" id="statusBar" title="Status progress" style="margin-top:6px;">
-        <div class="status-fill" id="statusFill"></div>
-      </div>
-    </div>
-  </header>
+  <h1>Stripe Transactions Lookup</h1>
 
-  <main class="container">
-    <section class="card" aria-label="search-form">
-      <div class="grid" style="align-items: end;">
-        <div>
-          <label for="searchMode">Search by</label>
-          <select id="searchMode" aria-label="Search mode">
-            <option value="id">Transaction ID</option>
-            <option value="session">Checkout Session ID</option>
-            <option value="payment_intent">Payment Intent</option>
-            <option value="customer_email">Customer Email</option>
-            <option value="business_id">Business ID</option>
-            <option value="invoice">Invoice</option>
-            <option value="date">Date (YYYY-MM-DD)</option>
-          </select>
-        </div>
-        <div>
-          <label for="query">Query</label>
-          <input id="query" placeholder="Enter your search value" />
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button id="searchBtn" type="button">Search</button>
-        </div>
-      </div>
-      <div class="note" style="margin-top: 8px;">
-        Tip: You can search across all time. Dates are matched against created_at.
-      </div>
-    </section>
+  <div class="status-bar" aria-label="status-bar" title="Status progress">
+    <div class="status-fill" id="statusFill"></div>
+  </div>
 
-    <section class="card" aria-label="results-section" id="resultsSection" style="margin-top:12px;">
-      <div id="results"></div>
-      <div style="margin-top: 12px; text-align: right;">
-        <button id="resetBtn" class="secondary" type="button">Reset</button>
-        <button id="statusBtn" class="secondary" type="button" style="margin-left:8px;">Status</button>
-      </div>
-    </section>
+  <div style="margin: 8px 0;">
+    <select id="searchMode">
+      <option value="id">Transaction ID</option>
+      <option value="session">Checkout Session ID</option>
+      <option value="payment_intent">Payment Intent</option>
+      <option value="customer_email">Customer Email</option>
+      <option value="business_id">Business ID</option>
+      <option value="invoice">Invoice</option>
+      <option value="date">Date (YYYY-MM-DD)</option>
+    </select>
+    <input id="query" placeholder="Enter search value" />
+    <button id="searchBtn">Search</button>
+  </div>
 
-    <p class="note" style="margin-top:8px;">
-      Note: This page reads from Supabase. If you enabled Row Level Security (RLS), ensure the read policy allows this page to fetch data or route reads through a backend API.
-    </p>
-  </main>
+  <div id="results"></div>
 
-  <!-- Supabase JS library via CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- CDN Supabase client -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <script>
-    // Replace with your actual values
+    // Replace with your real values
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0'; // Replace with your anon key
-
-    // Initialize via CDN
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
     const supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const searchBtn = document.getElementById('searchBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const statusBtn = document.getElementById('statusBtn');
-    const initFill = document.getElementById('initFill');
-    const statusFill = document.getElementById('statusFill');
-    const queryInput = document.getElementById('query');
     const searchMode = document.getElementById('searchMode');
+    const queryInput = document.getElementById('query');
     const resultsDiv = document.getElementById('results');
-    const statusLabel = document.getElementById('statusLabel');
-    const statusBar = document.getElementById('statusBar');
+    const statusFill = document.getElementById('statusFill');
 
-    function setInitProgress(p, text) {
-      initFill.style.width = Math.max(0, Math.min(100, p)) + '%';
-      if (text) statusLabel.textContent = text;
+    function setStatus(p, text) {
+      statusFill.style.width = Math.max(0, Math.min(100, p)) + '%';
     }
 
-    function setStatus(percent, text) {
-      statusFill.style.width = Math.max(0, Math.min(100, percent)) + '%';
-      statusLabel.textContent = text || (percent >= 100 ? 'Done' : 'Loading');
-    }
-
-    function renderTable(rows) {
-      if (!rows || rows.length === 0) {
-        resultsDiv.innerHTML = '<p>No results found.</p>';
-        return;
+    async function runQuery(mode, q) {
+      let column;
+      switch (mode) {
+        case 'id': column = 'id'; break;
+        case 'session': column = 'checkout_session_id'; break;
+        case 'payment_intent': column = 'stripe_payment_intent'; break;
+        case 'customer_email': column = 'customer_email'; break;
+        case 'business_id': column = 'business_id'; break;
+        case 'invoice': column = 'invoice'; break;
+        case 'date': column = 'created_at'; break;
+        default: column = 'id';
       }
-      const header = [
-        'id','stripe_payment_intent','stripe_charge_id','checkout_session_id',
-        'amount','currency','status','customer_email','description',
-        'business_id','invoice','created_at'
-      ];
-      let html = '<table><thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-      for (const r of rows) {
-        html += '<tr>' +
-          header.map(h => `<td>${(r[h] ?? '')}</td>`).join('') +
-          '</tr>';
-      }
-      html += '</tbody></table>';
-      resultsDiv.innerHTML = html;
-    }
 
-    async function fetchTransactions(mode, q, column) {
       if (mode === 'date') {
-        const date = new Date(q);
-        if (isNaN(date)) {
+        // Expect YYYY-MM-DD (no time)
+        const d = new Date(q);
+        if (isNaN(d)) {
           return { data: [], error: { message: 'Invalid date' } };
         }
-        const start = new Date(date);
+        const start = new Date(d);
         start.setHours(0,0,0,0);
         const end = new Date(start);
         end.setDate(end.getDate() + 1);
@@ -181,74 +98,46 @@
       const mode = searchMode.value;
       const q = (queryInput.value || '').trim();
       if (!q && mode !== 'date') {
-        resultsDiv.innerHTML = '<p>Please enter a search query.</p>';
+        resultsDiv.innerHTML = '<p>Please enter a search value.</p>';
         return;
-      }
-
-      let column;
-      switch (mode) {
-        case 'id': column = 'id'; break;
-        case 'session': column = 'checkout_session_id'; break;
-        case 'payment_intent': column = 'stripe_payment_intent'; break;
-        case 'customer_email': column = 'customer_email'; break;
-        case 'business_id': column = 'business_id'; break;
-        case 'invoice': column = 'invoice'; break;
-        case 'date': column = null; break;
-        default: column = 'id';
       }
 
       // Init progress
-      setInitProgress(0, 'Starting search...');
-      setStatus(10, 'Querying database...');
-      // Simulate gradual progress for nicer UX; real progress depends on network
-      setInitProgress(25);
-      let data, error;
-      if (mode === 'date') {
-        const res = await fetchTransactions(mode, q, 'created_at');
+      setStatus(10, 'Starting search...');
+      let data = [], error;
+      try {
+        const res = await runQuery(mode, q);
         data = res.data;
         error = res.error;
-      } else {
-        const res = await fetchTransactions(mode, q, column);
-        data = res.data;
-        error = res.error;
+      } catch (e) {
+        error = e;
       }
-      setInitProgress(60, 'Processing results...');
+
       if (error) {
-        resultsDiv.innerHTML = `<p style="color:var(--red);">Error: ${error.message}</p>`;
-        setInitProgress(0, 'Idle');
-        setStatus(0, 'Idle');
+        resultsDiv.innerHTML = `<p style="color:#e11d48;">Error: ${error.message}</p>`;
+        setStatus(0);
         return;
       }
-      renderTable(data);
-      setInitProgress(100, 'Done');
-      setStatus(100, 'Done');
-      // Reset progress after a short delay
-      setTimeout(() => { setInitProgress(0); setStatus(0, 'Idle'); }, 1200);
+
+      // Render
+      if (!data || data.length === 0) {
+        resultsDiv.innerHTML = '<p>No results found.</p>';
+      } else {
+        const header = ['id','stripe_payment_intent','stripe_charge_id','checkout_session_id','amount','currency','status','customer_email','description','business_id','invoice','created_at'];
+        let html = '<table><thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+        for (const r of data) {
+          html += '<tr>' + header.map(h => `<td>${r[h] ?? ''}</td>`).join('') + '</tr>';
+        }
+        html += '</tbody></table>';
+        resultsDiv.innerHTML = html;
+      }
+
+      setStatus(100);
+      // reset after a moment
+      setTimeout(() => setStatus(0), 800);
     }
 
-    resetBtn.addEventListener('click', async () => {
-      queryInput.value = '';
-      resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
-      setInitProgress(0);
-      setStatus(0, 'Idle');
-    });
-
-    searchBtn.addEventListener('click', async () => {
-      await search();
-    });
-
-    statusBtn.addEventListener('click', () => {
-      setInitProgress(0);
-      setStatus(0, 'Idle');
-      resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
-    });
-
-    // Initialize with a friendly message
-    document.addEventListener('DOMContentLoaded', () => {
-      resultsDiv.innerHTML = '<p>Enter a search query and press Search to see results.</p>';
-      setInitProgress(0);
-      setStatus(0, 'Idle');
-    });
+    searchBtn.addEventListener('click', search);
   </script>
 </body>
 </html>

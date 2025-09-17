@@ -5,10 +5,10 @@
   <title>Uniquity Solutions - Client Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* Minimal doc-style CSS preserved; extend to your exact theme as needed */
     :root {
       --bg: #96A3B1;
       --text: #1f2937;
-      --muted: #4b5563;
       --card: #ffffff;
       --primary: #e34b4b;
       --accent: #fbbf24;
@@ -16,49 +16,30 @@
       --radius: 18px;
       --nav-h: 56px;
     }
-    * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
-    /* Navbar / header (doc style) */
     .nav { position: sticky; top: 0; z-index: 1100;
-      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
-      border-bottom: 1px solid rgba(255,255,255,.15);
-      height: var(--nav-h);
+      background: linear-gradient(to bottom, rgba(150,163,177,.9), rgba(150,163,177,.6));
+      border-bottom: 1px solid rgba(255,255,255,.15); height: var(--nav-h);
     }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
-    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display: inline-block; }
-
+    .nav-inner { display:flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
+    .brand { font-weight: 700; color:#fff; display:flex; gap:12px; align-items:center; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); }
     .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-
-    /* Doc-style layout: 260px left rail, 1fr content */
     .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
-
     aside { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; }
     main { display: grid; gap: 16px; align-content: start; }
-
     .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
     .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
-
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 8px 6px; border-bottom: 1px solid #eee; text-align: left; font-size: 13px; }
     th { color: #64748b; font-weight: 600; }
-
-    .btn { background: var(--primary); color: white; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 10px; }
+    .btn { background: var(--primary); color: white; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
     .btn:hover { background: var(--accent); }
-
     .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
-
+    #status-bar-bottom { position: fixed; left: 0; right: 0; bottom: 0; background: #333; color: #fff; text-align: center; padding: 8px; display: none; }
     @media (max-width: 768px) {
       .layout { grid-template-columns: 1fr; }
-      .nav-inner { flex-direction: column; }
-    }
-
-    /* Status bar at bottom */
-    #status-bar-bottom {
-      position: fixed; left: 0; right: 0; bottom: 0;
-      background: #333; color: #fff; text-align: center;
-      padding: 8px; z-index: 1200; display: none;
     }
   </style>
 </head>
@@ -74,7 +55,6 @@
   </header>
 
   <div class="container layout" id="doc-layout">
-    <!-- Left rail (Overview / Balance / Payments) -->
     <aside class="panel" aria-label="Overview">
       <div class="section-title">Overview</div>
       <div id="clientGreeting" style="font-size:1.1rem; font-weight:700;">Welcome, Client!</div>
@@ -84,14 +64,11 @@
       <div id="pending-balance">Pending Balance: $0.00</div>
     </aside>
 
-    <!-- Right content: payments, ads, etc. (kept simple for doc style) -->
     <main>
       <section class="panel" id="paymentsPanel">
         <div class="section-title">Recent Payments</div>
         <table id="payments-table" aria-label="Payments">
-          <thead>
-            <tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th></tr>
-          </thead>
+          <thead><tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th></tr></thead>
           <tbody></tbody>
         </table>
       </section>
@@ -108,147 +85,147 @@
         <button id="send-payment" class="btn">Send Payment</button>
       </section>
     </main>
+
+    <aside class="panel" style="display:none;">
+      <!-- Optional right rail for future content -->
+    </aside>
   </div>
 
   <div id="status-bar-bottom">Initializing…</div>
 
-  <!-- Supabase UI (optional) - you can replace with your own init if you prefer -->
+  <!-- CDN: Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // Public keys will be loaded from /api/keys
     let SUPABASE_URL = null;
     let SUPABASE_ANON_KEY = null;
     let STRIPE_PUBLIC_KEY = null;
     let sb = null;
     let clientId = null;
 
-    function $(sel){ return document.querySelector(sel); }
-
-    function showStatus(msg){
-      const bar = document.getElementById('status-bar-bottom');
-      if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
-    }
-    function hideStatus(){ const bar = document.getElementById('status-bar-bottom'); if(bar){ bar.style.display = 'none'; } }
-
-    // Fetch keys from /api/keys and initialize
-    async function fetchKeysAndInit(){
+    async function initDashboard() {
       try{
-        showStatus('Loading API keys…');
         const res = await fetch('/api/keys');
         const keys = await res.json();
         SUPABASE_URL = keys.SUPABASE_URL;
         SUPABASE_ANON_KEY = keys.SUPABASE_ANON_KEY;
         STRIPE_PUBLIC_KEY = keys.STRIPE_PUBLIC_KEY;
 
+        // Init Supabase client directly in the frontend
         sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         await loadUserData();
         await loadBalanceData();
         await loadPaymentsData();
 
-        showStatus('Dashboard ready. Data loaded.');
+        showStatus('Dashboard ready.');
         setTimeout(() => hideStatus(), 1500);
-      } catch (err){
+      } catch (err) {
         console.error('Init error', err);
         showStatus('Initialization failed. Check console.');
-      } finally {
-        // keep status bar visible briefly then hide
-        setTimeout(() => hideStatus(), 2000);
       }
     }
 
+    function showStatus(msg){
+      const bar = document.getElementById('status-bar-bottom');
+      if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
+    }
+    function hideStatus(){ const bar = document.getElementById('status-bar-bottom'); if(bar) bar.style.display = 'none'; }
+
     async function loadUserData(){
       const { data: { user } = {}, error } = await sb.auth.getUser();
-      if (error){ console.error('User error', error.message); return; }
+      if(error){ console.error('User error', error.message); return; }
       clientId = user?.id || null;
       const meta = user?.user_metadata || {};
-      const clientName = meta.name || '';
+      const clientName = meta.name || 'Client';
       const businessId = meta.business_id || meta.businessId || '';
       const greet = document.getElementById('clientGreeting');
       if(greet){
-        const namePart = clientName || 'Client';
-        const bizPart = businessId ? ` | Business ID: ${businessId}` : '';
-        greet.textContent = `Welcome, ${namePart}${bizPart}!`;
+        greet.textContent = `Welcome, ${clientName}${businessId ? ` | Business ID: ${businessId}` : ''}!`;
       }
-      const bizEl = document.getElementById('business-id');
-      if(bizEl) bizEl.textContent = businessId ? `Business ID: ${businessId}` : '';
+      // You can render more client-specific fields here
     }
 
     async function loadBalanceData(){
       if(!clientId) return;
-      try{
-        const r = await fetch(`/stripe/${encodeURIComponent(clientId)}/balance`);
-        const d = await r.json();
-        const total = Number(d.total ?? 0).toFixed(2);
-        const avail = Number(d.available ?? 0).toFixed(2);
-        const pend = Number(d.pending ?? 0).toFixed(2);
-        const t = document.getElementById('total-balance');
-        const a = document.getElementById('available-balance');
-        const p = document.getElementById('pending-balance');
-        if(t) t.textContent = `Total Balance: $${total}`;
-        if(a) a.textContent = `Available for Payout: $${avail}`;
-        if(p) p.textContent = `Pending Balance: $${pend}`;
-      } catch(e){
-        console.error('Balance error', e);
-      }
+      const r = await fetch(`/stripe/${encodeURIComponent(clientId)}/balance`);
+      const d = await r.json();
+      document.getElementById('total-balance').textContent = `Total Balance: $${Number(d.total ?? 0).toFixed(2)}`;
+      document.getElementById('available-balance').textContent = `Available for Payout: $${Number(d.available ?? 0).toFixed(2)}`;
+      document.getElementById('pending-balance').textContent = `Pending Balance: $${Number(d.pending ?? 0).toFixed(2)}`;
     }
 
     async function loadPaymentsData(){
       if(!clientId) return;
-      try{
-        const resp = await fetch(`/payments?customer_id=${encodeURIComponent(clientId)}`);
-        const payments = await resp.json();
-        const tbody = document.querySelector('#payments-table tbody');
-        tbody.innerHTML = '';
-        if(Array.isArray(payments) && payments.length){
-          payments.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${p.id ?? ''}</td>
-              <td>${p.invoice ?? ''}</td>
-              <td>${p.amount != null ? '$' + Number(p.amount).toFixed(2) : ''}</td>
-              <td>${p.currency ?? 'USD'}</td>
-              <td>${p.status ?? ''}</td>
-              <td>${p.date ? new Date(p.date).toLocaleDateString() : ''}</td>
-              <td>${p.customer_name ?? ''}</td>
-              <td>${p.payment_method ?? ''}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else {
+      const resp = await fetch(`/payments?customer_id=${encodeURIComponent(clientId)}`);
+      const payments = await resp.json();
+      const tbody = document.querySelector('#payments-table tbody');
+      tbody.innerHTML = '';
+      if(Array.isArray(payments) && payments.length){
+        payments.forEach(p => {
           const tr = document.createElement('tr');
-          const td = document.createElement('td');
-          td.colSpan = 8;
-          td.textContent = 'No payments found';
-          tr.appendChild(td);
+          tr.innerHTML = `
+            <td>${p.id ?? ''}</td>
+            <td>${p.invoice ?? ''}</td>
+            <td>${p.amount != null ? '$' + Number(p.amount).toFixed(2) : ''}</td>
+            <td>${p.currency ?? 'USD'}</td>
+            <td>${p.status ?? ''}</td>
+            <td>${p.date ? new Date(p.date).toLocaleDateString() : ''}</td>
+            <td>${p.customer_name ?? ''}</td>
+            <td>${p.payment_method ?? ''}</td>
+          `;
           tbody.appendChild(tr);
-        }
-      } catch(e){
-        console.error('Payments error', e);
+        });
+      } else {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 8;
+        td.textContent = 'No payments found';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
       }
     }
 
-    // Logout button (redirect after sign-out)
+    // Logout flow
     function setupLogout() {
       const logoutBtn = document.getElementById('logoutBtn');
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-          if (window.sb && typeof window.sb.auth?.signOut === 'function') {
-            window.sb.auth.signOut().then(() => {
-              window.location.href = '/login.html'; // adjust as needed
-            }).catch(() => {
-              window.location.href = '/login.html';
-            });
-          } else {
-            window.location.href = '/login.html';
+        logoutBtn.addEventListener('click', async () => {
+          if (sb && typeof sb.auth?.signOut === 'function') {
+            await sb.auth.signOut();
           }
+          window.location.href = '/login.html';
         });
       }
     }
 
-    // Init on load
-    window.addEventListener('load', () => {
-      fetchKeysAndInit();
+    // Optional: Hook up Send Payment (mock)
+    function hookSendPayment() {
+      const btn = document.getElementById('send-payment');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const recipientId = document.getElementById('recipient-id').value;
+        const amount = document.getElementById('tenant-payment-amount').value;
+        if(!recipientId || !amount){ alert('Enter recipient and amount'); return; }
+        const resp = await fetch('/api/send-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipientId, amount, currency: 'usd' })
+        });
+        const data = await resp.json();
+        if(data.success){
+          alert('Payment sent');
+          loadUserData();
+        } else {
+          alert('Payment failed: ' + (data.error ?? 'unknown'));
+        }
+      });
+    }
+
+    window.addEventListener('load', async () => {
       setupLogout();
+      await initDashboard();
+      hookSendPayment();
     });
   </script>
 </body>

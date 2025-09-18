@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uniquity Solutions — Contact Us</title>
+  <style>
+    /* Minimal inline styles for a clean look; you can move to a CSS file later */
+    :root {
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --primary: #e94b4b;
+      --ring: rgba(0,0,0,.08);
+      --radius: 12px;
+    }
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); margin:0; }
+    .container { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 24px; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: 0 6px 20px rgba(0,0,0,.05); border:1px solid var(--ring);}
+    h1 { margin-top:0; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: grid; gap: 6px; }
+    label { font-weight: 600; font-size: 14px; }
+    input, textarea, select { padding: 10px 12px; border:1px solid #e5e7eb; border-radius: 8px; font: inherit; width: 100%; }
+    input:focus, textarea:focus { outline: 2px solid rgba(233,75,75,.4); border-color: #cbd5e1; }
+    .notice { font-size: 12px; color: #6b7280; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding: 12px 16px; border-radius: 999px; border:0; cursor:pointer; font-weight:700; }
+    .btn.primary { background: var(--primary); color:#fff; }
+    .error { color: #b91c1c; font-size: 12px; }
+    .success { color: #047857; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card" aria-label="Contact Form">
+      <h1>Contact Uniquity Solutions</h1>
+      <p class="notice">Email: support@uniquitysolutions.com</p>
+      <form id="contactForm" autocomplete="on" aria-label="Contact form">
+        <div class="row">
+          <div class="field">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" required placeholder="Jane Doe" />
+          </div>
+          <div class="field">
+            <label for="email">Your Email</label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field" style="grid-column: span 2;">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required placeholder="How can we help?"></textarea>
+          </div>
+        </div>
+
+        <div class="row" style="align-items:center;">
+          <div class="field" style="grid-column: span 1;">
+            <label for="topic">Topic (optional)</label>
+            <select id="topic" name="topic">
+              <option value="">General inquiry</option>
+              <option value="payments">Payments & gateway setup</option>
+              <option value="onboarding">Merchant onboarding</option>
+              <option value="support">Technical support</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column: span 1;">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn primary" id="submitBtn">Send Message</button>
+          </div>
+        </div>
+
+        <p id="formStatus" class="success" aria-live="polite" style="display:none;"></p>
+        <p id="formError" class="error" aria-live="polite" style="display:none;"></p>
+      </form>
+      <p class="notice" style="margin-top:12px;">
+        By sending this form, you agree to be contacted by Uniquity Solutions regarding your inquiry.
+      </p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script>
+    // Initialize Supabase - replace with your actual keys
+    // Create a new project on supabase.io and replace these with your values.
+    const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+    const supabase = Supabase.createClient ? Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+                                             : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Helper to display messages
+    function showStatus(text, isError=false) {
+      const status = document.getElementById('formStatus');
+      const err = document.getElementById('formError');
+      if (isError) {
+        err.textContent = text;
+        err.style.display = 'block';
+        status.style.display = 'none';
+      } else {
+        status.textContent = text;
+        status.style.display = 'block';
+        err.style.display = 'none';
+      }
+    }
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const topic = document.getElementById('topic').value;
+      const message = document.getElementById('message').value.trim();
+
+      // Basic validation
+      if (!name || !email || !message) {
+        showStatus('Please complete all required fields.', true);
+        return;
+      }
+
+      // Disable button to prevent multi-submit
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      // Write to Supabase table: "contacts" (you need to create this table)
+      // Example schema:
+      // create table contacts (
+      //   id uuid default gen_random_uuid() primary key,
+      //   name text,
+      //   email text,
+      //   topic text,
+      //   message text,
+      //   created_at timestamp with time zone default now()
+      // );
+      try {
+        const { data, error } = await supabase.from('contacts').insert([
+          { name, email, topic, message }
+        ]);
+        if (error) throw error;
+
+        // Optional: trigger email notification via a Supabase function or external webhook
+        // Example: call an edge function or REST webhook to send email to support@uniquitysolutions.com
+        // You would implement this part in your backend (not shown here)
+
+        showStatus('Thank you! Your message has been sent.');
+        document.getElementById('contactForm').reset();
+      } catch (err) {
+        console.error(err);
+        showStatus('There was an error submitting your message. Please try again later.', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      }
+    });
+  </script>
+</body>
+</html>

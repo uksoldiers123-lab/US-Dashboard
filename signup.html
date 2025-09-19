@@ -23,215 +23,299 @@
       --muted: #4b5563;
       --card: #ffffff;
       --primary: #e34b4b;
+      --primary-700: #d13f3f;
       --accent: #fbbf24;
+      --ring: rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(2,6,23,.15);
+      --radius: 18px;
+      --nav-h: 56px;
     }
     *{box-sizing:border-box}
     html, body{height:100%}
     html, body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
-    .nav{ position: sticky; top:0; z-index:1100; background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6)); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.15); }
-    .nav-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; width:100%; max-width:1120px; margin:0 auto; }
+    /* Navbar / header */
+    .nav{
+      position: sticky; top:0; z-index:1100;
+      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between; padding:14px 0;
+      width:100%; max-width:1120px; margin:0 auto;
+    }
     .brand{ display:flex; align-items:center; gap:10px; font-weight:700; color:#fff; text-decoration:none; }
-    .brand-mark { width:28px; height:28px; border-radius:8px; background: linear-gradient(135deg, var(--accent), var(--primary)); box-shadow:0 6px 14px rgba(0,0,0,.15); }
-    .container { max-width: 720px; margin: 2rem auto; padding: 1rem; }
-    label { display: block; margin-top: .5rem; }
-    input { width: 100%; padding: .6rem; margin-top: .25rem; border: 1px solid #ddd; border-radius: 6px; }
-    button { margin-top: .8rem; padding: .75rem 1rem; border: none; border-radius: 6px; background: var(--primary); color: #fff; cursor: pointer; }
-    #signup-status { margin-top: .5rem; color: #d00; }
-    a { color: #1d4ed8; }
-    #how-to-fix { font-size: .95rem; color:#374151; }
+    .brand-mark {
+      width:28px; height:28px; border-radius:8px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      box-shadow:0 6px 14px rgba(0,0,0,.15);
+    }
+    .nav-links{ display:flex; gap:26px; align-items:center; }
+    .nav-links a{ color:#eef2f7; font-weight:600; font-size:14.5px; text-decoration:none; }
+
+    /* Hamburger (visible on all viewports for this request) */
+    .menu-btn{ display:inline-flex; border:0; background:transparent; color:#fff; padding:0; cursor:pointer; }
+
+    /* Mobile overlay menu (overlay shown when hamburger clicked) */
+    .mobile-menu{
+      display:none;
+      position:fixed; left:0; right:0; top: var(--nav-h,56px); bottom:0;
+      z-index:9999; background: rgba(17,24,39,.7); backdrop-filter: blur(6px);
+      padding:12px 12px 24px; overflow-y:auto;
+    }
+    .mobile-menu.open{ display:block; }
+
+    /* Card / form styles (signup uses a clean card) */
+    .card{ background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin: 20px auto; max-width: 720px; }
+    .label{ font-weight:600; color:#374151; font-size:14px; }
+    .input, .select, .textarea{
+      width:100%; padding:12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font:inherit;
+    }
+    .input:focus, .select:focus, .textarea:focus{
+      outline:2px solid transparent; border-color:#cbd5e1; box-shadow:0 0 0 3px rgba(233,75,75,.15);
+    }
+    .btn{ display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:12px; font-weight:700; border:1px solid transparent; cursor:pointer; }
+    .btn-primary{ background:var(--primary); color:#fff; box-shadow:0 12px 24px rgba(233,75,75,.35); }
+    .btn-ghost{ background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.25); }
+
+    /* Status area and banner */
+    .status{ margin-top:12px; min-height:1.2em; font-size:0.95rem; color:var(--muted); }
+    .banner{
+      position: fixed; bottom:0; left:0; right:0; z-index:9999;
+      background:#111; color:#fff; padding:10px 12px; text-align:center; font-family:monospace;
+      font-size:12px; display:none;
+    }
+
+    /* Content wrapper styling (kept minimal) */
+    .container{ max-width: 980px; margin: 0 auto; padding: 20px; }
+
+    @media (max-width: 860px){
+      .nav-links{ display:none; } /* keep hamburger visible on small screens */
+    }
   </style>
 </head>
 <body>
 
-  <div class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="/">
+  <!-- Navbar with icon + hamburger (hamburger visible on all viewports) -->
+  <nav class="nav" aria-label="Primary">
+    <div class="container nav-inner">
+      <a class="brand" href="https://www.uniquitysolutions.com/index.html" aria-label="Uniquity Solutions Home">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>Uniquity Solutions</span>
+        Uniquity Solutions
       </a>
-      <nav>
-        <a href="/login" style="color:#fff; text-decoration:none;">Login</a> &nbsp;|&nbsp;
-        <strong style="color:#fff;">Sign Up</strong>
-      </nav>
+
+      <!-- Hamburger (top-left) -->
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" title="Menu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Login / Sign Up in header -->
+      <div class="nav-links" aria-label="Header actions">
+        <a href="/login" aria-current="page">Login</a>
+        <a href="/signup.html">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile overlay menu (accessible via hamburger) -->
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
+    <div class="menu-label">On this page</div>
+    <a href="https://www.uniquitysolutions.com/index.html">Home</a>
+    <a href="https://www.uniquitysolutions.com/index.html#services">Services</a>
+    <a href="https://www.uniquitysolutions.com/index.html#partners">Partners</a>
+    <a href="https://www.uniquitysolutions.com/index.html#careers">Careers</a>
+    <a href="https://www.uniquitysolutions.com/index.html#contact" class="cta">Contact</a>
+    <div class="menu-label">More pages</div>
+    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/signup.html">Create Account (Merchants)</a>
+    <a href="https://www.uniquitysolutions.com/faq.html">FAQ</a>
+    <a href="https://www.uniquitysolutions.com/pricing.html">Pricing</a>
+    <a href="https://www.uniquitysolutions.com/developers.html">Developers & API</a>
+    <a href="https://www.uniquitysolutions.com/integrations.html">Integrations</a>
+    <a href="https://www.uniquitysolutions.com/compliance.html">Compliance & Security</a>
+    <a href="https://www.dashboard.uniquitysolutions.com/login.html">Login Portal</a>
+  </div>
+
+  <!-- Sign-up Card (fields + Supabase flow) -->
+  <div class="container" style="padding: 20px 0 60px;">
+    <div class="card" aria-label="Sign up form">
+      <h2 style="text-align:center; margin:0 0 12px;">Create an account</h2>
+      <form id="signup-form" autocomplete="off" novalidate>
+
+        <!-- Account basics -->
+        <fieldset aria-labelledby="account-fieldset">
+          <legend id="account-fieldset" style="font-weight:600;">Account details</legend>
+
+          <label for="signup-email" class="label">Email</label>
+          <input class="input" type="email" id="signup-email" name="email" placeholder="name@example.com" required>
+
+          <label for="signup-password" class="label" style="margin-top:6px;">Password</label>
+          <input class="input" type="password" id="signup-password" name="password" placeholder="Your password" required>
+
+          <label for="signup-name" class="label" style="margin-top:6px;">Display name (optional)</label>
+          <input class="input" type="text" id="signup-name" name="display_name" placeholder="Your display name">
+
+          <label for="business_id" class="label" style="margin-top:6px;">Business ID (format: ABC-123456)</label>
+          <input class="input" type="text" id="business_id" name="business_id" placeholder="ABC-123456" required pattern="[A-Za-z]{3}-\d{6}">
+        </fieldset>
+
+        <!-- Profile details -->
+        <fieldset aria-labelledby="profile-fieldset" style="margin-top:14px;">
+          <legend id="profile-fieldset" style="font-weight:600;">Profile details</legend>
+
+          <label for="first-name" class="label">First name</label>
+          <input class="input" type="text" id="first-name" name="first_name" placeholder="First name" required>
+
+          <label for="last-name" class="label" style="margin-top:6px;">Last name</label>
+          <input class="input" type="text" id="last-name" name="last_name" placeholder="Last name" required>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary" style="margin-top:14px;">Create account</button>
+
+        <div id="signup-status" class="status" role="status"></div>
+      </form>
+
+      <p style="margin-top: 1rem;">
+        Already have an account? <a href="https://www.dashboard.uniquitysolutions.com/login.html" target="_blank" rel="noopener">Sign in</a>
+      </p>
+
+      <p id="how-to-fix" style="margin-top: 1rem; color:#374151;">
+        How to fix common signup issues:
+        <ul>
+          <li>Business ID must be in the format ABC-123456 (three letters, dash, six digits).</li>
+          <li>Email must be valid and unique.</li>
+          <li>Passwords must meet your policy.</li>
+        </ul>
+      </p>
     </div>
   </div>
 
-  <div class="container">
-    <h1>Uniquity Solutions</h1>
-
-    <h2>Create an account</h2>
-
-    <form id="signup-form" autocomplete="off">
-      <fieldset>
-        <legend>Account details</legend>
-
-        <label for="signup-email">Email</label>
-        <input id="signup-email" type="email" required>
-
-        <label for="signup-password">Password</label>
-        <input id="signup-password" type="password" required>
-
-        <label for="business_id">Business ID (format: ABC-123456)</label>
-        <input id="business_id" type="text" inputmode="text" pattern="[A-Za-z]{3}-\d{6}" placeholder="ABC-123456" required>
-
-        <label for="signup-name">Display name (optional)</label>
-        <input id="signup-name" type="text">
-      </fieldset>
-
-      <fieldset>
-        <legend>Profile details</legend>
-
-        <label for="first-name">First name</label>
-        <input id="first-name" type="text">
-
-        <label for="last-name">Last name</label>
-        <input id="last-name" type="text">
-      </fieldset>
-
-      <button type="submit">Create account</button>
-
-      <div id="signup-status" role="status"></div>
-    </form>
-
-    <p style="margin-top: 1rem;">
-      Already have an account? <a href="https://www.dashboard.uniquitysolutions.com/login.html" target="_blank" rel="noopener">Sign in</a>
-    </p>
-
-    <p id="how-to-fix" style="margin-top: 1rem;">
-      How to fix common signup issues:
-      <ul>
-        <li>Business ID must be in the format ABC-123456 (three letters, dash, six digits).</li>
-        <li>Email must be valid and unique.</li>
-        <li>Passwords must meet your policy.</li>
-        <li>Ensure the signup form is submitted over HTTPS.</li>
-      </ul>
-    </p>
-  </div>
-
   <script>
-    // 1) Replace with your real values
-    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+ // Replace with your real values
+ const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
 
-    let supabaseClient = null;
+ let supabaseClient = null;
 
-    function isValidBusinessId(bid) {
-      // Accepts ABC-123456 (case-insensitive letters)
-      return /^[A-Za-z]{3}-\d{6}$/.test(bid);
-    }
+ function isValidBusinessId(bid) {
+   // Accepts ABC-123456 (case-insensitive letters)
+   return /^[A-Za-z]{3}-\d{6}$/.test(bid);
+ }
 
-    function showBanner(text) {
-      // Optional: implement a banner if you want to show status
-      console.log('Banner:', text);
-    }
+ function showBanner(text) {
+   // Optional: implement a banner if you want to show status
+   console.log('Banner:', text);
+ }
 
-    function initSupabase() {
-      if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-        console.warn('Supabase library not loaded yet.');
-        setTimeout(initSupabase, 150);
-        return;
-      }
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase initialized:', !!supabaseClient);
-      showBanner('ready');
-    }
+ function initSupabase() {
+   if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
+     console.warn('Supabase library not loaded yet.');
+     setTimeout(initSupabase, 150);
+     return;
+   }
+   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+   console.log('Supabase initialized:', !!supabaseClient);
+   showBanner('ready');
+ }
 
-    async function handleSignup(event) {
-      event.preventDefault();
+ async function handleSignup(event) {
+   event.preventDefault();
 
-      const email = document.getElementById('signup-email').value.trim();
-      const password = document.getElementById('signup-password').value;
-      const displayName = document.getElementById('signup-name').value.trim();
-      const firstName = document.getElementById('first-name').value.trim();
-      const lastName = document.getElementById('last-name').value.trim();
-      const businessIdRaw = document.getElementById('business_id').value.trim();
+   const email = document.getElementById('signup-email').value.trim();
+   const password = document.getElementById('signup-password').value;
+   const displayName = document.getElementById('signup-name').value.trim();
+   const firstName = document.getElementById('first-name').value.trim();
+   const lastName = document.getElementById('last-name').value.trim();
+   const businessIdRaw = document.getElementById('business_id').value.trim();
 
-      const statusEl = document.getElementById('signup-status');
-      statusEl.textContent = '';
+   const statusEl = document.getElementById('signup-status');
+   statusEl.textContent = '';
 
-      if (!email || !password) {
-        statusEl.textContent = 'Please provide email and password';
-        return;
-      }
+   if (!email || !password) {
+     statusEl.textContent = 'Please provide email and password';
+     return;
+   }
 
-      // Validate Business ID format
-      if (!businessIdRaw || !isValidBusinessId(businessIdRaw)) {
-        statusEl.textContent = 'Business ID must be in the format ABC-123456';
-        return;
-      }
+   // Validate Business ID format
+   if (!businessIdRaw || !isValidBusinessId(businessIdRaw)) {
+     statusEl.textContent = 'Business ID must be in the format ABC-123456';
+     return;
+   }
 
-      // Normalize business id to uppercase for consistency
-      const businessId = businessIdRaw.toUpperCase();
+   // Normalize business id to uppercase for consistency
+   const businessId = businessIdRaw.toUpperCase();
 
-      // Role logic (as described)
-      let role = 'user';
-      const lowerEmail = email.toLowerCase();
-      if (lowerEmail === 'admin@uniquitysolutions.com') {
-        role = 'superadmin';
-      } else if (lowerEmail.endsWith('@uniquitysolutions.com')) {
-        role = 'admin';
-      }
+   // Role logic
+   let role = 'user';
+   const lowerEmail = email.toLowerCase();
+   if (lowerEmail === 'admin@uniquitysolutions.com') {
+     role = 'superadmin';
+   } else if (lowerEmail.endsWith('@uniquitysolutions.com')) {
+     role = 'admin';
+   }
 
-      try {
-        // 1) Create user in Auth
-        const { user, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
-        if (signUpError) {
-          statusEl.textContent = 'Signup error: ' + signUpError.message;
-          return;
-        }
+   try {
+     // 1) Create user in Auth
+     const { user, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
+     if (signUpError) {
+       statusEl.textContent = 'Signup error: ' + signUpError.message;
+       return;
+     }
 
-        const userId = user?.id;
-        if (!userId) {
-          statusEl.textContent = 'Signup failed: no user id returned.';
-          return;
-        }
+     const userId = user?.id;
+     if (!userId) {
+       statusEl.textContent = 'Signup failed: no user id returned.';
+       return;
+     }
 
-        // 2) Insert into custom tables
-        const userRow = {
-          Email: email,
-          Name: displayName || null,
-          Created_at: new Date().toISOString(),
-          Business_id: businessId,
-          Role: role
-        };
+     // 2) Insert into custom tables
+     const userRow = {
+       Email: email,
+       Name: displayName || null,
+       Created_at: new Date().toISOString(),
+       Business_id: businessId,
+       Role: role
+     };
 
-        const { error: userInsertError } = await supabaseClient.from('public.users').insert([{
-          id: userId,
-          ...userRow
-        }]);
-        if (userInsertError) {
-          statusEl.textContent = 'Error saving user data: ' + userInsertError.message;
-          return;
-        }
+     const { error: userInsertError } = await supabaseClient.from('public.users').insert([{
+       id: userId,
+       ...userRow
+     }]);
+     if (userInsertError) {
+       statusEl.textContent = 'Error saving user data: ' + userInsertError.message;
+       return;
+     }
 
-        const { error: profileInsertError } = await supabaseClient.from('public.profiles').insert([{
-          User_id: userId,
-          First_name: firstName || null,
-          Last_name: lastName || null,
-          Display_name: displayName || null,
-          Business_id: businessId,
-          Created_at: new Date().toISOString(),
-        }]);
+     const { error: profileInsertError } = await supabaseClient.from('public.profiles').insert([{
+       User_id: userId,
+       First_name: firstName || null,
+       Last_name: lastName || null,
+       Display_name: displayName || null,
+       Business_id: businessId,
+       Created_at: new Date().toISOString(),
+     }]);
 
-        if (profileInsertError) {
-          statusEl.textContent = 'Error saving profile: ' + profileInsertError.message;
-          return;
-        }
+     if (profileInsertError) {
+       statusEl.textContent = 'Error saving profile: ' + profileInsertError.message;
+       return;
+     }
 
-        // 3) Redirect on success
-        window.location.href = 'signup_success.html?status=success';
-      } catch (err) {
-        statusEl.textContent = 'Unexpected error: ' + (err?.message || err);
-      }
-    }
+     // 3) Redirect on success
+     window.location.href = 'signup_success.html?status=success';
+   } catch (err) {
+     statusEl.textContent = 'Unexpected error: ' + (err?.message || err);
+   }
+ }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      initSupabase();
+ window.addEventListener('DOMContentLoaded', () => {
+   initSupabase();
 
-      const form = document.getElementById('signup-form');
-      if (form) form.addEventListener('submit', handleSignup);
-    });
+   const form = document.getElementById('signup-form');
+   if (form) form.addEventListener('submit', handleSignup);
+ });
   </script>
 </body>
 </html>

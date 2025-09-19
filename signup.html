@@ -8,7 +8,7 @@
   <!-- CDN: Supabase JS (UMD) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
-  <!-- Your existing CSS/Tokens (preserve look) -->
+  <!-- Fonts and CSS (reuse login/theme CSS tokens) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=9" />
@@ -25,22 +25,40 @@
       --primary: #e34b4b;
       --accent: #fbbf24;
     }
-    body { font-family: Inter, system-ui, -apple-system, Arial; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    html, body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+    .nav{ position: sticky; top:0; z-index:1100; background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6)); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.15); }
+    .nav-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; width:100%; max-width:1120px; margin:0 auto; }
+    .brand{ display:flex; align-items:center; gap:10px; font-weight:700; color:#fff; text-decoration:none; }
+    .brand-mark { width:28px; height:28px; border-radius:8px; background: linear-gradient(135deg, var(--accent), var(--primary)); box-shadow:0 6px 14px rgba(0,0,0,.15); }
     .container { max-width: 720px; margin: 2rem auto; padding: 1rem; }
     label { display: block; margin-top: .5rem; }
     input { width: 100%; padding: .6rem; margin-top: .25rem; border: 1px solid #ddd; border-radius: 6px; }
     button { margin-top: .8rem; padding: .75rem 1rem; border: none; border-radius: 6px; background: var(--primary); color: #fff; cursor: pointer; }
     #signup-status { margin-top: .5rem; color: #d00; }
     a { color: #1d4ed8; }
+    #how-to-fix { font-size: .95rem; color:#374151; }
   </style>
 </head>
 <body>
 
+  <div class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Uniquity Solutions</span>
+      </a>
+      <nav>
+        <a href="/login" style="color:#fff; text-decoration:none;">Login</a> &nbsp;|&nbsp;
+        <strong style="color:#fff;">Sign Up</strong>
+      </nav>
+    </div>
+  </div>
+
   <div class="container">
     <h1>Uniquity Solutions</h1>
-    <nav>
-      <a href="/login">Login</a> | <strong>Sign Up</strong>
-    </nav>
 
     <h2>Create an account</h2>
 
@@ -54,8 +72,8 @@
         <label for="signup-password">Password</label>
         <input id="signup-password" type="password" required>
 
-        <label for="business_id">Business ID (numeric, required)</label>
-        <input id="business_id" type="text" inputmode="numeric" pattern="[0-9]+" required>
+        <label for="business_id">Business ID (format: ABC-123456)</label>
+        <input id="business_id" type="text" inputmode="text" pattern="[A-Za-z]{3}-\d{6}" placeholder="ABC-123456" required>
 
         <label for="signup-name">Display name (optional)</label>
         <input id="signup-name" type="text">
@@ -80,26 +98,31 @@
       Already have an account? <a href="https://www.dashboard.uniquitysolutions.com/login.html" target="_blank" rel="noopener">Sign in</a>
     </p>
 
-    <p id="how-to-fix" style="margin-top: 1rem; color:#374151;">
+    <p id="how-to-fix" style="margin-top: 1rem;">
       How to fix common signup issues:
       <ul>
-        <li>Business ID must be a number (digits only).</li>
+        <li>Business ID must be in the format ABC-123456 (three letters, dash, six digits).</li>
         <li>Email must be valid and unique.</li>
-        <li>Passwords must meet your project's password policy.</li>
-        <li>Ensure the signup form is submitted over HTTPS to protect credentials.</li>
+        <li>Passwords must meet your policy.</li>
+        <li>Ensure the signup form is submitted over HTTPS.</li>
       </ul>
     </p>
   </div>
 
   <script>
-    // Replace with your real values
+    // 1) Replace with your real values
     const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
 
     let supabaseClient = null;
 
+    function isValidBusinessId(bid) {
+      // Accepts ABC-123456 (case-insensitive letters)
+      return /^[A-Za-z]{3}-\d{6}$/.test(bid);
+    }
+
     function showBanner(text) {
-      // Optional: if you want a banner
+      // Optional: implement a banner if you want to show status
       console.log('Banner:', text);
     }
 
@@ -127,29 +150,27 @@
       const statusEl = document.getElementById('signup-status');
       statusEl.textContent = '';
 
-      // Basic validation
       if (!email || !password) {
         statusEl.textContent = 'Please provide email and password';
         return;
       }
 
-      // Validate numeric Business ID
-      if (!/^[0-9]+$/.test(businessIdRaw)) {
-        statusEl.textContent = 'Business ID must be numeric (digits only).';
+      // Validate Business ID format
+      if (!businessIdRaw || !isValidBusinessId(businessIdRaw)) {
+        statusEl.textContent = 'Business ID must be in the format ABC-123456';
         return;
       }
 
-      const businessId = Number(businessIdRaw);
+      // Normalize business id to uppercase for consistency
+      const businessId = businessIdRaw.toUpperCase();
 
-      // Determine role based on email
+      // Role logic (as described)
       let role = 'user';
-      if (email.toLowerCase() === 'admin@uniquitysolutions.com' || email.toLowerCase().endsWith('@uniquitysolutions.com')) {
-        // If specific admin email, make it superadmin
-        if (email.toLowerCase() === 'admin@uniquitysolutions.com') {
-          role = 'superadmin';
-        } else {
-          role = 'admin';
-        }
+      const lowerEmail = email.toLowerCase();
+      if (lowerEmail === 'admin@uniquitysolutions.com') {
+        role = 'superadmin';
+      } else if (lowerEmail.endsWith('@uniquitysolutions.com')) {
+        role = 'admin';
       }
 
       try {
@@ -166,10 +187,8 @@
           return;
         }
 
-        // 2) Insert into custom tables (adjust column/table names to your schema)
-        // Example: public.users
+        // 2) Insert into custom tables
         const userRow = {
-          id: userId,
           Email: email,
           Name: displayName || null,
           Created_at: new Date().toISOString(),
@@ -177,13 +196,15 @@
           Role: role
         };
 
-        const { error: userInsertError } = await supabaseClient.from('public.users').insert([userRow]);
+        const { error: userInsertError } = await supabaseClient.from('public.users').insert([{
+          id: userId,
+          ...userRow
+        }]);
         if (userInsertError) {
           statusEl.textContent = 'Error saving user data: ' + userInsertError.message;
           return;
         }
 
-        // Example: public.profiles
         const { error: profileInsertError } = await supabaseClient.from('public.profiles').insert([{
           User_id: userId,
           First_name: firstName || null,
@@ -198,7 +219,7 @@
           return;
         }
 
-        // 3) Redirect to success page
+        // 3) Redirect on success
         window.location.href = 'signup_success.html?status=success';
       } catch (err) {
         statusEl.textContent = 'Unexpected error: ' + (err?.message || err);

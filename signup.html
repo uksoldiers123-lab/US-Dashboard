@@ -34,7 +34,7 @@
     html, body{height:100%}
     html, body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
-    /* Navbar / header */
+    /* Navbar / header (exact look) */
     .nav{
       position: sticky; top:0; z-index:1100;
       background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
@@ -54,7 +54,7 @@
     .nav-links{ display:flex; gap:26px; align-items:center; }
     .nav-links a{ color:#eef2f7; font-weight:600; font-size:14.5px; text-decoration:none; }
 
-    /* Hamburger (visible on all viewports for this request) */
+    /* Hamburger (visible on all viewports for v8/v6 style) */
     .menu-btn{ display:inline-flex; border:0; background:transparent; color:#fff; padding:0; cursor:pointer; }
 
     /* Mobile overlay menu (overlay shown when hamburger clicked) */
@@ -112,7 +112,7 @@
         </svg>
       </button>
 
-      <!-- Login / Sign Up in header -->
+      <!-- Desktop header links -->
       <div class="nav-links" aria-label="Header actions">
         <a href="/login" aria-current="page">Login</a>
         <a href="/signup.html">Sign Up</a>
@@ -201,12 +201,11 @@
  let supabaseClient = null;
 
  function isValidBusinessId(bid) {
-   // Accepts ABC-123456 (case-insensitive letters)
+   // ABC-123456, case-insensitive letters
    return /^[A-Za-z]{3}-\d{6}$/.test(bid);
  }
 
  function showBanner(text) {
-   // Optional: implement a banner if you want to show status
    console.log('Banner:', text);
  }
 
@@ -315,6 +314,16 @@
 
    const form = document.getElementById('signup-form');
    if (form) form.addEventListener('submit', handleSignup);
+
+   // Mobile menu toggle
+   const menuBtn = document.getElementById('menuBtn');
+   const mobileMenu = document.getElementById('mobileMenu');
+   if (menuBtn && mobileMenu) {
+     menuBtn.addEventListener('click', () => {
+       const open = mobileMenu.classList.toggle('open');
+       menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+     });
+   }
  });
   </script>
 </body>

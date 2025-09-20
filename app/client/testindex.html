@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Uniquity Solutions – Client Dashboard (CDN + Inline Keys)</title>
+  <title>Uniquity Solutions – Client Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Charting library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
       --bg: #96A3B1;
@@ -19,21 +22,20 @@
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
 
-    /* Simple doc-style header same as your previous look */
+    /* Header/Nav */
     .nav { position: sticky; top: 0; z-index: 1100;
-      background: linear-gradient(to bottom, rgba(150,163,177,0.9), rgba(150,163,177,0.6));
-      border-bottom: 1px solid rgba(255,255,255,.15); height: var(--nav-h);
+      background: rgba(0,0,0,.04);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-bottom: 1px solid rgba(0,0,0,.08);
     }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1200px; margin: 0 auto; }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #fff; }
+    .brand { display:flex; align-items:center; gap: 10px; font-weight: 700; color:#fff; }
     .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); }
+
     .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
+    /* Layout */
     .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 20px 0; }
-    aside { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; }
-    main { display: grid; gap: 16px; }
-
-    .panel { padding: 16px; border-radius: var(--radius); border: 1px solid #e5e7eb; background: var(--card); min-height: 180px; box-shadow: var(--shadow); }
+    aside.panel, main.panel { background:#fff; border:1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; min-height: 180px; box-shadow: var(--shadow); }
     .section-title { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
 
     table { width: 100%; border-collapse: collapse; }
@@ -42,183 +44,270 @@
 
     .btn { background: var(--primary); color: white; border: 0; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
     .btn:hover { background: var(--accent); }
-
     .input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
 
-    #status-bar-bottom {
-      position: fixed; left: 0; right: 0; bottom: 0;
-      background: #333; color: #fff; text-align: center; padding: 8px;
-      z-index: 1200; display: none;
+    /* Notifications */
+    #notif-panel { position: absolute; top: calc(var(--nav-h) + 8px); right: 0; width: 360px; max-height: 420px; overflow: auto;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,.08); display: none; z-index: 2000;
     }
+    #notif-panel .notif-item { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    #notif-panel .notif-item.unread { background: #f8fafc; font-weight: 600; }
+    #notif-panel .notif-actions { display: flex; gap: 6px; }
+    .notif-badge { display: inline-block; background: #e11d48; color: #fff; border-radius: 999px; padding: 2px 6px; font-size: 11px; margin-left: 6px; }
 
-    @media (max-width: 768px) {
+    /* Charts area */
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .chart-card { padding: 12px; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; height: 260px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
+      #notif-panel { width: 100%; right: 0; }
     }
   </style>
 </head>
 <body>
-  <!-- CDN Supabase; inline keys below -->
-  <div id="client-root" class="client-root">
-    <header class="nav">
-      <div class="nav-inner">
-        <div class="brand">
-          <span class="brand-mark"></span> Uniquity Solutions – Client Dashboard
-        </div>
-        <button id="logoutBtn" class="btn" style="width:auto;">Logout</button>
-      </div>
-    </header>
-
-    <div class="container layout" id="doc-layout">
-      <!-- Left rail -->
-      <aside class="panel" aria-label="Overview">
-        <div class="section-title">Overview</div>
-        <div id="clientGreeting" style="font-size:1.1rem; font-weight:700;">Welcome, Client!</div>
-        <div id="business-id" style="margin-top:6px; color:#4b5563;"></div>
-        <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
-        <div id="available-balance">Available for Payout: $0.00</div>
-        <div id="pending-balance">Pending Balance: $0.00</div>
-      </aside>
-
-      <!-- Right content: dynamic data -->
-      <main>
-        <section class="panel" id="paymentsPanel">
-          <div class="section-title">Recent Payments</div>
-          <table id="payments-table" aria-label="Payments">
-            <thead><tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th></tr></thead>
-            <tbody><!-- filled by JS --></tbody>
-          </table>
-        </section>
-
-        <section class="panel" id="adsPanel">
-          <div class="section-title">Advertisements</div>
-          <div id="adsList">Loading ads…</div>
-        </section>
-
-        <section class="panel" id="actionsPanel">
-          <div class="section-title">Tenant to Tenant Payment</div>
-          <input type="text" id="recipient-id" placeholder="Recipient User ID" class="input" />
-          <input type="number" id="tenant-payment-amount" placeholder="Amount" class="input" />
-          <button id="send-payment" class="btn">Send Payment</button>
-        </section>
-      </main>
-
-      <aside class="panel" style="display:none;">
-        <!-- optional right rail -->
-      </aside>
+  <header class="nav" id="site-header">
+    <div class="brand">
+      <span class="brand-mark"></span> Uniquity Solutions – Client Dashboard
     </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div id="notifBtn" class="notif-trigger" title="Notifications" style="cursor:pointer;">
+        🔔
+        <span id="notifCount" class="notif-badge" style="display:none;">0</span>
+      </div>
+      <button id="logoutBtn" class="btn" style="width:auto;">Logout</button>
+    </div>
+  </header>
 
-    <div id="status-bar-bottom">Initializing…</div>
+  <div class="container layout" id="doc-layout">
+    <!-- Left rail: Overview -->
+    <aside class="panel" aria-label="Overview" id="overviewPanel">
+      <div class="section-title">Overview</div>
+      <div id="clientGreeting" style="font-size:1.15rem; font-weight:700;">Welcome, Client!</div>
+      <div id="business-id" style="margin-top:6px; color:#4b5563;"></div>
+      <div id="total-balance" style="margin-top:8px;">Total Balance: $0.00</div>
+      <div id="available-balance" style="margin-top:6px;">Available for Payout: $0.00</div>
+      <div id="pending-balance" style="margin-top:6px;">Pending Balance: $0.00</div>
+    </aside>
+
+    <!-- Right: dynamic data / onboarding -->
+    <main class="panel" id="dashboardMain">
+      <div class="section-title" style="margin-bottom:8px;">Your Dashboard</div>
+
+      <div id="greetingLine" style="font-size:14px; color:#374151; margin-bottom:8px;">
+        <!-- Greeting is injected here dynamically -->
+      </div>
+
+      <!-- Onboarding status / Stripe Connect-like view switch -->
+      <section id="onboardArea" class="panel" style="margin-bottom:16px;">
+        <div class="section-title" id="onboardTitle">Onboarding</div>
+        <div id="onboardBody" style="color:#374151;">Checking onboarding status...</div>
+        <div id="onboardActions" style="margin-top:12px;">
+          <button id="startOnboarding" class="btn" style="width:auto;">Start Onboarding</button>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="charts" aria-label="Charts">
+        <div class="chart-card">
+          <div class="section-title" style="margin-bottom:6px;">Revenue (Payments) over Time</div>
+          <canvas id="revenueChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="section-title" style="margin-bottom:6px;">Payments by Status</div>
+          <canvas id="paymentsStatusChart" height="180"></canvas>
+        </div>
+      </section>
+
+      <section class="charts" aria-label="More charts">
+        <div class="chart-card">
+          <div class="section-title" style="margin-bottom:6px;">Payouts over Time</div>
+          <canvas id="payoutsChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="section-title" style="margin-bottom:6px;">Transfers</div>
+          <canvas id="transfersChart" height="180"></canvas>
+        </div>
+      </section>
+
+      <!-- Payments table -->
+      <section class="panel" id="paymentsPanel" style="margin-top:12px;">
+        <div class="section-title">Recent Payments</div>
+        <table aria-label="Payments">
+          <thead><tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th><th>Customer</th><th>Method</th></tr></thead>
+          <tbody id="payments-tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- Search -->
+      <section class="panel" id="searchPanel" style="margin-top:12px;">
+        <div class="section-title">Search</div>
+        <input id="global-search" class="input" placeholder="Search payments, payouts, transfers, users…" />
+        <div id="search-results" class="notif-panel" style="display:none; margin-top:8px; padding:8px 0;"></div>
+      </section>
+
+      <!-- Optional right rail -->
+      <aside class="panel" id="adsPanel" style="display:none;">
+        <div class="section-title">Advertisements</div>
+        <div id="adsList">Loading ads…</div>
+      </aside>
+    </main>
   </div>
 
-  <!-- CDN: Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Notification panel -->
+  <div id="notif-panel" aria-label="Notifications" style="position: fixed; right: 20px; top: 70px; width: 420px; max-height: 520px; overflow: auto; background:#fff; border:1px solid #e5e7eb; border-radius:12px; display:none; z-index:2100;">
+    <div style="padding:8px 12px; border-bottom:1px solid #eee; font-weight:700;">Notifications</div>
+    <div id="notif-list"></div>
+    <div style="padding:8px; text-align:right;">
+      <button id="mark-all-read" class="btn" style="width:auto;">Mark all read</button>
+    </div>
+  </div>
+
+  <div id="status-bar" style="display:none; position:fixed; bottom:0; left:0; right:0; text-align:center; padding:6px; background:#111; color:#fff; z-index:3000;">
+    Initializing…
+  </div>
 
   <script>
-    // Directly embedded credentials (for dev/testing only)
-    // Replace these with your own values in env/.env in prod
+    // Replace with real initialization in production
     const SUPABASE_URL = "https://gifguoyqccozlijrxgcf.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0"; // WARNING: do not use in prod
-    const STRIPE_PUBLIC_KEY = "pk_live_51Rv1X3By3HHUeuve2mwl2HJqUYgFuSa2xWM6AwjbcM10Ts6jqdsrtT5RZ9DkK754BEHQ68jqKZ0w0N32zQHLT9Xr007tOweb2G";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHRyY2FlaHBzaGt3Z2FubGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4NjM0NzMsImV4cCI6MjA3MDQzOTQ3M30.8CLBXrknu3kea7OMdJKOBSNayXBOu3lJFu_H4PqI0vg";
 
-    // Init Supabase client
-    const sb = window.supabase || (function(){ 
-      // Inline initialization to avoid extra deps if window.supabase isn't ready
-      return null;
-    })();
-
-    // If window.supabase is not yet defined by the CDN, create a minimal client factory
+    // Simple inline mock or real client
     function createClient(url, key){
       if (window.supabase && window.supabase.createClient) return window.supabase.createClient(url, key);
-      // Fallback: naive object to avoid crash (DO NOT rely on this in prod)
-      return { auth: { getUser: async () => ({ data: { user: null }, error: { message: "CDN not loaded" } }), signOut: async () => {} } };
+      // Minimal fallback (read-only mock)
+      return {
+        auth: {
+          getUser: async () => ({
+            data: {
+              user: {
+                id: "dev-user",
+                user_metadata: {
+                  name: "Dev Client",
+                  business_id: "BUS-123",
+                  onboarding_complete: false,
+                  role: "user_connect" // or "user" or "connect_user"
+                }
+              }
+            }, error: null
+          }),
+          signOut: async () => {}
+        },
+        from: () => ({
+          select: () => ({ data: [], error: null }),
+          insert: () => ({ data: [], error: null }),
+          update: () => ({ data: [], error: null }),
+          delete: () => ({ data: [], error: null }),
+        })
+      };
     }
 
-    // Make sure Supabase client exists
-    const SUPABASE = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Use the CDN Supabase client if available
-    const supabase = window.supabase ? window.supabase : SUPABASE;
+    const $ = (sel) => document.querySelector(sel);
+    const $el = (sel) => document.querySelector(sel);
 
-    // Helpers
-    function $(sel){ return document.querySelector(sel); }
-    function showStatus(msg){
-      const bar = document.getElementById('status-bar-bottom');
-      if(bar){ bar.style.display = 'block'; bar.textContent = msg; }
+    function show(el){ if (el) el.style.display = ''; }
+    function hide(el){ if (el) el.style.display = 'none'; }
+
+    // Unread count simulation
+    let unreadCount = 0;
+
+    // Load user + greeting
+    async function init(){
+      // Get user (via real auth in prod)
+      const user = (sb && sb.auth && (await sb.auth.getUser()).data.user) || {
+        id: "guest",
+        user_metadata: { name: "Guest User", business_id: "BUS-GUEST", onboarding_complete: false, role: "user_connect" }
+      };
+
+      // Greeting: "Welcome, <Name> (Business ID: <id>)"
+      const name = user.user_metadata?.name || "Client";
+      const biz = user.user_metadata?.business_id || user.user_metadata?.businessId || "";
+      const greetingEl = document.getElementById('greetingLine');
+      if (greetingEl) {
+        greetingEl.textContent = `Welcome, ${name}${biz ? ` | Business ID: ${biz}` : ''}!`;
+      } else {
+        // Fallback to overview panel
+        const g = document.getElementById('clientGreeting');
+        if (g) g.textContent = `Welcome, ${name}${biz ? ` (Business ID: ${biz})` : ''}!`;
+      }
+
+      // Onboarding vs Dashboard
+      const onboardingComplete = user.user_metadata?.onboarding_complete || false;
+      const role = user.user_metadata?.role || 'user';
+      setupView(onboardingComplete, role);
+
+      // Load sample data
+      await loadOverview(user);
+      await loadPayments();
+      renderCharts();
+      setupSearch();
+      loadNotifications(user.id);
     }
-    function hideStatus(){ const bar = document.getElementById('status-bar-bottom'); if(bar){ bar.style.display = 'none'; } }
 
-    // Init flow
-    async function initDashboard(){
-      try{
-        showStatus('Loading API keys... (inline keys)');
-        // If you want to pull real keys from /api/keys, fetch them here.
-        // For this inline version we already have SUPABASE_URL/Anon in constants.
+    // View switch based on onboarding_complete + role
+    function setupView(onboardComplete, role){
+      // onboard vs dashboard
+      const onboardArea = document.getElementById('onboardArea');
+      if (!onboardArea) return;
 
-        // Initialize real data from Supabase (login parity)
-        // Try to get current user (anonymous users may appear)
-        let user = null;
-        if (window.supabase && window.supabase.auth) {
-          const { data } = await window.supabase.auth.getUser();
-          user = data?.user || null;
-        }
-
-        // If user is logged in, render a greeting
-        const greetEl = document.getElementById('clientGreeting');
-        if (user && user.user_metadata && (user.user_metadata.name || user.user_metadata.businessId)) {
-          const name = user.user_metadata.name || 'Client';
-          const biz = user.user_metadata.businessId || user.user_metadata.business_id || '';
-          greetEl.textContent = `Welcome, ${name}${biz ? ` | Business ID: ${biz}` : ''}!`;
-        }
-
-        // Load balance data
-        const bal = await fetch('/stripe/c0/balance').catch(() => null); // placeholder if you wire a route later
-        // If you have a proper backend, replace the above with a real call, else skip
-
-        // Load hard-coded demo payments as placeholder (or wire to your real /payments endpoint)
-        await loadPaymentsData();
-
-        // Final readiness
-        showStatus('Dashboard ready. Data loaded.');
-        setTimeout(() => hideStatus(), 1500);
-      } catch (e){
-        console.error('Initialization failed', e);
-        showStatus('Initialization failed. Check console.');
+      // If onboard not complete and role matches "user_connect" (Stripe Connect user), show onboarding
+      const shouldShowOnboard = (role === 'user_connect' || role === 'connect_user') && !onboardComplete;
+      if (shouldShowOnboard){
+        onboardArea.style.display = '';
+        document.getElementById('startOnboarding').onclick = () => {
+          // Simulate onboarding flow you can replace with real Stripe Connect onboarding URL
+          alert('Starting onboarding for Stripe Connect account...');
+          // After onboarding, you would update onboarding_complete in your DB
+          onboardArea.style.display = 'none';
+          // Force refresh or route to dashboard
+        };
+      } else {
+        onboardArea.style.display = 'none';
       }
     }
 
-    // Mock: load payments table with real data if you have an API
-    async function loadPaymentsData(){
-      const tbody = document.querySelector('#payments-table tbody');
+    async function loadOverview(user){
+      // Replace with real values from Supabase
+      const biz = user.user_metadata?.business_id || '';
+      document.getElementById('business-id').textContent = biz ? `Business ID: ${biz}` : '';
+      document.getElementById('total-balance').textContent = "Total Balance: $1,234.56";
+      document.getElementById('available-balance').textContent = "Available for Payout: $1,000.00";
+      document.getElementById('pending-balance').textContent = "Pending Balance: $234.56";
+
+      // Greeting line in header
+      const name = user.user_metadata?.name || 'Client';
+      const bizId = biz || '';
+      const greet = document.getElementById('clientGreeting');
+      if (greet) greet.textContent = `Welcome, ${name}${bizId ? ` (Business ID: ${bizId})` : ''}!`;
+    }
+
+    async function loadPayments(){
+      const tbody = document.getElementById('payments-tbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
-      // Try to fetch actual payments if you have an API endpoint
-      try {
-        const res = await fetch('/payments?customer_id=' + encodeURIComponent('c0'));
-        const payments = await res.json();
-        if (Array.isArray(payments) && payments.length){
-          payments.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${p.id ?? ''}</td>
-              <td>${p.invoice ?? ''}</td>
-              <td>${p.amount != null ? '$' + Number(p.amount).toFixed(2) : ''}</td>
-              <td>${p.currency ?? 'USD'}</td>
-              <td>${p.status ?? ''}</td>
-              <td>${p.date ? new Date(p.date).toLocaleDateString() : ''}</td>
-              <td>${p.customer_name ?? ''}</td>
-              <td>${p.payment_method ?? ''}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else {
+      const rows = [
+        { id:'pay_001', invoice:'INV-001', amount:120, currency:'USD', status:'succeeded', date:'2025-09-15', customer:'ACME', method:'card' },
+        { id:'pay_002', invoice:'INV-002', amount:75, currency:'USD', status:'pending', date:'2025-09-16', customer:'Globex', method:'bank' },
+      ];
+      if (rows.length){
+        rows.forEach(p => {
           const tr = document.createElement('tr');
-          const td = document.createElement('td');
-          td.colSpan = 8;
-          td.textContent = 'No payments found';
-          tr.appendChild(td);
+          tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.invoice}</td>
+            <td>$${p.amount.toFixed(2)}</td>
+            <td>${p.currency}</td>
+            <td>${p.status}</td>
+            <td>${new Date(p.date).toLocaleDateString()}</td>
+            <td>${p.customer}</td>
+            <td>${p.method}</td>
+          `;
           tbody.appendChild(tr);
-        }
-      } catch(err){
-        // If you have no API yet, render a placeholder row
+        });
+      } else {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
         td.colSpan = 8;
@@ -228,26 +317,128 @@
       }
     }
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        if (window.supabase && window.supabase.auth && typeof window.supabase.auth.signOut === 'function') {
-          await window.supabase.auth.signOut();
+    function renderCharts(){
+      // Revenue over time
+      const ctxRev = document.getElementById('revenueChart').getContext('2d');
+      new Chart(ctxRev, {
+        type: 'line',
+        data: {
+          labels: ['2025-09-01','2025-09-05','2025-09-10','2025-09-15','2025-09-20'],
+          datasets: [{
+            label: 'Revenue',
+            data: [200, 400, 350, 520, 610],
+            borderColor: '#e34b4b',
+            backgroundColor: 'rgba(227,75,75,.15)',
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { x: { type: 'time', time: { unit: 'day' } }, y: { beginAtZero: true } }
         }
-      } catch (e) {
-        // ignore
-      }
-      window.location.href = 'https://www.dashboard.uniquitysolutions.com/login.html';
-    });
+      });
 
-    // Optional: webhook-like update UI (not a real webhook)
-    function hookWebhooksFromSupabase() {
-      // You can poll a Supabase table for new webhook events and render them here
+      // Payments by status
+      const ctxStatus = document.getElementById('paymentsStatusChart').getContext('2d');
+      new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+          labels: ['Succeeded','Pending','Failed'],
+          datasets: [{ data: [40, 10, 5], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
+        },
+        options: { maintainAspectRatio: false }
+      });
+
+      // Payouts over time
+      const ctxPayouts = document.getElementById('payoutsChart').getContext('2d');
+      new Chart(ctxPayouts, {
+        type: 'line',
+        data: {
+          labels: ['2025-09-01','09-05','09-10','09-15','09-20'],
+          datasets: [{
+            label: 'Payouts',
+            data: [50, 100, 80, 120, 160],
+            borderColor: '#f59e0b',
+            fill: false
+          }]
+        },
+        options: { maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'day' } }, y: { beginAtZero: true } } }
+      });
+
+      // Transfers
+      const ctxTransfers = document.getElementById('transfersChart').getContext('2d');
+      new Chart(ctxTransfers, {
+        type: 'bar',
+        data: {
+          labels: ['Mon','Tue','Wed','Thu','Fri'],
+          datasets: [{ label: 'Transfers', data: [8, 12, 6, 9, 11], backgroundColor: '#3b82f6' }]
+        },
+        options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+      });
     }
 
-    window.addEventListener('load', () => {
-      initDashboard();
+    function setupSearch(){
+      const search = document.getElementById('global-search');
+      const results = document.getElementById('search-results');
+      if (!search || !results) return;
+
+      search.addEventListener('input', function(){
+        const q = this.value.trim();
+        if (!q) { results.style.display = 'none'; results.innerHTML = ''; return; }
+        const fake = [
+          { type:'Payment', id:'pay_001', text:`Payment ${q} - INV-001` },
+          { type:'User', id:'u_123', text:`User ${q} - john@example.com` }
+        ];
+        results.innerHTML = fake.map(r => `<div class="notif-item" data-id="${r.id}" data-type="${r.type}">${r.type}: ${r.text}</div>`).join('');
+        results.style.display = 'block';
+        results.querySelectorAll('.notif-item').forEach(el => {
+          el.addEventListener('click', () => {
+            // Implement navigation to detail if needed
+            results.style.display = 'none';
+          });
+        });
+      });
+    }
+
+    // Notifications
+    function loadNotifications(userId){
+      const list = document.getElementById('notif-list');
+      if (!list) return;
+      // Simple mock notifications
+      const items = [
+        { id:'n1', message:'Payment of $120.00 succeeded', is_read:false, created_at:'2025-09-15T12:00:00Z' },
+        { id:'n2', message:'Payout of $50.00 completed', is_read:true, created_at:'2025-09-14T09:00:00Z' }
+      ];
+      list.innerHTML = '';
+      const unread = items.filter(i => !i.is_read).length;
+      unreadCount = unread;
+      const badge = document.getElementById('notifCount');
+      if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline-block'; }
+      else badge.style.display = 'none';
+
+      items.forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'notif-item' + (n.is_read ? '' : ' unread');
+        div.textContent = `${n.message} • ${new Date(n.created_at).toLocaleString()}`;
+        list.appendChild(div);
+      });
+    }
+
+    // Onboarding button
+    document.getElementById('startOnboarding')?.addEventListener('click', () => {
+      alert('Begin Stripe Connect onboarding (replace with real flow)');
     });
+
+    // Sign out
+    const signOutBtn = document.getElementById('logoutBtn');
+    if (signOutBtn) signOutBtn.addEventListener('click', () => {
+      // Implement sign-out with Supabase
+      window.location.href = 'login.html';
+    });
+
+    // Init
+    window.addEventListener('load', init);
   </script>
 </body>
 </html>

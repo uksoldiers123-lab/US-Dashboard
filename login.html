@@ -1,188 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uniquity Solutions — Login</title>
-
-  <!-- CDN: Supabase JS (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-
-  <!-- Fonts and CSS (reuse login/theme CSS tokens) -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=9" />
-
-  <!-- Runtime config BEFORE your app code -->
-  <script src="/env.js" defer></script>
+ <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <title>Uniquity Solutions — Login</title>
+ <style>
+ :root {
+ --bg: #f7f7fb;
+ --text: #1f2937;
+ --card: #ffffff;
+ --primary: #e34b4b;
+ --shadow: 0 10px 30px rgba(2,6,23,.15);
+ --radius: 12px;
+ }
+ * { box-sizing: border-box; }
+ html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+ .nav { position: sticky; top: 0; z-index: 1100; background: rgba(0,0,0,.04); display:flex; align-items:center; justify-content: space-between; padding: 12px 20px; }
+ .brand { display:flex; align-items:center; gap: 8px; font-weight:700; color:#111; }
+ .brand-mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #fff, #ffd6a3); display:inline-block; }
+ .container { width: 100%; max-width: 720px; margin: 0 auto; padding: 40px 16px; }
+ .card { background: var(--card); border-radius: var(--radius); border: 1px solid #e5e7eb; padding: 24px; box-shadow: var(--shadow); }
+ h1 { font-size: 1.25rem; margin: 0 0 12px; font-weight: 700; }
+ .field { margin: 12px 0; display: block; }
+ label { display: block; font-size: 0.9rem; color: #374151; margin-bottom: 6px; }
+ input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 1rem; }
+ .btn { background: var(--primary); color:white; border:0; padding: 12px 16px; border-radius: 8px; font-weight:700; cursor: pointer; width: 100%; }
+ .status { margin-top: 8px; font-size: 0.9rem; color: #374151; }
+ #onboardArea { display: none; margin-top: 16px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; }
+ </style>
 </head>
 <body>
+ <nav class="nav">
+ <div class="brand">
+ <span class="brand-mark" aria-hidden="true"></span>
+ <span>Uniquity Solutions</span>
+ </div>
+ <div style="opacity:.7">Login</div>
+ </nav>
 
-  <!-- Navbar with icon + hamburger (hamburger visible on all viewports) -->
-  <nav class="nav" aria-label="Primary">
-    <div class="container nav-inner">
-      <a class="brand" href="https://www.uniquitysolutions.com/index.html" aria-label="Uniquity Solutions Home">
-        <span class="brand-mark" aria-hidden="true"></span>
-        Uniquity Solutions
-      </a>
+ <main class="container">
+ <section class="card" aria-label="Login Card">
+ <h1>Sign In</h1>
 
-      <!-- Hamburger (top-left) -->
-      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileMenu" title="Menu">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
+ <form id="login-form" autocomplete="on" novalidate>
+ <div class="field">
+ <label for="login-email">Email</label>
+ <input id="login-email" type="email" placeholder="you@example.com" required />
+ </div>
+ <div class="field">
+ <label for="login-password">Password</label>
+ <input id="login-password" type="password" placeholder="••••••••" required />
+ </div>
+ <button id="login-btn" class="btn" type="submit">Sign In</button>
+ <div id="login-status" class="status" style="display:none;"></div>
+ </form>
 
-      <!-- Login / Sign Up in header -->
-      <div class="nav-links" aria-label="Header actions">
-        <a href="/login.html" aria-current="page">Login</a>
-        <a href="/signup.html">Sign Up</a>
-      </div>
-    </div>
-  </nav>
+ <div id="onboardArea" aria-live="polite">
+ <strong>Onboarding Required</strong>
+ <p>Please complete onboarding to access the dashboard.</p>
+ </div>
 
-  <!-- Mobile overlay menu (accessible via hamburger) -->
-  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Mobile Navigation">
-    <div class="menu-label">On this page</div>
-    <a href="https://www.uniquitysolutions.com/index.html">Home</a>
-    <a href="https://www.uniquitysolutions.com/index.html#services">Services</a>
-    <a href="https://www.uniquitysolutions.com/index.html#partners">Partners</a>
-    <a href="https://www.uniquitysolutions.com/index.html#careers">Careers</a>
-    <a href="https://www.uniquitysolutions.com/index.html#contact" class="cta">Contact</a>
-    <div class="menu-label">More pages</div>
-    <a href="https://buy.stripe.com/7sYeVcakW9dRbrObHsgw000">Make a Payment</a>
-    <a href="https://www.dashboard.uniquitysolutions.com/presignup.html">Create Account (Merchants)</a>
-    <a href="https://www.uniquitysolutions.com/faq.html">FAQ</a>
-    <a href="https://www.uniquitysolutions.com/pricing.html">Pricing</a>
-    <a href="https://www.uniquitysolutions.com/developers.html">Developers & API</a>
-    <a href="https://www.uniquitysolutions.com/integrations.html">Integrations</a>
-    <a href="https://www.uniquitysolutions.com/compliance.html">Compliance & Security</a>
-    <a href="https://www.dashboard.uniquitysolutions.com/login.html">Login Portal</a>
-  </div>
+ <div id="clientGreeting" style="margin-top:12px;"></div>
+ </section>
+ </main>
 
-  <!-- Sign-up Card is replaced with a Login Card but visuals stay consistent -->
-  <div class="container" style="padding: 20px 0 60px;">
-    <div class="card" aria-label="Login form">
-      <h2 style="text-align:center; margin:0 0 12px;">Sign In</h2>
-      <form id="login-form" autocomplete="username" novalidate>
-        <label for="login-email" class="label">Email</label>
-        <input class="input" type="email" id="login-email" name="email" placeholder="name@example.com" required>
+ <script>
+ // Replace with your real values, or keep as is for local dev (mock fallback)
+ // Production: import from your hosted Client.js or configure in inline if small
+ const SUPABASE_URL = "https://gifguoyqccozlijrxgcf.supabase.co";
+ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHRyY2FlaHBzaGt3Z2FubGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4NjM0NzMsImV4cCI6MjA3MDQzOTQ3M30.8CLBXrknu3kea7OMdJKOBSNayXBOu3lJFu_H4PqI0vg";
 
-        <label for="login-password" class="label" style="margin-top:6px;">Password</label>
-        <input class="input" type="password" id="login-password" name="password" placeholder="Your password" required>
+ (async () => {
+ let sb = null;
+ try {
+ const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm");
+ sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ } catch (err) {
+ console.warn("Supabase JS module failed to load. Using mock.", err);
+ sb = null;
+ }
 
-        <button type="submit" id="login-btn" class="btn btn-primary" style="margin-top:12px; width:100%;">Sign In</button>
-        <div class="status" id="login-status" aria-live="polite" style="margin-top:8px;"></div>
-      </form>
-    </div>
-  </div>
+ const loginForm = document.getElementById("login-form");
+ const loginStatus = document.getElementById("login-status");
+ const loginBtn = document.getElementById("login-btn");
 
-  <!-- Status banner area (init) -->
-  <div id="qp-banner" class="banner" aria-live="polite" role="status" style="display:none;"></div>
+ function showStatus(msg) {
+ if (loginStatus) {
+ loginStatus.textContent = msg;
+ loginStatus.style.display = "";
+ }
+ }
 
-  <script>
-  // CDN: Supabase JS is already loaded above via script tag
-  const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+ function hideStatus() {
+ if (loginStatus) loginStatus.style.display = "none";
+ }
 
-  function showBanner(text) {
-    const b = document.getElementById('qp-banner');
-    if (b) { b.style.display = 'block'; b.textContent = 'Init: ' + text; }
-  }
+ async function renderPostLogin(user) {
+ // user: { id, name, business_id, role, onboarding_complete }
+ const name = user?.name || "Client";
+ const biz = user?.business_id || "";
+ const greetingEl = document.getElementById("clientGreeting");
+ if (greetingEl) {
+ greetingEl.textContent = `Welcome, ${name}${biz ? ` (Business ID: ${biz})` : ""}!`;
+ }
 
-  function initSupabase() {
-    if (typeof supabase === 'undefined' || typeof supabase.createClient !== 'function') {
-      console.warn('Supabase library not loaded yet.');
-      showBanner('not ready');
-      setTimeout(initSupabase, 150);
-      return;
-    }
-    window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase initialized:', !!window.supabase);
-    showBanner('ready');
-    if (typeof window.bindLoginHandler === 'function') window.bindLoginHandler();
-  }
+ const onboardPanel = document.getElementById("onboardArea");
+ const shouldShowOnboard = (user?.role === "user_connect" || user?.role === "connect_user") && !user?.onboarding_complete;
+ if (onboardPanel) onboardPanel.style.display = shouldShowOnboard ? "" : "none";
+ // Redirect to dashboard or initialize UI as needed
+ // window.location.href = "dashboard.html";
+ }
 
-  // Kick off init after CDN load
-  setTimeout(initSupabase, 0);
+ async function handleLogin(event) {
+ event.preventDefault();
+ if (!sb) {
+ // Mock login for local dev
+ const email = document.getElementById("login-email").value.trim();
+ const password = document.getElementById("login-password").value;
+ if (!email || !password) {
+ showStatus("Please enter email and password.");
+ return;
+ }
+ const mockUser = {
+ id: "guest",
+ name: "Guest",
+ business_id: "",
+ role: "user_connect",
+ onboarding_complete: false
+ };
+ await renderPostLogin(mockUser);
+ return;
+ }
 
-  (function() {
-    // Login handler (exactly as requested)
-    window.bindLoginHandler = async function() {
-      const form = document.getElementById('login-form');
-      const status = document.getElementById('login-status');
-      const btn = document.getElementById('login-btn');
-      if (!form) return;
+ const email = document.getElementById("login-email").value.trim();
+ const password = document.getElementById("login-password").value;
+ if (!email || !password) {
+ showStatus("Please enter email and password.");
+ return;
+ }
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!window.supabase) {
-          alert('Please wait for initialization. Try again in a moment.');
-          return;
-        }
+ if (loginBtn) loginBtn.disabled = true;
+ showStatus("Signing in…");
 
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
+ try {
+ const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({ email, password });
+ if (signInError) throw new Error(signInError.message || "Login failed");
 
-        btn.disabled = true;
-        btn.textContent = 'Signing in...';
-        status.textContent = '';
+ const userId = signInData?.user?.id;
+ if (!userId) throw new Error("No user returned from auth");
 
-        try {
-          const { data, user, session, error } = await window.supabase.auth.signInWithPassword({ email, password });
-          if (error) {
-            status.textContent = 'Login error: ' + (error.message || error);
-            btn.disabled = false;
-            btn.textContent = 'Sign In';
-            return;
-          }
+ // Load profile
+ // Adjust table/field names to your schema
+ const { data: profile, error: profileError } = await sb
+ .from("profiles")
+ .select("name, business_id, role, onboarding_complete")
+ .eq("user_id", userId)
+ .maybeSingle();
 
-          const currentUser = user || (data && data.user) || null;
+ if (profileError) throw new Error(profileError.message || "Failed to load user profile");
 
-          // Fetch role from users table (id matches auth user id)
-          let role = null;
-          if (currentUser && currentUser.id) {
-            try {
-              const { data: userRow } = await window.supabase
-                .from('users')
-                .select('role')
-                .eq('id', currentUser.id)
-                .single();
-              if (userRow && userRow.role) role = userRow.role;
-            } catch (e) {
-              console.warn('Role fetch failed:', e);
-            }
-          }
+ const currentUser = {
+ id: userId,
+ name: profile?.name || "",
+ business_id: profile?.business_id || "",
+ role: profile?.role || "user",
+ onboarding_complete: !!profile?.onboarding_complete
+ };
 
-          const target = (role && String(role).toLowerCase() === 'admin')
-            ? 'app/admin/adminDashboard.html'
-            : 'app/client/testindex.html';
+ await renderPostLogin(currentUser);
 
-          status.textContent = 'Login successful. Redirecting...';
-          showBanner('redirecting to ' + target);
-          setTimeout(() => {
-            window.location.href = target;
-          }, 250);
-        } catch (err) {
-          status.textContent = 'Login failed: ' + (err?.message || err);
-        } finally {
-          btn.disabled = false;
-          btn.textContent = 'Sign In';
-        }
-      });
-    };
-  })();
+ } catch (err) {
+ console.error("Login error:", err);
+ showStatus("Login failed: " + (err?.message || err));
+ } finally {
+ if (loginBtn) loginBtn.disabled = false;
+ }
+ }
 
-  // Initialize header menu toggle (optional, keep same behavior as signup)
-  (function setupMenu() {
-    const btn = document.getElementById('menuBtn');
-    const mnu = document.getElementById('mobileMenu');
-    if (!btn || !mnu) return;
-    btn.addEventListener('click', () => {
-      const isOpen = mnu.classList.toggle('open');
-      btn.setAttribute('aria-expanded', String(isOpen));
-    });
-  })();
-  </script>
+ loginForm.addEventListener("submit", handleLogin);
+ })();
+ </script>
 </body>
 </html>

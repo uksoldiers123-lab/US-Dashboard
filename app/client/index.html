@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Client Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --bg:#f7f7fb; --text:#1f2937; --muted:#4b5563; --card:#fff; --primary:#e34b4b; --accent:#f59e0b; --shadow:0 8px 20px rgba(0,0,0,.05); }
+    body { font-family: Inter, system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); margin:0; padding:20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: 260px 1fr; gap:16px; align-items:start; }
+    .panel { padding:16px; border-radius:12px; background: var(--card); border:1px solid #e5e7eb; box-shadow: var(--shadow); min-height:180px; }
+    h2 { margin:0 0 8px; font-size:1.1rem; }
+    table { width:100%; border-collapse: collapse; font-size:13px; }
+    th, td { padding:8px 6px; border-bottom:1px solid #eee; text-align:left; }
+    .summary { font-size: 0.95rem; margin-top:6px; color: var(--muted); }
+    canvas { width: 100% !important; height: 220px !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="grid">
+      <aside class="panel" id="left-panel">
+        <div class="section-title">Overview</div>
+        <div id="clientGreeting" style="font-weight:700; font-size:1.1rem;">Welcome, Client!</div>
+        <div id="total-balance" class="summary">Total Balance: $0.00</div>
+        <div id="available-balance" class="summary">Available for Payout: $0.00</div>
+        <div id="pending-balance" class="summary">Pending Balance: $0.00</div>
+      </aside>
+
+      <section class="panel" id="clientMain">
+        <div class="section-title" style="margin-bottom:6px;">Your Dashboard</div>
+
+        <div class="charts" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="chart-card panel" style="padding:12px;">
+            <div class="section-title" style="font-size:12px; margin-bottom:6px;">Revenue (Payments) over Time</div>
+            <canvas id="revenueChart" height="180"></canvas>
+          </div>
+          <div class="chart-card panel" style="padding:12px;">
+            <div class="section-title" style="font-size:12px; margin-bottom:6px;">Payments by Status</div>
+            <canvas id="paymentsStatusChart" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="charts" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px;">
+          <div class="chart-card panel" style="padding:12px;">
+            <div class="section-title" style="font-size:12px; margin-bottom:6px;">Payouts over Time</div>
+            <canvas id="payoutsChart" height="180"></canvas>
+          </div>
+          <div class="chart-card panel" style="padding:12px;">
+            <div class="section-title" style="font-size:12px; margin-bottom:6px;">Transfers</div>
+            <canvas id="transfersChart" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <div class="section-title">Recent Payments</div>
+          <table id="paymentsTable" aria-label="Payments">
+            <thead><tr><th>ID</th><th>Invoice</th><th>Amount</th><th>Currency</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="payments-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div id="status-bar" style="position:fixed; bottom:0; left:0; right:0; background:#111; color:#fff; text-align:center; padding:8px; display:none;">Loading…</div>
+
+  <script src="https://unpkg.com/chart.js/dist/chart.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js/dist/umd/supabase.js"></script>
+  <script>
+    // Init Supabase client
+    const SUPABASE_URL = 'https://gifguoyqccozlijrxgcf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpZmd1b3lxY2NvemxpanJ4Z2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MTg2MzUsImV4cCI6MjA3MjE5NDYzNX0.gwZnr8fKE7qXuLi8B5Merul3cVAXZ1r6SaWEUoAJWX0';
+    // Create client (CDN exposes a global function)
+    const supabase = (window.supabase && window.supabase.createClient)
+      ? window.supabase
+      : (window.supabase = (function(){ return createClient(SUPABASE_URL, SUPABASE_ANON_KEY); })());
+
+    function createClient(url, key){
+      return window.supabase || (window.supabase = {
+        auth: { getUser: async ()=>({ data: { user: { id: 'guest', email: 'guest@example.com' } } }), signOut: async ()=>{} },
+        from: () => ({
+          select: () => Promise.resolve({ data: [] }),
+          insert: () => Promise.resolve({ data: [] }),
+          update: () => Promise.resolve({ data: [] }),
+          delete: () => Promise.resolve({ data: [] })
+        }),
+        rpc: () => Promise.resolve({ data: [] })
+      });
+    }
+
+    // Real-world: rely on actual Supabase CDN client.
+    // For this template, you should replace with a working client initialization like:
+    // const { createClient } = window.supabase ? window.supabase : {};
+    // const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadDashboard() {
+      // Get current user; if not signed in, redirect to login
+      let { data: { user } } = await supabase.auth.getUser();
+      user = user || { id: null, email: 'guest' };
+
+      // Fetch profile balances (assumes public.profiles.user_id -> auth user.id)
+      const userId = user.id;
+      if (!userId) {
+        // No user, show defaults
+      } else {
+        // Example: fetch profiles
+        const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+        if (profile) {
+          document.getElementById('clientGreeting').textContent = `Welcome, ${profile.display_name || user.email}`;
+          document.getElementById('total-balance').textContent = `Total Balance: $${Number(profile.total_balance || 0).toFixed(2)}`;
+          document.getElementById('available-balance').textContent = `Available for Payout: $${Number(profile.available_balance || 0).toFixed(2)}`;
+          document.getElementById('pending-balance').textContent = `Pending Balance: $${Number(profile.pending_balance || 0).toFixed(2)}`;
+        }
+      }
+
+      // Payments for the current user
+      const { data: payments } = await supabase.from('payments').select('*').eq('client_id', userId ? userId : -1);
+      const tbody = document.getElementById('payments-tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        (payments || []).slice(0, 50).forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${p.id ?? ''}</td><td>${p.invoice ?? ''}</td><td>${p.amount ?? 0}</td><td>${p.currency ?? ''}</td><td>${p.status ?? ''}</td><td>${p.created_at ?? ''}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Revenue chart (fake data if needed, adapt to real data)
+      const revenueLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+      const revenueData = [100, 200, 150, 300, 250, 400, 350];
+
+      const ctx1 = document.getElementById('revenueChart').getContext('2d');
+      new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: revenueLabels,
+          datasets: [{ label: 'Revenue', data: revenueData, borderColor: '#e34b4b', fill: false }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      // Payments by status
+      const statusLabels = ['paid','pending','failed'];
+      const statusData = [5, 2, 1];
+      const ctx2 = document.getElementById('paymentsStatusChart').getContext('2d');
+      new Chart(ctx2, {
+        type: 'bar',
+        data: { labels: statusLabels, datasets: [{ label: 'Payments by Status', data: statusData, backgroundColor: ['#4ade80','#f59e0b','#f87171'] }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      // Payouts over time (sample)
+      const payoutsLabels = ['Jan','Feb','Mar','Apr'];
+      const payoutsData = [20, 40, 30, 50];
+      const ctx3 = document.getElementById('payoutsChart').getContext('2d');
+      new Chart(ctx3, {
+        type: 'line',
+        data: { labels: payoutsLabels, datasets: [{ label: 'Payouts', data: payoutsData, borderColor: '#60a5fa', fill: false }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      // Transfers over time (sample)
+      const transfersLabels = ['Week 1','Week 2','Week 3','Week 4'];
+      const transfersData = [5, 8, 3, 6];
+      const ctx4 = document.getElementById('transfersChart').getContext('2d');
+      new Chart(ctx4, {
+        type: 'bar',
+        data: { labels: transfersLabels, datasets: [{ label: 'Transfers', data: transfersData, backgroundColor: '#93c5fd' }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    window.addEventListener('load', loadDashboard);
+  </script>
+</body>
+</html>

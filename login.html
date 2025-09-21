@@ -30,29 +30,41 @@
  </style>
 </head>
 <body>
- <nav class="nav">
- <div class="brand">
+ <nav class="nav" aria-label="Primary">
+ <div class="container nav-inner" style="display:flex; align-items:center; gap:12px;">
+ <a class="brand" href="https://www.uniquitysolutions.com/index.html" aria-label="Uniquity Solutions Home">
  <span class="brand-mark" aria-hidden="true"></span>
- <span>Uniquity Solutions</span>
+ Uniquity Solutions
+ </a>
+ <div style="margin-left:auto;">
+ <a href="/login.html" aria-current="page" style="margin-right:12px;">Login</a>
+ <a href="/signup.html">Sign Up</a>
  </div>
- <div style="opacity:.7">Login</div>
+ </div>
  </nav>
 
- <main class="container">
+ <main class="container" id="appRoot">
+ <section class="card" aria-label="Login Card">
+ html">Sign Up</a>
+ </div>
+ </div>
+ </nav>
+
+ <main class="container" id="appRoot">
  <section class="card" aria-label="Login Card">
  <h1>Sign In</h1>
 
- <form id="login-form" autocomplete="on" novalidate>
+ <form id="login-form" autocomplete="username" novalidate>
  <div class="field">
  <label for="login-email">Email</label>
  <input id="login-email" type="email" placeholder="you@example.com" required />
  </div>
  <div class="field">
  <label for="login-password">Password</label>
- <input id="login-password" type="password" placeholder="••••••••" required />
+ <input id="login-password" type="password" placeholder="Your password" required />
  </div>
- <button id="login-btn" class="btn" type="submit">Sign In</button>
- <div id="login-status" class="status" style="display:none;"></div>
+ <button type="submit" id="login-btn" class="btn" style="text-transform:uppercase;">Sign In</button>
+ <div id="login-status" class="status" aria-live="polite" style="display:none;"></div>
  </form>
 
  <div id="onboardArea" aria-live="polite">
@@ -64,93 +76,86 @@
  </section>
  </main>
 
- <script>
- // Replace with your real values, or keep as is for local dev (mock fallback)
- // Production: import from your hosted Client.js or configure in inline if small
+ <script type="module">
+ // Production: replace these with your real values (safe to hardcode only in prod build)
  const SUPABASE_URL = "https://gifguoyqccozlijrxgcf.supabase.co";
  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHRyY2FlaHBzaGt3Z2FubGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4NjM0NzMsImV4cCI6MjA3MDQzOTQ3M30.8CLBXrknu3kea7OMdJKOBSNayXBOu3lJFu_H4PqI0vg";
 
- (async () => {
+ // Optional: if you want a mock path in dev, keep this flag false in production
+ const USE_MOCK = false;
+
  let sb = null;
+
+ // Initialize Supabase client
+ async function initSupabase() {
+ if (typeof window !== "undefined") {
  try {
  const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm");
  sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+ console.info("Supabase initialized");
  } catch (err) {
- console.warn("Supabase JS module failed to load. Using mock.", err);
- sb = null;
+ console.error("Failed to load Supabase JS module:", err);
+ if (USE_MOCK) {
+ sb = null; // will use mock fallback in login handler
+ } else {
+ // In production, fail hard to surface config issues early
+ alert("Failed to initialize authentication client.");
  }
-
- const loginForm = document.getElementById("login-form");
- const loginStatus = document.getElementById("login-status");
- const loginBtn = document.getElementById("login-btn");
-
- function showStatus(msg) {
- if (loginStatus) {
- loginStatus.textContent = msg;
- loginStatus.style.display = "";
+ }
  }
  }
 
- function hideStatus() {
- if (loginStatus) loginStatus.style.display = "none";
- }
-
+ // Post-login: fetch profile and gate onboarding
  async function renderPostLogin(user) {
  // user: { id, name, business_id, role, onboarding_complete }
  const name = user?.name || "Client";
  const biz = user?.business_id || "";
  const greetingEl = document.getElementById("clientGreeting");
- if (greetingEl) {
- greetingEl.textContent = `Welcome, ${name}${biz ? ` (Business ID: ${biz})` : ""}!`;
- }
+ if (greetingEl) greetingEl.textContent = `Welcome, ${name}${biz ? ` (Business ID: ${biz})` : ""}!`;
 
  const onboardPanel = document.getElementById("onboardArea");
  const shouldShowOnboard = (user?.role === "user_connect" || user?.role === "connect_user") && !user?.onboarding_complete;
  if (onboardPanel) onboardPanel.style.display = shouldShowOnboard ? "" : "none";
- // Redirect to dashboard or initialize UI as needed
+
+ // TODO: redirect to your dashboard if needed
  // window.location.href = "dashboard.html";
  }
 
- async function handleLogin(event) {
- event.preventDefault();
- if (!sb) {
- // Mock login for local dev
+ // Login handler
+ async function handleLogin(e) {
+ e.preventDefault();
  const email = document.getElementById("login-email").value.trim();
  const password = document.getElementById("login-password").value;
- if (!email || !password) {
- showStatus("Please enter email and password.");
- return;
- }
- const mockUser = {
- id: "guest",
- name: "Guest",
- business_id: "",
- role: "user_connect",
- onboarding_complete: false
- };
- await renderPostLogin(mockUser);
+
+ const loginStatus = document.getElementById("login-status");
+ const loginBtn = document.getElementById("login-btn");
+ if (!sb && !USE_MOCK) {
+ // If not using mock and SB isn't initialized yet
+ loginStatus.textContent = "Initializing authentication client...";
+ loginStatus.style.display = "";
+ await new Promise(r => setTimeout(r, 200));
  return;
  }
 
- const email = document.getElementById("login-email").value.trim();
- const password = document.getElementById("login-password").value;
  if (!email || !password) {
- showStatus("Please enter email and password.");
+ loginStatus.textContent = "Please enter email and password.";
+ loginStatus.style.display = "";
  return;
  }
 
  if (loginBtn) loginBtn.disabled = true;
- showStatus("Signing in…");
+ loginStatus.textContent = "Signing in…";
+ loginStatus.style.display = "";
 
  try {
+ if (sb) {
  const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({ email, password });
  if (signInError) throw new Error(signInError.message || "Login failed");
 
  const userId = signInData?.user?.id;
  if (!userId) throw new Error("No user returned from auth");
 
- // Load profile
- // Adjust table/field names to your schema
+ // Profile lookup
  const { data: profile, error: profileError } = await sb
  .from("profiles")
  .select("name, business_id, role, onboarding_complete")
@@ -168,16 +173,30 @@
  };
 
  await renderPostLogin(currentUser);
-
+ } else {
+ // Mock flow for local dev
+ const mockUser = {
+ id: "guest",
+ name: "Guest",
+ business_id: "",
+ role: "user_connect",
+ onboarding_complete: false
+ };
+ await renderPostLogin(mockUser);
+ }
  } catch (err) {
  console.error("Login error:", err);
- showStatus("Login failed: " + (err?.message || err));
+ loginStatus.textContent = "Login failed: " + (err?.message || err);
  } finally {
  if (loginBtn) loginBtn.disabled = false;
  }
  }
 
- loginForm.addEventListener("submit", handleLogin);
+ // Init
+ (async () => {
+ await initSupabase();
+ const loginForm = document.getElementById("login-form");
+ if (loginForm) loginForm.addEventListener("submit", handleLogin);
  })();
  </script>
 </body>

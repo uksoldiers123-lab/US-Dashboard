@@ -3,8 +3,9 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import Stripe from 'https://esm.sh/stripe@14.1.0?target=deno&deno-std=0.177.0'
 
+// Initialize the Stripe client
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  apiVersion: '2022-11-15', // Ensure this matches your Stripe account's API version if necessary
+  apiVersion: '2022-11-15',
   httpClient: Stripe.createFetchHttpClient(),
 })
 
@@ -25,22 +26,24 @@ serve(async (req: Request) => {
     })
   }
 
-  // --- THIS IS THE CRITICAL PART ---
-  // Must get the raw body as text *before* verification.
-  const rawBody = await req.text() 
+  const rawBody = await req.text()
   
-  console.log('Received raw body (first 100 chars):', rawBody.substring(0,100)); // Debugging
-  console.log('Received signature:', signature); // Debugging
+  // --- TEMPORARY DEBUGGING LINES (REMOVE AFTER FIXING!) ---
+  console.log('--- DEBUG INFO ---');
+  console.log('Received raw body (first 200 chars):', rawBody.substring(0, 200));
+  console.log('Received signature:', signature);
+  console.log('Webhook Secret Used:', Deno.env.get('STRIPE_WEBHOOK_SECRET')); // This is the key line to check!
+  console.log('--- END DEBUG INFO ---');
+  // --- END TEMPORARY DEBUGGING ---
 
   let event: Stripe.Event
   try {
     event = await stripe.webhooks.constructEventAsync(
-      rawBody, // Pass the raw body here
+      rawBody,
       signature,
-      Deno.env.get('STRIPE_WEBHOOK_SECRET')! // The secret from your Supabase secrets
+      Deno.env.get('STRIPE_WEBHOOK_SECRET')!
     )
   } catch (err) {
-    // Handle verification failure
     console.error(`Webhook signature verification failed: ${err.message}`)
     return new Response(JSON.stringify({ error: 'Webhook signature verification failed', message: err.message }), {
       status: 400,
@@ -48,7 +51,6 @@ serve(async (req: Request) => {
     })
   }
 
-  // --- If verification is successful, handle the event ---
   console.log(`Successfully verified and received event: ${event.id} (Type: ${event.type})`)
 
   switch (event.type) {
@@ -60,7 +62,6 @@ serve(async (req: Request) => {
       console.log(`Unhandled event type: ${event.type}`)
   }
 
-  // Acknowledge receipt to Stripe with a 200 OK
   return new Response(JSON.stringify({ received: true }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
